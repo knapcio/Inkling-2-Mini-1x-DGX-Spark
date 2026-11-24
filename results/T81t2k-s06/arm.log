@@ -1,0 +1,12 @@
+2026-11-24T15:54:38Z T81t2k-s06 mode warm
+T81t2k-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.03, "geomean_tok_s": 73.95, "aggregate_tok_s": 71.72, "median_ttft_ms": 166.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 40.25, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2537, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.092, "drift_pct_all": -0.092}}
+wrote results/T81t2k-s06/warm-sbquick.json (1.4 min)
+2026-11-24T15:56:04Z T81t2k-s06 mode sbf
+T81t2k-s06: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 69.97, "geomean_tok_s": 72.71, "aggregate_tok_s": 70.75, "median_ttft_ms": 161.6, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.722, "median_step_ms": 40.84, "median_tokens_per_step": 2.802, "steps_source": "response", "median_accept_rate": 0.259, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.219, "drift_pct_all": -0.219}}
+wrote results/T81t2k-s06/speedbench.json (4.9 min)
+2026-11-24T16:00:58Z T81t2k-s06 mode lc32
+T81t2k-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32700    6.387      5119.8      6.378        None      61.8 [57.7, 66.2]        49.172    2.993
+128K     130841   35.503     3685.4      35.315       None      48.6 [42.2, 56.0]        59.88     3.016
+wrote results/T81t2k-s06/longctx-lc32.json (6.7 min)

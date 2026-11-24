@@ -1,5 +1,49 @@
 # Changelog
 
+## v2.8.1 (2026-11-24)
+
+Basic tests on one box; full two-box qualification follows in v2.8.x.
+
+Fixes prefix-hit draft starvation of the DFlash2 drafter. The drafter's KV is a ring over the last 2,048 positions,
+filled from the target's hidden states as the target prefills or verifies them. On a prefix-cache hit the target
+skips the cached prefix, so the ring held only the uncached suffix and the drafter drafted with little or no context.
+speedbench primes every prompt, and real chat and agent turns re-hit cached prefixes, so v2.8's speedbench
+long-context (-16 %) and agentic (-4 %) deficits against v2.7.2 came from this.
+
+- `inkling_dftail` (new; launcher `DFLASH_PREFIX_TAIL=2048`, `DFLASH_PREFIX_TAIL_MAX_INPUT=4096`): on a prefix-cache
+  hit of a prompt of at most 4,096 tokens, the last 2,048 prompt tokens are prefilled again (SGLang's own prefix bound,
+  as for logprob requests), so the drafter sees them. Prefill-only (exact up to the floating-point order of the
+  prefill chunking), DFLASH only, never streaming sessions, pinned to the image's source; allocates no memory.
+  `DFLASH_PREFIX_TAIL=0` turns it off.
+- speedbench full, release defaults on box B (`results/V281s-s06/`, `MEM_FRACTION=0.89`), against v2.8 on the same
+  box (`MEM_FRACTION=0.85`): all prompts 69.59 -> 72.86, long context 63.09 -> 73.53, agentic 73.44 -> 82.74, code
+  79.84 -> 81.88; prose, structured and multilingual move by under 0.5 %. longctx-02 (4,930 tokens) is above the
+  limit and runs as on v2.8. With the radix cache off, the investigation runs reached 72.82 / 75.00 / 82.42 (all /
+  long context / agentic). Against the published v2.7.2 (same harness; v2.8.1 one box, v2.7.2 a two-box median):
+  all +14.2 %, agentic +7.9 %, long context on par (73.53 vs 75.1, -2.1 %). End to end (time to first token plus decode, 256-token outputs): long context +6.2 %, agentic +1.2 %, code
+  +1.6 %.
+- Trade-off: median time to first token on cache hits rises (speedbench long-context prompts 186 -> 540 ms, agentic
+  170 -> 235 ms). The first hit of a prompt re-prefills it fully, because the hybrid state cache resumes only at
+  checkpoints; later hits reuse a checkpoint planted at the bound. Cached hits at 32K / 128K are above the limit and
+  unchanged (0.24 / 0.46 s; without the limit 6.38 / 35.3 s). Decode at 32K / 128K on v2.8.1: 64.3 / 50.7 tok/s. Multi-turn agent sessions (8 conversations of 4-8 turns, 5-12K-token histories) behave
+  exactly as on v2.8 at the default limit; raising it to 6,144 / 8,192 / 12,288 costs +5.0 / +8.7 / +14.8 %
+  end-to-end time at 160-token turns and is about break-even at 512-token turns. Raise it only for long-output or
+  document-QA traffic.
+- Exactness: greedy output with the tail is bit-identical to the same server with the radix cache off (43/43 prompts,
+  top-5 logprobs); against the default cached server it differs only by near-ties, the same ones the stock server
+  shows between cache on and cache off (`results/T81EX2*-s06/`).
+- The 32K / 128K decode caveat stays: it is the drafter's 2,048-token window, not the cache (no gain at 32K / 128K
+  with the radix cache off either).
+- Memory: worst case (thinking c24 alongside a cold 240K needle) 4.1 GiB, guard 3.5 GiB; the tail allocates no
+  memory, and the run generated 4 % more tokens than the v2.8 run. Needles at 128K and 240K PASS.
+- 1M on v2.8 (`CTX=1048576`, box A, `results/V28m1-s05/`): needle PASS at 999,296 tokens, decode at 1,000K context
+  23.3 tok/s (one repetition), pool 2.14M global-layer tokens, lowest MemAvailable 8.9 GiB.
+- Results: `results/V281s-s06/` (v2.8.1 release defaults), `results/T81a1-s06/` (tail 2,048, limit 8,192),
+  `results/N81sbfc-s06/` (v2.8), `results/N81sbf-s06/` (radix cache off),
+  `results/T81t1k-s06/` (1,024-token tail), `results/T81t2k-s06/` (no input limit),
+  `results/T81kv-s06/`, `results/A81off-s06/`, `results/A81m6k-s06/`, `results/A81m8k-s06/`, `results/A81m12k-s06/`,
+  `results/V28m1-s05/`, `results/T81EX2nc-s06/`, `results/T81EX2tail-s06/`, `results/T81EX2ref-s06/`.
+
 ## v2.8 (2026-11-24)
 
 Basic tests on one box; full two-box qualification follows in v2.8.x.

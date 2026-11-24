@@ -1,0 +1,6 @@
+2026-11-24T15:37:19Z N81sbf-s06 mode warm
+N81sbf-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.75, "geomean_tok_s": 73.92, "aggregate_tok_s": 71.69, "median_ttft_ms": 165.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.81, "reasoning_char_frac": 0.854, "median_step_ms": 40.27, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2537, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.294, "drift_pct_all": 0.294}}
+wrote results/N81sbf-s06/warm-sbquick.json (1.4 min)
+2026-11-24T15:38:45Z N81sbf-s06 mode sbf
+N81sbf-s06: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.1, "geomean_tok_s": 72.82, "aggregate_tok_s": 70.84, "median_ttft_ms": 160.5, "truncated_frac": 0.904, "reasoning_token_frac": 0.661, "reasoning_char_frac": 0.731, "median_step_ms": 41.01, "median_tokens_per_step": 2.833, "steps_source": "response", "median_accept_rate": 0.2619, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.077, "drift_pct_all": -0.077}}
+wrote results/N81sbf-s06/speedbench.json (4.9 min)

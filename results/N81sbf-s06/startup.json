@@ -1,0 +1,2 @@
+{"label":"N81sbf-s06","ready_utc":"2026-11-24T15:37:19Z","startup_s":127,"memavail_ready_gib":9.5,"kv":"[2026-11-24 15:37:16 PID133] max_total_num_tokens=1973760, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=9.94 GB"}
+{"memavail_end_gib":9.3}

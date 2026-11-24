@@ -1,0 +1,2 @@
+{"label":"T81kv-s06","ready_utc":"2026-11-24T17:23:56Z","startup_s":127,"memavail_ready_gib":4.4,"kv":"[2026-11-24 17:23:53 PID132] max_total_num_tokens=2404864, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=4.85 GB"}
+{"memavail_end_gib":4.2}

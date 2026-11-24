@@ -69,6 +69,9 @@ try:
     if _on("INKLING_DFLASH_FUSED_ACCEPT"):  # DFLASH sampled accept from the logits with sparse q (same law)
         import inkling_dfaccept
         inkling_dfaccept.install()
+    if _on("INKLING_DFLASH_PREFIX_TAIL"):  # DFLASH: re-prefill the last N input tokens of a prefix hit (draft ring)
+        import inkling_dftail
+        inkling_dftail.install()
     if _on("INKLING_RSFIX"):  # exact residual / bonus lane rule (+ SGLang PR #51681 / #51692 fixes)
         import inkling_rsfix
         inkling_rsfix.install()

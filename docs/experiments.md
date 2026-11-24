@@ -1038,3 +1038,87 @@ prefill scratch) until measured.
 v2.7.3 and v2.7.4 were not released separately: `RSFIX=1` in both profiles; for `SPEC=dspark`, `hotbase` (compact
 hot-vocabulary base logits inside the captured Markov walk, bit-identical step logits and tokens) and
 `RNNHOIST_MAX_BS=32` (the Markov-walk hoist for up to 32 rows; c17-c32 drafts change by FP32 order, proposals only).
+
+## v2.8.1: prefix-hit draft starvation and the prefix tail
+
+Basic tests on one box; full two-box qualification follows in v2.8.x. Results on box B: `results/V281s-s06/`
+(release defaults), `results/T81a1-s06/`
+(speedbench full, tail 2,048 with limit 8,192), `results/N81sbfc-s06/` (v2.8 default), `results/N81sbf-s06/` (radix
+cache off), `results/T81t1k-s06/` (tail 1,024 with limit 8,192), `results/T81t2k-s06/` (no input limit),
+`results/T81kv-s06/` (worst case, shipping default), `results/A81off-s06/`, `results/A81m6k-s06/`,
+`results/A81m8k-s06/`, `results/A81m12k-s06/` (multi-turn agent sessions); on box A: `results/V28m1-s05/` (1M).
+
+Cause. DFlash2's draft KV is a ring over the last 2,048 positions, filled from the target's hidden states as the
+target prefills or verifies them. A radix-cache hit skips the target prefill of the matched prefix, so the ring holds
+only the uncached suffix and the drafter proposes with little or no context. speedbench primes every prompt before it
+measures, and multi-turn traffic re-hits its prefix on every turn.
+
+Cache off against cache on (speedbench full, c1, same box and session, `MEM_FRACTION=0.85`):
+
+| | all 73 prompts | long context | agentic |
+|---|---:|---:|---:|
+| v2.8 (radix cache on) | 69.59 | 63.09 | 73.44 |
+| tail 2,048, limit 8,192 (`T81a1`) | 72.49 | 73.85 | 82.25 |
+| radix cache off (upper bound) | 72.82 | 75.00 | 82.42 |
+
+Prose, structured and multilingual do not move; code 79.84 -> ~81.5. A 1,024-token tail was also screened
+(`results/T81t1k-s06/`). Per prompt: longctx-01 2.84 -> 4.20 tokens per
+step, agentic-01 10.8 -> 17.0. The tail recovers almost all of the cache-off upper bound. The v2.8.1 row was measured
+with the 2,048-token tail at a limit of 8,192; every speedbench prompt in those categories that gains is at most 4,096
+tokens long except longctx-02 (4,930 tokens), so the shipped limit of 4,096 gives the same categories. End to end
+(time to first token plus decode, 256-token outputs): long context +6.2 %, agentic +1.2 %, code +1.6 %.
+
+Release defaults (box B, `results/V281s-s06/`, `MEM_FRACTION=0.89`, limit 4,096), speedbench full, tok/s with the
+median tokens per step in brackets: prose 64.92 (2.50), code 81.88 (3.62), structured 77.46 (3.40), agentic 82.74
+(3.38), multilingual 57.46 (2.23), long context 73.53 (3.27), all 73 prompts 72.86 (2.80); median time to first token
+162.1 ms. v2.8 on the same box (`MEM_FRACTION=0.85`): 64.57 / 79.84 / 77.10 / 73.44 / 57.19 / 63.09 / 69.59.
+longctx-02 (4,930 tokens) is above the 4,096 limit and runs as on v2.8. At 32K / 128K: decode 64.3 tok/s (3.17
+tokens per step) / 50.7 tok/s, cached time to first token 0.24 / 0.46 s.
+
+Long context is a different matter. A 32K test refuted starvation there: with the radix cache off, DFlash2 at 32K
+drafted 2.99 tokens per step against 3.04-3.08 with the cache, and DSpark 3.29-3.37 either way. Without the input
+limit (`results/T81t2k-s06/`) the tail also bounds 32K / 128K hits, which raised their cached time to first token
+from 0.26 to 6.38 s and from 0.45 to 35.3 s (a full re-prefill, see below) for no acceptance gain; with the limit they
+stay at 0.24 / 0.45 s. The 32K decode deficit against DSpark is the drafter's 2,048-token window.
+
+Elastic draft window (box A, up to 8 requests, drafter config copies with a larger `sliding_window`):
+
+| drafter `sliding_window` | speedbench quick | tokens per step at 32K | tokens per step at 128K |
+|---|---:|---:|---:|
+| 2,048 (as shipped) | 69.9 | 3.26 | 3.42 |
+| 8,192 | 70.4 | 3.29 | 2.97 |
+| 16,384 | 70.4 | 3.11 | 2.89 |
+
+No gain: the drafter was trained at a 2,048-token window, and a wider window lowers its acceptance at 128K.
+
+Gate design. The tail bounds the prefix match (`Req._compute_max_prefix_len`, the bound SGLang's own logprob path
+uses for the match, the prefetch and the storage linker) to at most `input_len - 2048`; the cache picks the longest
+reusable prefix within the bound, page- and checkpoint-aligned, as for a logprob request. When the uncached suffix is
+already >= 2,048 tokens nothing changes. Inkling's hybrid state is cached at checkpoints, so the first bounded hit of
+a prompt usually resumes from the root (a full re-prefill); that re-prefill plants a checkpoint at the bound, and later
+hits of the same prompt redo only ~2K tokens. The planted checkpoint replaces the request's end-of-prompt checkpoint,
+so the next turn re-prefills from the bound once even when it is not bounded itself. Hence the input limit: only
+prompts of at most 4,096 tokens are bounded (`DFLASH_PREFIX_TAIL_MAX_INPUT`). Scope: DFLASH only (read from SGLang's
+runtime context), never a streaming-session continuation; the stock bound and its lookup are pinned by source hash.
+Measured cost on cache hits: median time to first token 186 -> 540 ms on speedbench's long-context prompts, 170 -> 235
+ms on its agentic prompts; 32K / 128K hits are above the limit and stay at 0.24 / 0.45 s.
+
+Multi-turn agent sessions (speedbench agent mode, 8 conversations of 4-8 turns, 5-12K-token histories), end-to-end
+time against the tail off:
+
+| limit (`DFLASH_PREFIX_TAIL_MAX_INPUT`) | 160-token turns | 512-token turns |
+|---|---:|---:|
+| 4,096 (default) | same as v2.8 | same as v2.8 |
+| 6,144 | +5.0 % | about break-even |
+| 8,192 | +8.7 % | about break-even |
+| 12,288 | +14.8 % | about break-even |
+
+At 512-token turns decode gains +3-8 %, about what the re-prefill costs. Raise the limit only for long-output or
+document-QA traffic.
+
+Memory. The tail allocates no memory; the worst case (thinking c24 alongside a cold 240K needle, shipping default)
+was 4.1 GiB, in a run that generated 4 % more tokens than the v2.8 run (guard
+3.5 GiB), and the needles at 128K and 240K pass.
+
+1M on v2.8 (`CTX=1048576`, box A): needle PASS at 999,296 tokens; decode at 1,000K context 23.3 tok/s (one
+repetition); pool 2.14M global-layer tokens; lowest MemAvailable 8.9 GiB.

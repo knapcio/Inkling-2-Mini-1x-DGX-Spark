@@ -1,0 +1,13 @@
+{
+ "url": "http://127.0.0.1:8000",
+ "results": [
+  {
+   "check": "needle 1000K",
+   "pass": true,
+   "prompt_tokens": 999296,
+   "seconds": 935.6,
+   "expected": "PYLON-MEADOW-2343",
+   "answer": "PYLON-MEADOW-2343"
+  }
+ ]
+}

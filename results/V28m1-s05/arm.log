@@ -1,0 +1,7 @@
+2026-11-24T14:35:38Z V28m1-s05 mode ctx1mq
+needle 1000K                 PASS  {"prompt_tokens": 999296, "seconds": 935.6, "expected": "PYLON-MEADOW-2343", "answer": "PYLON-MEADOW-2343"}
+1 / 1 passed
+V28m1-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1000K    1024200  977.978    1047.3      1.636        None      23.3 [0.5, 1128.4]       181.758   4.467
+wrote results/V28m1-s05/longctx-1m.json (17.2 min)

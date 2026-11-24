@@ -1,0 +1,11 @@
+2026-11-24T17:11:59Z A81m12k-s06 mode warm
+A81m12k-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.78, "geomean_tok_s": 73.36, "aggregate_tok_s": 71.13, "median_ttft_ms": 165.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 40.7, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2537, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.579, "drift_pct_all": -0.579}}
+wrote results/A81m12k-s06/warm-sbquick.json (1.5 min)
+2026-11-24T17:13:26Z A81m12k-s06 mode sba
+A81m12k-s06: {"failed": 0, "valid_decode": 94, "ALL": {"n": 94, "median_tok_s": 74.74, "geomean_tok_s": 76.29, "aggregate_tok_s": 74.8, "median_ttft_ms": 701.5, "truncated_frac": 0.702, "reasoning_token_frac": 0.532, "reasoning_char_frac": 0.731, "median_step_ms": 45.62, "median_tokens_per_step": 3.329, "steps_source": "response", "median_accept_rate": 0.3411, "median_draft_per_step": 7.0}}
+A81m12k-s06: agent: cold TTFT 1092.8 ms, cached-turn TTFT 640.3 ms, cache hit vs ideal 0.6045, e2e 2.719 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/A81m12k-s06/sbagent.json (4.5 min)
+2026-11-24T17:17:54Z A81m12k-s06 mode sba512
+A81m12k-s06-512: {"failed": 0, "valid_decode": 47, "ALL": {"n": 47, "median_tok_s": 74.96, "geomean_tok_s": 78.93, "aggregate_tok_s": 78.71, "median_ttft_ms": 679.3, "truncated_frac": 0.255, "reasoning_token_frac": 0.418, "reasoning_char_frac": 0.678, "median_step_ms": 46.11, "median_tokens_per_step": 3.5, "steps_source": "response", "median_accept_rate": 0.3571, "median_draft_per_step": 7.0}}
+A81m12k-s06-512: agent: cold TTFT 1094.9 ms, cached-turn TTFT 628.7 ms, cache hit vs ideal 0.6161, e2e 4.037 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/A81m12k-s06/sbagent512.json (3.7 min)
