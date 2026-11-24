@@ -43,6 +43,16 @@ class DfPolicy:
     rowcost: dict         # band bs -> [G] ms
     bsmax: int
     gamma: int = 7
+    theta_x: Tuple[Tuple[int, int, int, float], ...] = ()   # (band bs, mode 0 greedy / 1 sampled, ctx bucket, theta)
+    ctx_edges: Tuple[int, ...] = ()                          # context buckets: bucket = #edges <= committed length
+
+    def theta_req(self, band_bs: int, mode: int, cb: int) -> float:
+        """Price of one request (tools/dfreplay.theta_of): (band, mode, bucket), then (band, mode, 0), then the band."""
+        tx = {(b, m, c): t for b, m, c, t in self.theta_x}
+        for key in ((band_bs, mode, cb), (band_bs, mode, 0)):
+            if key in tx:
+                return tx[key]
+        return dict(self.theta).get(band_bs, 0.0)
 
     def band_index(self, bs: int) -> int:
         for i, b in enumerate(self.bands):
@@ -51,13 +61,12 @@ class DfPolicy:
         return len(self.bands) - 1
 
     def theta_for(self, bs: int) -> float:
+        """The band's largest price over modes / context buckets (0 = the band never caps: uncapped step)."""
         if bs > self.bsmax:
             return 0.0
         band = self.bands[self.band_index(bs)]
-        for key, value in self.theta:
-            if key == band:
-                return float(value)
-        return 0.0
+        ncb = len(self.ctx_edges) + 1
+        return max(self.theta_req(band, m, c) for m in (0, 1) for c in range(ncb))
 
     def n_bins(self, feature: str) -> int:
         return self.gamma if feature == "slot" else len(self.edges[feature]) + 1
@@ -77,7 +86,11 @@ def load_df_policy(path: str) -> DfPolicy:
                    calib=[float(x) for x in obj["calib"]],
                    theta=tuple((int(k), float(v)) for k, v in obj["theta"]),
                    rowcost={int(k): [float(c) for c in v] for k, v in obj["rowcost"].items()},
-                   bsmax=int(obj["bsmax"]), gamma=int(obj["stride"]) - 1)
+                   bsmax=int(obj["bsmax"]), gamma=int(obj["stride"]) - 1,
+                   theta_x=tuple((int(b), int(m), int(c), float(t)) for b, m, c, t in obj.get("theta_x", [])),
+                   ctx_edges=tuple(int(e) for e in obj.get("ctx_edges", [])) if obj.get("theta_x") else ())
+    if any(m not in (0, 1) or c < 0 or c > len(pol.ctx_edges) or t < 0 for _, m, c, t in pol.theta_x):
+        raise ValueError(f"{path}: theta_x entries must be [band, mode 0/1, bucket 0..{len(pol.ctx_edges)}, theta >= 0]")
     strata = 2 * (len(pol.bands) if pol.band_calib else 1)
     size = strata
     for f in feats:
@@ -95,13 +108,20 @@ class DfPolicyDevice:
         self.table = torch.tensor(pol.calib, dtype=torch.float32, device=device)
         self.edges = {f: torch.tensor(pol.edges[f], dtype=torch.float32, device=device)
                       for f in pol.features if f != "slot"}
-        thr = torch.zeros((len(pol.bands), pol.gamma), dtype=torch.float32)
+        ncb = len(pol.ctx_edges) + 1
+        thr = torch.zeros((len(pol.bands), 2, ncb, pol.gamma), dtype=torch.float32)  # [band, mode, bucket, slot]
         for i, b in enumerate(pol.bands):
             cost = pol.rowcost.get(b)
-            th = dict(pol.theta).get(b, 0.0)
-            if cost is not None and th > 0:
-                thr[i] = th * torch.tensor(cost, dtype=torch.float32)
+            if cost is None:
+                continue
+            for mode in (0, 1):
+                for cb in range(ncb):
+                    th = pol.theta_req(b, mode, cb)
+                    if th > 0:
+                        thr[i, mode, cb] = th * torch.tensor(cost, dtype=torch.float32)
         self.thr = thr.to(device)
+        self.ctx_edges = (torch.tensor(pol.ctx_edges, dtype=torch.int64, device=device) if pol.ctx_edges
+                          else None)
 
 
 def lens_fixed(bs: int, k: int, device) -> torch.Tensor:
@@ -115,7 +135,7 @@ def lens_conf(m: torch.Tensor, threshold: float) -> torch.Tensor:
 
 
 def lens_policy(m: torch.Tensor, gap: torch.Tensor, sampled: torch.Tensor, band: int,
-                dev: DfPolicyDevice) -> torch.Tensor:
+                dev: DfPolicyDevice, context: Optional[torch.Tensor] = None) -> torch.Tensor:
     """[bs] int64 live lengths of the calibrated rule for one decode batch (band known on the host): S_j = prod a,
     draft j live while S_j >= theta_band * rowcost_band[j] (leading run). Same cells as dfreplay.Calib."""
     pol = dev.pol
@@ -133,7 +153,13 @@ def lens_policy(m: torch.Tensor, gap: torch.Tensor, sampled: torch.Tensor, band:
         cell = cell * nb + b
     a = dev.table[cell]
     surv = torch.cumprod(a, dim=1)
-    ok = (surv >= dev.thr[band][None, :]).to(torch.int64)
+    mode = sampled.to(torch.int64)
+    if dev.ctx_edges is not None and context is not None:
+        cb = torch.bucketize(context.reshape(-1)[:bs].to(torch.int64).contiguous(), dev.ctx_edges, right=True)
+    else:
+        cb = torch.zeros_like(mode)
+    thr = dev.thr[band][mode, cb]  # [bs, G]: a request with theta 0 verifies every row
+    ok = (surv >= thr).to(torch.int64)
     return 1 + torch.cumprod(ok, dim=1).sum(dim=1)
 
 
@@ -149,7 +175,7 @@ class Cutoff:
 
 
 def plan(state, *, bs: int, mode: str, arg, sampled: Optional[torch.Tensor] = None, lo: int = 1,
-         hi: int = 0) -> Optional[Cutoff]:
+         hi: int = 0, context: Optional[torch.Tensor] = None) -> Optional[Cutoff]:
     """Write this step's live lengths and remap index (no host sync) and return the cutoff, or None when the step is
     not capped (then neither remap nor cutoff applies: src_index stays the identity for this step)."""
     from inkling_vcap import logic
@@ -175,7 +201,7 @@ def plan(state, *, bs: int, mode: str, arg, sampled: Optional[torch.Tensor] = No
         if th <= 0:
             return uncapped()
         lens = lens_policy(feats.m[:bs], feats.gap[:bs], ~feats.greedy[:bs] if sampled is None else sampled,
-                           arg.pol.band_index(bs), arg)
+                           arg.pol.band_index(bs), arg, context=context)
     else:
         raise ValueError(mode)
     state.live_lens[:bs].copy_(lens.clamp_(max(1, lo), hi if hi > 0 else stride))

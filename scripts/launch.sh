@@ -69,7 +69,7 @@ DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only f
 SPEC=${SPEC:-dflash2}                  # dflash2 (default: third-party DFlash2 drafter) | dspark (the model's own draft, v2.7.2 profile) | none
 DFLASH_BV=${DFLASH_BV:-1}                                    # SPEC=dflash2 + OVERLAY=1: block verification on sampled steps (exact with RSFIX)
 DFCAP_USER=${DFCAP+set}
-DFCAP=${DFCAP:-}                                             # SPEC=dflash2 verify-width cap; unset = the v2.8 policy with OVERLAY=1, off = full width
+DFCAP=${DFCAP:-}                                             # SPEC=dflash2 verify-width cap; unset = the v2.8.2 policy (df-SLDF2x) with OVERLAY=1, off = full width
 DFLASH2_DIR=${DFLASH2_DIR:-$HOME/models/Inkling-2-Mini-DFlash2}   # scripts/download.sh --dflash2
 DFLASH2_REVISION=4f9088ea66c21f2b99ed657d1941c306b03e84d2           # incoai/Inkling-2-Mini-DFlash2
 DFLASH2_SHA256="14223ae2f3aa1d661da67cf0143ec33070d952a6e28a119e6cec64fcc0bebe50 sglang_inkling_dflash2.py
@@ -118,7 +118,7 @@ if [[ $SPEC == dflash2 ]]; then
   # The verify cap on DFLASH. DFCAP = fixed:K | conf:T | dfpolicy:/opt/inkling-overlay/...json (+ ,bsmax=N);
   # DFCAP_NOEXP=1: dead rows get no experts (inkling_noexp); DFCAP_BV=1: block verification (sparse-q mask).
   if [[ -z $DFCAP_USER && $OVERLAY == 1 && -z ${STEPLOG:-} ]]; then
-    DFCAP=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json,bsmax=8
+    DFCAP=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8
   fi
   [[ $DFCAP == off ]] && DFCAP=
   if [[ -n ${DFCAP:-} ]]; then
@@ -135,6 +135,10 @@ case $(printf %s "$KV12S" | tr '[:upper:]' '[:lower:]') in   # one spelling for 
   1|true|yes|on) KV12S=1 ;;
   0|false|no|off|'') KV12S=0 ;;
   *) echo "KV12S must be 0 or 1 (got '$KV12S')" >&2; exit 2 ;;
+esac
+case " ${SGLANG_ENV:-} " in                                   # the prefill levers are sized here (MEM_FRACTION): no env overrides
+  *INKLING_PFUSE_HOIST*|*INKLING_ATTN_GATE*|*INKLING_PROLOGUE*)
+    echo "set PFUSE_HOIST / ATTN_GATE / PROLOGUE instead of passing INKLING_PFUSE_HOIST / INKLING_ATTN_GATE / INKLING_PROLOGUE in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the store is chosen here, so engine flags and overlay agree
   *INKLING_KV12*)                                            # any INKLING_KV12* name, with or without a value
@@ -155,6 +159,19 @@ KV12S_FALLBACK_PAGES=${KV12S_FALLBACK_PAGES:-64}            # raw fallback pages
 KV12_SLOTS=${KV12_SLOTS:-2048}                              # packed side-pool pages per global layer (2048 = 6.1 GiB, one 256K request)
 SCODES=${SCODES:-1}                                          # NVFP4 expert scale codes: 5-bit codes + row base, expanded in the GEMM (exact)
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
+PFUSE_HOIST=${PFUSE_HOIST:-0}                               # opt-in prefill loop-bank hoist over pfuse loop_mix (1: FP32-order class, not in the default pending a bracket; exact: bit-identical, slower; 0: off)
+ATTN_GATE=${ATTN_GATE:-1}                                   # gate_sink in the sliding-window prefill attention epilogue (bit-identical; 0: off)
+PROLOGUE=${PROLOGUE:-0}                                     # opt-in SWA prefill: K conv + L2 clip and V conv + value norm in one kernel each (1: FP32-order class, 1-ulp flips; not in the default)
+[[ ",$PFUSE," == *,all,* || ",$PFUSE," == *,loopmix,* ]] || PFUSE_HOIST=0   # the hoist wraps pfuse loopmix
+_onoff() { case $(printf %s "$1" | tr '[:upper:]' '[:lower:]') in ''|0|off|false|no|none) echo 0 ;; *) echo 1 ;; esac; }
+[[ $(_onoff "$PFUSE_HOIST") == 0 ]] && PFUSE_HOIST=0
+[[ $(_onoff "$ATTN_GATE") == 0 ]] && ATTN_GATE=0
+[[ $(_onoff "$PROLOGUE") == 0 ]] && PROLOGUE=0
+PREFILL_LEVERS=0; [[ $PFUSE_HOIST != 0 || $ATTN_GATE != 0 || $PROLOGUE != 0 ]] && PREFILL_LEVERS=1
+[[ $PREFILL_LEVERS == 1 ]] && case " ${SGLANG_ARGS:-} $* " in
+  *--enable-mixed-chunk*)                                     # MIXED batches replay through EXTEND prefill graphs
+    echo "--enable-mixed-chunk needs PFUSE_HOIST=0 ATTN_GATE=0 PROLOGUE=0 (decode rows would get prefill-only math)" >&2; exit 2 ;;
+esac
 MOE_TILES=${MOE_TILES:-1@2304:swap_ab=1,tile_n=32,tile_k=256;1@1152:swap_ab=1,tile_n=32,tile_k=256;8@2304:swap_ab=1,tile_n=32,tile_k=256;8@1152:swap_ab=1,tile_n=32,tile_k=256;64@2304:swap_ab=0,tile_n=64,tile_k=256;64@1152:swap_ab=1,tile_n=32,tile_k=256}
 SGLANG_ARGS=${SGLANG_ARGS:-}
 # vLLM profile
@@ -193,8 +210,11 @@ if [[ $KV12S == 1 ]]; then
     # With SPEC=dflash2 the draft is a fixed 2.16 GB ring: 0.89 sizes ~2.38M tokens (measured: 0.90 gave 2.42M
     # with the kvstress worst case at 4.6 GiB, guard 3.5); contexts above 256K keep 0.85 (their prefix scratch
     # is larger) until measured.
+    # v2.8.2: the prefill levers (PFUSE_HOIST, ATTN_GATE, PROLOGUE) deepen the long-prefill MemAvailable dip by ~0.3-0.7 GB,
+    # so SPEC=dflash2 up to 256K sizes at 0.88 with them on (-1 % KV tokens).
     if [[ $SPEC == dflash2 ]]; then
       if (( CTX > 262144 )); then [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.85
+      elif [[ $PREFILL_LEVERS == 1 ]]; then [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.88
       else [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.89; fi
     else [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.89; fi
     # ~79K window tokens, as v2.7 and v2.7.1 (48 requests' windows plus an 8K chunk).
@@ -283,7 +303,7 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_DRAFT_BYTES="$DRAFT_BYTES" -e INKLING_DRAFT_HOTVOCAB_FILE="$HOTVOCAB_FILE" -e INKLING_KERNELS="$KERNELS" -e INKLING_MOE_TILES="$MOE_TILES"
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
-        -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
+        -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_PFUSE_HOIST="$PFUSE_HOIST" -e INKLING_ATTN_GATE="$ATTN_GATE" -e INKLING_PROLOGUE="$PROLOGUE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
         -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
         -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"

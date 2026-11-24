@@ -64,7 +64,7 @@ def load(dirs):
         bs = z["bs"]
         for key in ("rid", "context", "greedy", "temp", "t_eff", "rows", "m", "gap", "accepted"):
             req[key].append(z[key])
-        for key in ("unary", "lse"):  # lattice fields (captures since the section-3 fields)
+        for key in ("unary", "lse", "tgt_cand_p", "cand_ids", "drafted"):  # lattice / exact-BV fields when captured
             if key in z.files:
                 req[key].append(z[key])
         req["run"].append(np.full(n, run))
@@ -236,7 +236,23 @@ def fit_beta(S, sidx_train):
 
 
 # ------------------------------------------------------------------ replay
+CTX_EDGES = (16384, 65536)  # price context buckets: <16K, 16K-64K, >=64K tokens of committed context
+
+
+def theta_of(policy, b, mode, cb):
+    """Price for one request: per (band, mode, context bucket) when fitted (theta_x), falling back to the request's
+    short-context price, then to the band's single price."""
+    tx = policy.get("theta_x") or {}
+    for key in ((b, mode, cb), (b, mode, 0)):
+        if key in tx:
+            return tx[key]
+    return policy["theta"].get(b, 0.0)
+
+
 def widths_for(surv, theta, rowcost):
+    theta = np.asarray(theta, dtype=float)
+    if theta.ndim == 1:
+        theta = theta[:, None]
     ok = surv >= theta * rowcost[None, :]
     return 1 + np.cumprod(ok, axis=1).sum(axis=1)
 
@@ -252,19 +268,30 @@ def replay(R, S, steps_idx, surv_all, policy, args, beta):
         acc = R["accepted"][rows].astype(int)
         draft = S["t_draft_ms"][s] if b not in args.draft_ms else args.draft_ms[b]
         t_full = draft + S["t_verify_ms"][s]
-        out["tok_full"] += float((1 + acc).sum())
+        bvx = R.get("bvx")
+        ex = None if bvx is None else bvx[rows]
+        use = None if ex is None else np.isfinite(ex[:, 0]) & getattr(args, "bv_exact", True)
+        if use is not None and use.any():
+            full_tok = np.where(use, 1 + ex[:, STRIDE - 1], 1 + acc)
+        else:
+            full_tok = 1 + acc
+        out["tok_full"] += float(full_tok.sum())
         out["ms_full"] += t_full
-        th = policy["theta"].get(b, 0.0)
+        ths = np.array([theta_of(policy, b, int(R["mode"][r]), int(R["cb"][r])) for r in rows])
+        th = float(ths.max())
         if th <= 0 or bs > policy["bsmax"]:
             L = np.full(bs, STRIDE)
         else:
-            L = widths_for(surv_all[rows], th, policy["rowcost"][b])
+            L = widths_for(surv_all[rows], ths, policy["rowcost"][b])  # theta 0 -> that request full width
         bt = beta.get(b, {}).get("beta", args.beta_default) * args.beta_scale
         u8 = cached_union(R, S, s, (STRIDE,) * bs)
         uL = cached_union(R, S, s, tuple(int(x) for x in L))
         saving = bt * (u8 - uL) + args.row_ms * float((STRIDE - L).sum())
         overhead = args.policy_ms if th > 0 else 0.0
-        out["tok_pol"] += float((1 + np.minimum(acc, L - 1)).sum())
+        pol_tok = 1 + np.minimum(acc, L - 1)
+        if use is not None and use.any():
+            pol_tok = np.where(use, 1 + ex[np.arange(bs), L - 1], pol_tok)
+        out["tok_pol"] += float(pol_tok.sum())
         out["ms_pol"] += t_full - saving + overhead
         out["width"] += float(L.sum())
         out["nreq"] += bs
@@ -328,7 +355,36 @@ def search_theta(R, S, train, surv_all, beta, rowcost, args):
             if best_rate is None or rate > best_rate * (1 + 1e-9):
                 best, best_rate = th, rate
         policy["theta"][b] = best
+    if getattr(args, "per_mode", False) or getattr(args, "ctx_price", False):
+        policy["theta_x"] = {}
+        grid_x = np.r_[0.0, np.geomspace(1e-4, 2.0, 40)]
+        for b in sorted(rowcost):
+            band_steps = [s for s in train if band_of(int(S["bs"][s])) == b]
+            if len(band_steps) < args.min_steps or bs_ok(b, args) is False:
+                continue
+            buckets = [0] + ([1, 2] if getattr(args, "ctx_price", False) else [])
+            for cb in buckets:
+                for mode in (0, 1):
+                    sel = [s for s in band_steps
+                           if any(int(R["mode"][r]) == mode and int(R["cb"][r]) == cb for r in R["by_step"][s])]
+                    if len(sel) < (args.min_steps if cb == 0 else args.min_ctx_steps):
+                        continue
+                    if cb == 0 and not getattr(args, "per_mode", False):
+                        continue
+                    key = (b, mode, cb)
+                    best, best_rate = None, None
+                    for th in grid_x:
+                        policy["theta_x"][key] = th
+                        o = replay(R, S, sel, surv_all, policy, args, beta)
+                        rate = o["tok_pol"] / o["ms_pol"]
+                        if best_rate is None or rate > best_rate * (1 + 1e-9):
+                            best, best_rate = th, rate
+                    policy["theta_x"][key] = best
     return policy
+
+
+def bs_ok(b, args):
+    return BANDS[b] <= args.bsmax
 
 
 def prepare(R, S):
@@ -339,6 +395,24 @@ def prepare(R, S):
         start += int(bs)
     R["by_step"] = by_step
     R["bs_req"] = np.repeat(S["bs"], S["bs"])
+    R["mode"] = (~R["greedy"]).astype(np.int64)
+    R["bvx"] = None
+    if all(k in R for k in ("tgt_cand_p", "cand_ids", "drafted")):
+        # exact block-verification yield for sampled requests with complete inputs (tools/bvexpect.py)
+        import bvexpect
+
+        P = R["tgt_cand_p"].astype(np.float64)
+        ok = (~R["greedy"]) & np.isfinite(P).all(axis=(1, 2))
+        bvx = np.full((len(ok), STRIDE), np.nan)
+        if ok.any():
+            rows = R["rows"][ok].astype(np.float64) / R["t_eff"][ok][:, None, None]
+            rows = rows - rows.max(axis=-1, keepdims=True)
+            q = np.exp(rows)
+            q /= q.sum(axis=-1, keepdims=True)
+            lane = (R["cand_ids"][ok] == R["drafted"][ok][..., None]).argmax(axis=-1)
+            bvx[ok] = bvexpect.expected_accepts(q, P[ok], lane)
+        R["bvx"] = bvx
+    R["cb"] = np.digitize(R["context"], CTX_EDGES)
     R["ucache"] = {}
 
 
@@ -358,6 +432,11 @@ def main(argv=None):
     ap.add_argument("--no-gap", action="store_true", help="ablation: calibrate on m only (one gap bin)")
     ap.add_argument("--features", default="slot,m,gap", help=f"<= 3 of {','.join(FEATURES)}")
     ap.add_argument("--band-calib", action="store_true", help="also stratify the calibration by batch band")
+    ap.add_argument("--per-mode", action="store_true", help="price per (band, greedy/sampled)")
+    ap.add_argument("--no-bv-exact", dest="bv_exact", action="store_false",
+                    help="score sampled requests by min(A_full, L-1) even when the capture has tgt_cand_p")
+    ap.add_argument("--ctx-price", action="store_true", help="price per context bucket too (<16K, 16-64K, >=64K)")
+    ap.add_argument("--min-ctx-steps", type=int, default=30)
     ap.add_argument("--folds", type=int, default=2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--bootstrap", type=int, default=500)
@@ -398,11 +477,16 @@ def main(argv=None):
         surv_all = calib.survival(R, np.arange(len(R["rid"])), bins)
         policy = search_theta(R, S, train, surv_all, beta, rowcost, args)
         report["folds"].append(dict(theta={BANDS[b]: t for b, t in policy["theta"].items()},
+                                    theta_x={f"{BANDS[b]}/{'sampled' if m else 'greedy'}/ctx{cb}": t
+                                             for (b, m, cb), t in (policy.get("theta_x") or {}).items()},
                                     beta={BANDS[b]: v for b, v in beta.items()}))
         for s in test:
             o = replay(R, S, [s], surv_all, policy, args, beta)
+            rows_s = R["by_step"][s]
             for key in ("all", f"bs={BANDS[band_of(int(S['bs'][s]))]}",
-                        "greedy" if R["greedy"][R["by_step"][s]].all() else "sampled/mixed"):
+                        "greedy" if R["greedy"][rows_s].all() else "sampled/mixed",
+                        f"ctx{int(R['cb'][rows_s].max())}",
+                        f"bs={BANDS[band_of(int(S['bs'][s]))]}/{'greedy' if R['greedy'][rows_s].all() else 'sampled'}"):
                 for k2, v in o.items():
                     held[key][k2] += v
             per_cluster[comp[s]] += [o["tok_full"], o["ms_full"], o["tok_pol"], o["ms_pol"]]
@@ -439,8 +523,14 @@ def main(argv=None):
             saving = bt * (cached_union(R, S, s, (STRIDE,) * bs) - cached_union(R, S, s, (K,) * bs)) \
                 + args.row_ms * (STRIDE - K) * bs
             t = draft + S["t_verify_ms"][s] - saving
+            tok = 1 + np.minimum(acc, K - 1)
+            bvx = R.get("bvx")
+            if bvx is not None and getattr(args, "bv_exact", True):
+                ex = bvx[rows]
+                use = np.isfinite(ex[:, 0])
+                tok = np.where(use, 1 + ex[:, K - 1], tok)   # sampled block verification: exact expectation
             for key in ("all", f"bs={BANDS[b]}"):
-                per[key] += [float((1 + np.minimum(acc, K - 1)).sum()), t]
+                per[key] += [float(tok.sum()), t]
         fixed[K] = {k: 1000 * v[0] / v[1] for k, v in per.items()}
     report["fixed_width_tok_s"] = fixed
     report["beta_all"] = {BANDS[b]: v for b, v in beta_all.items()}
@@ -458,6 +548,9 @@ def main(argv=None):
                                       prev=list(PREV_EDGES)),
                            calib=calib.tables[-1].tolist(),
                            theta=[[BANDS[b], float(t)] for b, t in sorted(policy["theta"].items())],
+                           theta_x=[[BANDS[b], int(m), int(cb), float(t)]
+                                    for (b, m, cb), t in sorted((policy.get("theta_x") or {}).items())],
+                           ctx_edges=list(CTX_EDGES),
                            rowcost={BANDS[b]: v.tolist() for b, v in rowcost.items()}, bsmax=args.bsmax,
                            source=dict(dirs=args.dirs, draft_ms={BANDS[b]: v for b, v in args.draft_ms.items()},
                                        beta={BANDS[b]: v for b, v in beta.items()}, beta_scale=args.beta_scale,

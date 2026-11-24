@@ -44,6 +44,9 @@ plane: tail mass = 1 - sum_k exp(unary_k - lse); NaN when the plane was not prod
 probability and top-1 minus top-2 of softmax(next_token_logits) at T = 1 per verify row, computed after e2; NaN when the
 logits were not materialized), prompt_len, prompt_hash (hash of the prompt token ids, per request). Category and the
 inside-thinking bit are derived offline (phase timestamps of the window script, the rebuilt per-rid outputs).
+tgt_cand_p [G, K]: the target's probabilities (request temperature) of verify row j on slot j's candidate ids, sampled
+requests without top-k / top-p / min-p filtering only (NaN otherwise): input of the exact block-verification replay
+(tools/bvexpect.py). filtered: the request's target was filtered before sampling.
 """
 
 from __future__ import annotations
@@ -126,8 +129,9 @@ class DfStepLog:
         # META_COLS are filled at _plan_verify (draft side), FINISH_COLS at _accept_block.
         self.meta_cols = [("rows", g * k), ("m", g), ("gap", g), ("t_eff", 1), ("greedy", 1), ("temp", 1),
                           ("context", 1), ("cand", g * k), ("scores", g * k * k), ("unary", g * k), ("lse", g),
-                          ("drafted", g)]
-        self.finish_cols = [("accepted", 1), ("committed", S), ("commit_len", 1), ("tgt_p1", S), ("tgt_gap", S)]
+                          ("drafted", g), ("filtered", 1)]
+        self.finish_cols = [("accepted", 1), ("committed", S), ("commit_len", 1), ("tgt_p1", S), ("tgt_gap", S),
+                            ("tgt_cand_p", g * k)]
         self.col = {}
         off = 0
         for name, width in self.meta_cols + self.finish_cols:
@@ -338,9 +342,23 @@ class DfStepLog:
                        f.drafted[:bs].to(torch.float32))
         else:
             lattice = (nan(g * k), nan(g * k * k), nan(g * k), nan(g), nan(g))
+        # requests whose target is filtered (top-k / top-p / min-p) before sampling: their raw softmax is not the
+        # verified law, so the exact block-verification replay input (tgt_cand_p) is not recorded for them
+        filt = torch.zeros(bs, dtype=torch.bool, device=dev)
+        si = getattr(batch, "sampling_info", None)
+        for name, off in (("top_ks", None), ("top_ps", 1.0), ("min_ps", 0.0)):
+            v = getattr(si, name, None)
+            if isinstance(v, torch.Tensor) and v.numel() >= bs:
+                v = v.reshape(-1)[:bs].to(device=dev)
+                if name == "top_ks":
+                    filt |= (v > 0) & (v < int(1 << 30))
+                elif name == "top_ps":
+                    filt |= v.to(torch.float32) < 1.0
+                else:
+                    filt |= v.to(torch.float32) > 0.0
         # A fresh tensor: the next draft overwrites the feature buffers.
         meta = torch.cat((rows, f.m[:bs], f.gap[:bs], f.t_eff[:bs, None], greedy[:, None].to(torch.float32),
-                          temp[:, None], context[:, None]) + lattice, dim=1)
+                          temp[:, None], context[:, None]) + lattice + (filt[:, None].to(torch.float32),), dim=1)
         prompts = [self._prompt_key(req) for req in reqs]
         self.pending = (rids, meta, time.time(), prompts)
         self.slot.seq_dev[1].copy_(f.seq[0])
@@ -390,6 +408,28 @@ class DfStepLog:
             gap[start:end].copy_(a - b)
         return p1.view(bs, S), gap.view(bs, S)
 
+    def _target_cand_p(self, logits, bs, meta, chunk=4):
+        """[bs, G, K] target probabilities (softmax at the request temperature) of verify row j on slot j's candidate
+        ids, for sampled requests (greedy rows NaN: unused, and a certified greedy batch has no full logits).
+        Exact block-verification replay input (tools/bvexpect.py)."""
+        G, K, S = self.gamma, self.top_k, self.stride
+        dev = self.features.m.device
+        out = torch.full((bs, G, K), float("nan"), device=dev)
+        if logits is None or logits.dim() != 2 or logits.shape[0] < bs * S or not getattr(self.features, "lattice", False):
+            return out
+        temp = meta[:, self.col["temp"]][:, 0]
+        greedy = (meta[:, self.col["greedy"]][:, 0] > 0.5) | (meta[:, self.col["filtered"]][:, 0] > 0.5)
+        t = torch.where(temp > 0, temp, torch.ones_like(temp))
+        cand = self.features.cand[:bs]
+        rows = logits[:bs * S].view(bs, S, -1)
+        for b0 in range(0, bs, chunk):
+            b1 = min(bs, b0 + chunk)
+            x = rows[b0:b1, :G].float()
+            x = (x - x.amax(dim=-1, keepdim=True)) / t[b0:b1, None, None]  # shift before scaling (low temperatures)
+            lse = torch.logsumexp(x, dim=-1, keepdim=True)
+            out[b0:b1] = torch.exp(x.gather(-1, cand[b0:b1]) - lse)
+        return torch.where(greedy[:, None, None], torch.full_like(out, float("nan")), out)
+
     def _finish(self, accept_len, commit_lens=None, out_tokens=None, logits=None):
         if self.pending is None:
             return
@@ -411,7 +451,8 @@ class DfStepLog:
         clen = (commit_lens.reshape(-1)[:bs].to(**f32)[:, None] if commit_lens is not None
                 else torch.full((bs, 1), float("nan"), device=dev))
         p1, gap = self._target_stats(logits if self.target_stats_ok else None, bs)
-        data = torch.cat((meta, acc, committed, clen, p1, gap), dim=1)
+        cp = self._target_cand_p(logits, bs, meta).reshape(bs, -1)
+        data = torch.cat((meta, acc, committed, clen, p1, gap, cp), dim=1)
         slot.rows[:bs].copy_(data, non_blocking=self.cuda)
         size = MAX_VISITS * bs * self.stride * MAX_TOPK
         slot.routes[:size].copy_(self.journal[:size], non_blocking=self.cuda)
@@ -557,6 +598,7 @@ class DfStepLog:
                 committed=np.nan_to_num(data[:, c["committed"]], nan=-1).astype(np.int32),
                 commit_len=np.nan_to_num(data[:, c["commit_len"]][:, 0], nan=-1).astype(np.int8),
                 tgt_p1=data[:, c["tgt_p1"]], tgt_gap=data[:, c["tgt_gap"]],
+                tgt_cand_p=data[:, c["tgt_cand_p"]].reshape(-1, g, k),
                 prompt_len=prm[:, 0].astype(np.int32), prompt_hash=prm[:, 1],
                 union=np.stack(unions), visits=np.asarray(visits, dtype=np.int16),
                 walks=np.asarray(walks, dtype=np.int32), t_start_ms=np.asarray(t_start, dtype=np.float64),

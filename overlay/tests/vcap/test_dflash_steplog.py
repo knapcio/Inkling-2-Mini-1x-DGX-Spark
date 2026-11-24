@@ -225,7 +225,7 @@ class EndToEndTest(unittest.TestCase):
         files = sorted(glob.glob(os.path.join(self.dir_on, "dflash1-*.npz")))
         z = {k: np.concatenate([np.load(f)[k] for f in files]) for k in
              ("cand_ids", "scores", "unary", "lse", "drafted", "committed", "commit_len", "tgt_p1", "tgt_gap",
-              "prompt_len", "prompt_hash", "accepted")}
+              "prompt_len", "prompt_hash", "accepted", "tgt_cand_p")}
         hist = torch.load(self.hist_on, weights_only=False)
         dm = mdf.DFlash2DraftModel(64, 16, 16)
         bs = hist[0]["bs"]
@@ -248,6 +248,14 @@ class EndToEndTest(unittest.TestCase):
             self.assertTrue(np.allclose(z["tgt_p1"][rs], top[..., 0].numpy(), atol=1e-5))
             self.assertTrue(np.allclose(z["tgt_gap"][rs], (top[..., 0] - top[..., 1]).numpy(), atol=1e-5))
             self.assertEqual(z["prompt_len"][rs].tolist(), [17 + 5 * i for i in range(bs)])
+            # exact-BV replay input: P of row j (request temperature) on slot j's candidates; greedy rows NaN
+            T = torch.where(h["req_temps"] > 0, h["req_temps"], torch.ones_like(h["req_temps"]))
+            pref = torch.softmax(x[:, :7] / T[:, None, None], dim=-1).gather(-1, h["candidate_ids"])
+            for i in range(bs):
+                if bool(h["greedy"][i]):
+                    self.assertTrue(np.isnan(z["tgt_cand_p"][rs][i]).all())
+                else:
+                    self.assertTrue(np.allclose(z["tgt_cand_p"][rs][i], pref[i].numpy(), atol=1e-6))
             self.assertEqual(len(set(z["prompt_hash"][rs].tolist())), bs)
 
     def test_width_unions_recomputed(self):
@@ -409,6 +417,30 @@ class FailureIsolationTest(unittest.TestCase):
             c = log._prompt_key(Slotted("y", [4, 5, 6, 7]))
             d = log._prompt_key(Slotted("y", [4, 5]))
             self.assertEqual((c[0], d[0]), (4, 2))
+        finally:
+            log.close()
+
+    def test_target_cand_p_numerics_and_filtering(self):
+        from inkling_vcap import dfsteplog
+        from inkling_vcap.dflash import DflashFeatures
+
+        feats = DflashFeatures(capacity=2, gamma=7, top_k=16, device="cpu", keep_rows=True)
+        log = dfsteplog.DfStepLog(os.path.join(self.tmp, "tcp"), stride=8, top_k=16, capacity=2, device="cpu",
+                                  features=feats)
+        try:
+            V = 40
+            feats.cand[:2] = torch.arange(16).expand(2, 7, 16)
+            logits = torch.full((16, V), -5.0)
+            logits[:, 0] = 3.0
+            logits[:, 1] = 3.0                     # a tie at the top
+            meta = torch.zeros(2, log.col["filtered"].stop)
+            meta[:, log.col["temp"]] = torch.tensor([[1e-6], [0.8]])
+            out = log._target_cand_p(logits, 2, meta)
+            self.assertTrue(torch.allclose(out[0, :, :2], torch.full((7, 2), 0.5), atol=1e-6))  # low temperature: shift before scaling
+            self.assertTrue(torch.allclose(out.sum(-1)[1], torch.softmax(logits[:7] / 0.8, -1)[:, :16].sum(-1)))
+            meta[1, log.col["filtered"]] = 1.0     # top-k / top-p / min-p: not recorded
+            out = log._target_cand_p(logits, 2, meta)
+            self.assertTrue(torch.isnan(out[1]).all() and not torch.isnan(out[0]).any())
         finally:
             log.close()
 

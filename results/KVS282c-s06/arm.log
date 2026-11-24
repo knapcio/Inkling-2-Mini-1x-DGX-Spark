@@ -1,0 +1,9 @@
+2026-11-24T22:09:05Z KVS282c-s06 mode warm
+KVS282c-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.47, "geomean_tok_s": 73.01, "aggregate_tok_s": 70.82, "median_ttft_ms": 164.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.28, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.021, "drift_pct_all": -0.021}}
+wrote results/KVS282c-s06/warm-sbquick.json (1.4 min)
+2026-11-24T22:10:31Z KVS282c-s06 mode kvstress
+<lambda>                     FAIL  {"error": "RemoteDisconnected('Remote end closed connection without response')"}
+0 / 1 passed
+2026-11-24T22:10:58Z KVS282c-s06 mode nd128
+<lambda>                     FAIL  {"error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+0 / 1 passed

@@ -317,7 +317,7 @@ def patch_worker(mod) -> None:
                 if STATE.steplog is not None:
                     STATE.steplog.start(batch=batch, prefix_lens=prefix_lens)
                 elif STATE.capping:
-                    cut = plan_cap(int(prefix_lens.numel()), batch)
+                    cut = plan_cap(int(prefix_lens.numel()), batch, prefix_lens)
                     STATE.df_planned = cut
                     if cut is not None:
                         # The stock code hands layout.verify_lens to _accept_block as cutoff_verify_lens; with the
@@ -401,7 +401,7 @@ def patch_worker(mod) -> None:
     STATE.applied.update((P_DF_INIT, P_DF_STAGE, P_DF_PLAN, P_DF_ACCEPT, P_DF_FBG, P_DF_SAMPLED))
 
 
-def plan_cap(bs: int, batch=None):
+def plan_cap(bs: int, batch=None, prefix_lens=None):
     """This step's live lengths / remap (dfcap.plan) under the configured DFLASH mode; None = uncapped step (full
     width, identity src_index)."""
     from inkling_vcap import dfcap
@@ -422,7 +422,7 @@ def plan_cap(bs: int, batch=None):
         return uncapped()  # adaptive rules need this step's features: full width when they are unavailable
     if cfg.kind == "conf":
         return dfcap.plan(STATE, bs=bs, mode="conf", arg=cfg.threshold, lo=lo, hi=hi)
-    return dfcap.plan(STATE, bs=bs, mode="policy", arg=STATE.df_policy, lo=lo, hi=hi)
+    return dfcap.plan(STATE, bs=bs, mode="policy", arg=STATE.df_policy, lo=lo, hi=hi, context=prefix_lens)
 
 
 def _graph_capacity() -> int:

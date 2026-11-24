@@ -1,5 +1,68 @@
 # Changelog
 
+## v2.8.2 (2026-11-24)
+
+Basic tests on one box; full two-box qualification follows in v2.8.x.
+
+A bit-identical prefill lever on by default, two more opt-in, and a refitted DFLASH verify-width policy: a prefill
+and verify-policy release, with decode speed on speedbench unchanged. Box B, release defaults: speedbench full 72.78
+/ 72.82 in two runs (v2.8.1 72.86); cold prefill 8K / 32K / 128K +2.1 / +2.2 / +1.0 %; KV pool 2,349,056 tokens at
+`MEM_FRACTION=0.88`; worst case 5.0 GiB. Results: `results/PF282-s06/`, `results/REL282-s06/`,
+`results/KVS282a-s06/`, `results/KVS282b-s06/`, `results/KVS282c-s06/`, `results/SBF0-s06/`, `results/SBF1-s06/`,
+`results/PHAc-s06/`, `results/PHAc2-s06/` (v2.8.1-tree prefill control),
+`results/XGc-s06/`, `results/XGc2-s06/`, `results/XGg-s06/`,
+`results/XGgp-s06/`, `results/XGag-s06/`, `results/XGn-s06/`, `results/CAP282-s06/`.
+
+- Prefill levers, each pinned to the image's source:
+  - `ATTN_GATE=1` (`inkling_attn`, on): the sink gate in the sliding-window prefill attention epilogue, coalesced.
+    Bit-identical to SGLang's `gate_sink`, padded rows zeroed; in serving, greedy outputs identical to the control on
+    30 / 30 prompts with a maximum log-probability difference of 0. The gated epilogue turns itself off while
+    `SGLANG_KERNEL_API_LOGLEVEL` is non-zero (that kernel logging reads the output buffer the gate leaves
+    unwritten); with the variable unset nothing changes (4 unit tests, checked live).
+  - `PFUSE_HOIST` (`inkling_phoist`, new, opt-in, default `0`): the loop controller's linear source projection is
+    prepared once per loop pass instead of inside every fused visit (99.96 % of elements bit-equal, FP64-reference
+    error within 1.5x of the fused path; a start-up self-test with fallback). It ships off because two long prompts
+    gave different greedy text with it on, and the check of whether that is ordinary rounding is not finished.
+    `PFUSE_HOIST=1` turns it on; `PFUSE_HOIST=exact` is a bit-identical, slower variant.
+  - `PROLOGUE` (`inkling_prologue`, new, opt-in, default `0`): the sliding-window visit's K conv + L2 clip and V
+    conv + value norm fused, one kernel each. It ships off because it changes single values by the smallest BF16 step
+    (a different order of the sum of squares), and greedy outputs then did not match the control.
+  - With any of them on, `scripts/launch.sh` refuses `--enable-mixed-chunk` (exit 2).
+  - Cold prefill, release defaults against a control on the v2.8.1 tree, same box, mean of 2 runs: 1K 2,821 vs 2,836
+    (flat), 8K 5,527 vs 5,411 (+2.1 %), 32K 5,189 vs 5,073 (+2.2 %), 128K 3,785 vs 3,749 (+1.0 %); cold time to first
+    token 1.48 / 6.30 / 34.6 s at 8K / 32K / 128K. Opt-in, same box: hoist + gate 8K 5,599 (+3.5 %), 32K 5,254
+    (+3.5 %), 128K 3,844 (+2.6 %); hoist + gate + prologue 8K 5,656.
+- Memory: the prefill levers add up to ~0.6-0.7 GB of transient memory during long prefills, so `SPEC=dflash2` up to
+  `CTX=262144` sizes at `MEM_FRACTION=0.88` with any of them on, as with the default gate (0.89 with all three off;
+  0.85 above 262,144 as before; `SPEC=dspark` keeps 0.89). KV pool 2,349,056 tokens (v2.8.1 at 0.89: 2,400,384,
+  -2.1 %). Lowest MemAvailable over 4 release-defaults runs with thinking c24 (48 x 2,048 tokens) alongside a cold
+  240K needle: 5.0 GiB (guard 3.5 GiB; 48 / 48 requests completed). At 0.89 the guard stopped the server 25 s into
+  that load (3.3 GiB), so 0.88 stays. Needles at 128K and 240K PASS.
+- Speedbench full, release defaults (two runs, 0 failed): prose 64.99 / 64.96, code 81.52 / 81.43, structured 77.62 /
+  77.56, agentic 83.32 / 83.21, multilingual 57.63 / 57.56, long context 72.15 / 72.94, all 72.78 / 72.82 (v2.8.1
+  72.86). Same tree without the cap: 64.06 (long context 67.31); with v2.8.1's policy: 72.42 (73.05).
+- The DFLASH verify-width policy now prices greedy and sampled requests separately and has a context bucket
+  (`df-SLDF2x.json`, the new `DFCAP` default; `bsmax=8` as before). It was fitted on a larger full-width capture (all
+  batch bands, greedy and sampled thinking, 32K-128K prompts) with the same survival-table form (slot x selector
+  confidence) and cross-fitted on held-out requests. Sampled requests verify all rows from 8 requests up; a single
+  greedy request at 64K tokens of context or more caps less (price 0.057 instead of 0.095). The policy file adds two
+  optional fields, `theta_x` (price per batch band, greedy / sampled, context bucket) and `ctx_edges` (16,384 /
+  65,536); files without them behave as before. The rule is still a stopping rule on draft-side information, so the
+  target distribution is unchanged.
+  - Measured on box A on the v2.8.1 stack, ABBA, two runs per policy, v2.8.1 policy -> `df-SLDF2x`: greedy decode
+    prose c4 141.2 / 138.0 -> 140.2 / 140.6, c8 201.9 / 205.3 -> 201.6 / 202.4; code c4 137.1 / 137.0 -> 139.9 /
+    134.2, c8 204.4 / 199.5 -> 201.3 / 199.2 (within run noise); speedbench quick 73.17 -> 73.75; decode at 32K
+    61.27 -> 66.05 (+7.8 %), at 128K 51.83 -> 50.91.
+  - Exactness against the uncapped server, 30 speedbench quick prompts: 27 / 30 identical, 2 top-2 near-ties and 1
+    three-way near-tie (longctx-09 at token 93: four candidates within 0.1 nat, ' It' -1.939, ' self' -1.991,
+    ' In' -2.033, ' Need' -2.035; the capped run took the third at 0.094 nat). The same class as previous releases.
+    Against v2.8.1 the release defaults give identical greedy outputs on 29 / 30 prompts; the one difference,
+    longctx-09, is this near-tie and comes from the cap, not the sink gate (gate off with the cap on gives the same
+    outputs as the release on 30 / 30, `results/CAP282-s06/`).
+  - The fitting tool (`tools/dfreplay.py --per-mode --ctx-price`) scores sampled requests by the exact expected yield
+    of block verification when the capture has the target's candidate probabilities (`tools/bvexpect.py`).
+- Closed prefill candidates (measured, not adopted): docs/experiments.md, "v2.8.2".
+
 ## v2.8.1 (2026-11-24)
 
 Basic tests on one box; full two-box qualification follows in v2.8.x.

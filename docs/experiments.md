@@ -1122,3 +1122,146 @@ was 4.1 GiB, in a run that generated 4 % more tokens than the v2.8 run (guard
 
 1M on v2.8 (`CTX=1048576`, box A): needle PASS at 999,296 tokens; decode at 1,000K context 23.3 tok/s (one
 repetition); pool 2.14M global-layer tokens; lowest MemAvailable 8.9 GiB.
+
+## v2.8.2: prefill levers and the verify-cap policy df-SLDF2x
+
+Basic tests on one box; full two-box qualification follows in v2.8.x. Release-defaults runs on box B:
+`results/PF282-s06/`, `results/REL282-s06/` (speedbench full, prefill, worst case), `results/KVS282a-s06/`,
+`results/KVS282b-s06/` (worst case, needles), `results/KVS282c-s06/` (`MEM_FRACTION=0.89`), `results/PHAc-s06/`,
+`results/PHAc2-s06/` (prefill control on the v2.8.1 tree), `results/SBF0-s06/` (cap
+off), `results/SBF1-s06/` (v2.8.1's cap policy), exactness `results/XGc-s06/`, `results/XGc2-s06/`, `results/XGg-s06/`,
+`results/XGgp-s06/`, `results/XGag-s06/`, `results/XGn-s06/`, `results/CAP282-s06/`. v2.8.2 is a prefill and
+verify-policy release: speedbench decode is unchanged (72.78 / 72.82 against v2.8.1's 72.86).
+
+### Where prefill time goes (v2.8 defaults, box A)
+
+Cold prefill in the same boot: 1K / 8K / 32K / 128K 2,856 / 5,425 / 5,111 / 3,743 tok/s; profiler overhead < 1 %.
+One 8,119-token chunk is one captured graph: GPU wall 1,436 ms, busy 1,416 ms, host 20 ms.
+
+| class (8K chunk) | ms | % |
+|---|---:|---:|
+| MoE GEMMs: NVFP4 w13 182.9 (166 TF/s), w2 114.5 (133 TF/s), MXFP8 44.2 (94 TF/s) | 341.6 | 23.8 |
+| dense GEMMs (qkvr, wo, router, dynamic conv) | 279.1 | 19.4 |
+| loop message path (fused mix 113.8, statistics 82.0, split down projection 29.7) | 225.5 | 15.7 |
+| MoE glue (combine 71.6, SwiGLU + quantise 67.5, quantise-once gather 23.4, quantise 10.8, MXFP8 17.2, routing 4.6) | 196.5 | 13.7 |
+| attention (sliding window 79.9 at ~48 TF/s, global 49.8 at ~65 TF/s) | 131.1 | 9.1 |
+| short conv 64.1, residual norm 49.2, gate_sink 39.3, L2 clips 31.8, KV store 26.2, RMSNorm 20.1, other ~10 | 240 | 16.8 |
+| host | 20.1 | 1.4 |
+
+At 128K the chunks grow from 1,403 to 2,846 ms; global attention is 12.2 s of 34.7 s at ~69 TF/s (the kernel's peak).
+A prompt of 16 x 8,192 + 25 tokens pays a 220 ms forward for its 25-token tail, so prefill runs are compared only at
+equal prompt lengths.
+
+### Prefill levers
+
+- `PFUSE_HOIST` (`overlay/inkling_phoist`, opt-in, default 0): the loop bank's attention-residual weights, the message rstd and the
+  message-only K groups of the controller down projection are prepared once per loop pass. 99.96 % of elements
+  bit-equal to the fused path, 168 / 168 FP64-reference comparisons within 1.5x of its error (512-8,192 rows). One 8K
+  loop pass 104.5 -> 93.0-94.0 ms (-21 to -23 ms per 8K chunk). A start-up self-test (before graph capture) checks it
+  against the fused path and falls back on any failure; only the checked row-count regimes are armed. In the
+  prefill exactness gate, 2 long prompts diverged with the hoist on at points that are not near-ties; it ships
+  opt-in until a bracket places them within the normal floating-point spread.
+- `ATTN_GATE=1`: gate_sink in the epilogue of the sliding-window prefill attention kernel. Bit-identical (output and
+  LSE) to SGLang's gate_sink, including graph replay and padded multi-request batches. The epilogue stages the gate
+  tile in the free K / V shared memory (coalesced 16-byte loads and stores): 234 vs 232 registers, no spills, 2 CTAs
+  per SM. 8K: attention + gate_sink 2,759 -> 1,944 us per sliding-window visit (-32.6 ms per chunk); a first,
+  uncoalesced version saved 20.6 ms.
+- `PROLOGUE` (`overlay/inkling_prologue`, opt-in, default 0): the sliding-window visit's K conv + L2 clip and V conv +
+  value norm as one kernel each. 227 -> 122 us per call, -8.4 ms per 8K chunk. It flips single elements by one BF16
+  ulp (the order of the sum of squares), so it is in the floating-point-order class like the hoist: the gate + prologue
+  serving run did not match the control in the exactness gate, and it ships opt-in.
+
+Exactness gate (30 speedbench quick prompts, greedy, against a control on the v2.8.1 tree):
+
+| arm | identical | near-ties | not near-ties |
+|---|---:|---:|---:|
+| control repeat (`XGc2` vs `XGc`) | 30 / 30 (4,691 tokens bit-equal) | 0 | 0 |
+| sink gate, the default (`XGg`) | 30 / 30, max log-probability difference 0 | 0 | 0 |
+| gate + prologue (`XGgp`) | 27 / 30 | 1 | 2 |
+| hoist + gate (`XGag`) | 26 / 30 | 2 | 2 |
+| the FP-order prefill fusion shipped since v2.8 turned off (`XGn`) | 26 / 30 | 3 | 1 |
+
+Turning off the floating-point-order prefill fusion that has shipped since v2.8 moves the same four long prompts as
+the hoist does, so these long-prompt divergences follow any change of floating-point order in prefill, not a defect in
+one lever. With the v2.8.2 cap on, the release matches v2.8.1 on 29 / 30; the difference (longctx-09) comes from the
+cap: with the gate off and the cap on (`CAP282`) the outputs equal the release on 30 / 30. It is the four-way near-tie
+described under the policy below.
+
+The gated epilogue turns itself off while `SGLANG_KERNEL_API_LOGLEVEL` is non-zero (logging "gated epilogue OFF
+..."): that kernel logging reads the FA4 FP32 output buffer, which the gate leaves unwritten. With the variable unset
+nothing changes (4 unit tests; checked live in the release run).
+
+Serving, cold prefill tok/s (box B, same prompts, mean of 2 runs):
+
+| | 1K | 8K | 32K | 128K |
+|---|---:|---:|---:|---:|
+| v2.8.1 control (same box; a repeat: 2,812 / 5,408 / 5,077 / 3,726) | 2,836 | 5,411 | 5,073 | 3,749 |
+| opt-in: hoist + gate | 2,833 | 5,599 (+3.5 %) | 5,254 (+3.5 %) | 3,844 (+2.6 %) |
+| opt-in: hoist + gate + prologue | - | 5,656 | - | - |
+| gate only (release defaults) | 2,821 (flat) | 5,527 (+2.1 %) | 5,189 (+2.2 %) | 3,785 (+1.0 %) |
+
+Memory: the levers deepen the MemAvailable dip of a long prefill by ~0.6-0.7 GB, so `SPEC=dflash2` up to
+`CTX=262144` sizes at `MEM_FRACTION=0.88` with any of them on, including the default gate. Release defaults: KV pool
+2,349,056 tokens (v2.8.1 at 0.89: 2,400,384, -2.1 %); cold time to first token 1.48 / 6.30 / 34.6 s at 8K / 32K /
+128K. Worst case (thinking c24, 48 x 2,048 tokens, alongside a cold 240K needle; 48 / 48 completed, 343.8 / 341.8
+tok/s aggregate): lowest MemAvailable 5.7 / 5.0 / 5.9 / 6.4 GiB over four runs (guard 3.5 GiB). At 0.89 the guard
+stopped the server 25 s into the same load (3.3 GiB), so 0.88 stays. Needles at 128K and 240K PASS.
+
+Speedbench full, release defaults, two runs (`PF282` / `REL282`), against v2.8.1 (`V281s`):
+
+| | prose | code | structured | agentic | multilingual | long context | all 73 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| v2.8.2 | 64.99 / 64.96 | 81.52 / 81.43 | 77.62 / 77.56 | 83.32 / 83.21 | 57.63 / 57.56 | 72.15 / 72.94 | 72.78 / 72.82 |
+| v2.8.1 | 64.92 | 81.88 | 77.46 | 82.74 | 57.46 | 73.53 | 72.86 |
+
+Same tree, other cap settings: no cap (`SBF0`) 64.06, long context 67.31; v2.8.1's `df-SLDF1-sm` policy (`SBF1`)
+72.42, long context 73.05. The new policy is +0.4 on all prompts against the old one, and the long-context spread
+(72.15-73.53) is run-to-run variation.
+
+### Closed prefill candidates (measured, not adopted)
+
+| idea | measured | verdict |
+|---|---|---|
+| single-kernel loop message path | correct against FP64, but one 8K pass 137-163 ms against the fused path's 104 ms; an all-controllers variant needs 104-115 KB of shared memory (99 KB available) | slower: the mix is bound by compute and parallelism (~82 GB/s effective), not by bytes |
+| 8-warp sliding-window prefill attention | 2,152 vs 1,877 us per 8K visit | slower |
+| Triton BF16 GEMM instead of cuBLAS for the prefill linears | cuBLAS runs at 79-92 TF/s on the served shapes; Triton wins only wo (+5.6 %) and k / v (+6 %), ~-5 ms per chunk | cuBLAS is already the best choice; not worth an overlay |
+| MXFP8 MoE tactics at prefill row counts | stock is already the best tactic (128, 128) at 109-126 TF/s; the others are bit-equal but 20-85 % slower | closed |
+| one-pass loop mix with an L2-resident FP32 slab | L2 probe: reads up to 20 MB hit L2 at 1.5-1.6 TB/s, but repeated writes run at 658 / 766 / 578 / 321 GB/s for 2 / 4 / 8 / 12 MB and at DRAM speed from 16 MB; a 4 / 8 MB slab read back after 32 MB of other traffic costs +22 / +44 us | the write-back L2 retains only ~8 MB of dirty data: the 14 MB slab under ~50 MB of concurrent traffic goes to DRAM and costs about what the recompute saves |
+| mlp-side RMSNorm folded into the loop mix | 3,866 -> 4,186 us per mlp call | slower (+7.7 ms per chunk) |
+
+### Verify-width policy df-SLDF2x
+
+`df-SLDF2x.json` (the new `DFCAP` default, `bsmax=8`) prices greedy and sampled requests separately and adds a
+context bucket (`theta_x` per batch band, greedy / sampled and context bucket; `ctx_edges` 16,384 / 65,536). It was
+fitted on a larger full-width capture (all batch bands, greedy and sampled thinking, 32K-128K prompts) with the same
+survival-table form (slot x selector confidence) and cross-fitted on held-out requests. Sampled requests verify all
+rows from 8 requests up; a single greedy request at 64K tokens of context or more caps less (price 0.057 instead of
+0.095). Policy files without the new fields behave as before.
+
+On the v2.8.1 stack (box A, ABBA, two runs per policy), v2.8.1 policy against `df-SLDF2x`:
+
+| | v2.8.1 policy | df-SLDF2x |
+|---|---|---|
+| prose c4 | 141.2 / 138.0 | 140.2 / 140.6 |
+| prose c8 | 201.9 / 205.3 | 201.6 / 202.4 |
+| code c4 | 137.1 / 137.0 | 139.9 / 134.2 |
+| code c8 | 204.4 / 199.5 | 201.3 / 199.2 |
+| speedbench quick | 73.17 | 73.75 |
+| decode at 32K | 61.27 | 66.05 (+7.8 %) |
+| decode at 128K | 51.83 | 50.91 |
+
+Earlier, on the v2.8 stack before the prefix-tail fix (off / v2.8 policy / new): speedbench quick 62.20 / 70.65 /
+70.79; decode at 32K 58.97 / 60.13 / 63.85, at 128K 47.02 / 50.72 / 50.78. Sampled thinking: two identical c8
+cohorts on the same server differ by up to 6.7 %, so one cohort cannot resolve a few percent; over three paired c8
+cohorts the new policy against off was 0.973 / 1.056 / 1.038 in aggregate tok/s (mean 1.022), c1 per-request median
+78.8 off, 79.5 new. A variant that also capped sampled requests at 8 requests (price 0.338) measured 1.042 / 0.953 /
+1.024 against the new policy (mean 1.006, spread 0.089), within the cohort spread, so it was not adopted.
+
+Exactness against the uncapped server (30 speedbench quick prompts, top-2 logprobs): 27 / 30 identical, 2 top-2
+near-ties and 1 three-way near-tie (longctx-09 at token 93: four candidates within 0.1 nat, ' It' -1.939, ' self'
+-1.991, ' In' -2.033, ' Need' -2.035; the capped run took the third at 0.094 nat). Unit tests check that the runtime
+widths equal the fitting tool's per-request price lookup. The fitting tool (`tools/dfreplay.py --per-mode
+--ctx-price`) scores sampled requests by the exact expected yield of block verification when the capture has the
+target's candidate probabilities (`tools/bvexpect.py`, capture field `tgt_cand_p`, not recorded for top-k / top-p /
+min-p filtered requests); on the capture this changed sampled scores by under 0.5 percentage points and left the
+prices unchanged.

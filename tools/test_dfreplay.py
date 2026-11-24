@@ -145,6 +145,32 @@ class ReplayTest(unittest.TestCase):
                               "slot,m,gap,tail", "--visits", str(V)], capture_output=True, text=True)
         self.assertNotEqual(out.returncode, 0)
 
+    def test_exact_bv_scoring_for_sampled(self):
+        # sampled synthetic requests with target probabilities on the candidates: the replay scores them by the exact
+        # stopped-block expectation (bvexpect), not by min(A_full, L-1)
+        d = os.path.join(self.tmp, "bv")
+        synth(d, runs=2, steps=120, bs_list=(1,), seed=4)
+        for f in os.listdir(d):
+            z = dict(np.load(os.path.join(d, f)))
+            n = len(z["rid"])
+            rng = np.random.default_rng(1)
+            z["greedy"] = np.zeros(n, bool)
+            z["t_eff"] = np.ones(n, np.float32)
+            z["cand_ids"] = np.tile(np.arange(K, dtype=np.int32), (n, G, 1))
+            z["drafted"] = rng.integers(0, K, size=(n, G)).astype(np.int32)
+            z["tgt_cand_p"] = rng.dirichlet(np.ones(K), size=(n, G)).astype(np.float32) * 0.9
+            np.savez_compressed(os.path.join(d, f), **z)
+        R, S_ = dfreplay.load([d])
+        dfreplay.prepare(R, S_)
+        self.assertIsNotNone(R["bvx"])
+        self.assertTrue(np.isfinite(R["bvx"]).all())
+        # (no monotonicity in L per fixed realized block: block verification is optimal in expectation over the
+        # draft's own sampling, not for one conditioned block)
+        self.assertTrue((R["bvx"][:, 0] == 0).all() and (R["bvx"] <= np.arange(8)[None, :] + 1e-12).all())
+        exact = run([d])
+        trunc = run([d], "--no-bv-exact")
+        self.assertNotAlmostEqual(exact["scores"]["all"]["full_tok_s"], trunc["scores"]["all"]["full_tok_s"])
+
     def test_union_exact_vs_interpolated(self):
         R, S_ = dfreplay.load([self.dir])
         dfreplay.prepare(R, S_)

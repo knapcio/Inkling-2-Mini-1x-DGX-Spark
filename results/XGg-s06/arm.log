@@ -1,0 +1,34 @@
+2026-11-24T21:16:59Z XGg-s06 mode warm
+XGg-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 67.23, "geomean_tok_s": 70.01, "aggregate_tok_s": 68.89, "median_ttft_ms": 156.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 40.74, "median_tokens_per_step": 2.718, "steps_source": "response", "median_accept_rate": 0.2503, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.046, "drift_pct_all": 0.046}}
+wrote results/XGg-s06/warm-sbquick.json (1.4 min)
+2026-11-24T21:18:25Z XGg-s06 mode lcdump
+agentic-01 51
+longctx-07 160
+multilingual-03 160
+prose-04 160
+longctx-09 160
+multilingual-07 160
+prose-08 160
+structured-05 160
+multilingual-01 160
+prose-09 160
+code-07 160
+code-05 160
+agentic-09 160
+longctx-02 160
+structured-01 160
+multilingual-05 160
+prose-01 160
+structured-08 160
+code-01 160
+agentic-07 160
+longctx-04 160
+prose-03 160
+code-10 160
+structured-02 160
+code-14 160
+agentic-02 160
+prose-12 160
+prose-14 160
+code-03 160
+prose-17 160

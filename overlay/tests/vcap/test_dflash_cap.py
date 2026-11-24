@@ -141,5 +141,58 @@ class PolicyParityTest(unittest.TestCase):
         self.assertGreater(checked, 100)
 
 
+class ModeContextPriceParityTest(unittest.TestCase):
+    """theta_x (per band, greedy/sampled, context bucket) + ctx_edges: dfcap.lens_policy (runtime) equals the
+    replay's per-request price lookup (dfreplay.theta_of) and widths, request by request."""
+
+    def test_runtime_equals_replay(self):
+        import argparse
+
+        import dfreplay
+
+        g = np.random.default_rng(5)
+        G, nm = 7, len(dfreplay.M_EDGES) + 1
+        calib = g.uniform(0.3, 0.98, size=2 * G * nm)  # strata (mode) x slot x m-bin
+        bands = list(dfreplay.BANDS)
+        rowcost = {b: list(g.uniform(0.5, 4.0, size=G)) for b in bands}
+        theta = [[b, float(g.uniform(0.02, 0.3))] for b in bands]
+        theta_x = [[1, 0, 2, 0.05], [1, 1, 0, 0.0], [4, 1, 0, 0.12], [4, 0, 1, 0.2], [8, 1, 0, 0.0]]
+        obj = dict(format=dfcap.FORMAT, stride=8, bands=bands, features=["slot", "m"], band_calib=False,
+                   edges=dict(m=list(dfreplay.M_EDGES)), calib=calib.tolist(), theta=theta, theta_x=theta_x,
+                   ctx_edges=list(dfreplay.CTX_EDGES), rowcost={str(b): v for b, v in rowcost.items()}, bsmax=48)
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            json.dump(obj, fh)
+        pol = dfcap.load_df_policy(fh.name)
+        dev = dfcap.DfPolicyDevice(pol, "cpu")
+        rp = dict(theta={bands.index(b): t for b, t in theta},
+                  theta_x={(bands.index(b), m, c): t for b, m, c, t in theta_x},
+                  rowcost={bands.index(b): np.asarray(v) for b, v in rowcost.items()}, bsmax=48)
+        table = calib.reshape(2, G, nm)
+        checked = 0
+        for bs in (1, 3, 4, 8):
+            for _ in range(40):
+                m = g.uniform(0, 1, size=(bs, G)).astype(np.float32)
+                sampled = g.random(bs) < 0.5
+                ctx = g.choice([100, 16383, 16384, 40000, 65535, 65536, 200000], size=bs)
+                band = dfreplay.band_of(bs)
+                # replay side
+                mb = np.digitize(m, dfreplay.M_EDGES)
+                surv = np.cumprod(table[sampled.astype(int)[:, None], np.arange(G)[None, :], mb], axis=1)
+                cb = np.digitize(ctx, dfreplay.CTX_EDGES)
+                ths = np.array([dfreplay.theta_of(rp, band, int(sampled[i]), int(cb[i])) for i in range(bs)])
+                want = dfreplay.widths_for(surv, ths, rp["rowcost"][band])
+                got = dfcap.lens_policy(torch.tensor(m), torch.zeros(bs, G), torch.tensor(sampled), band, dev,
+                                        context=torch.tensor(ctx))
+                self.assertEqual(got.tolist(), want.tolist())
+                checked += 1
+        self.assertEqual(checked, 160)
+        # host decision: a band caps when any (mode, bucket) price is positive
+        self.assertGreater(pol.theta_for(8), 0.0)  # greedy band-8 price from theta
+        obj2 = dict(obj, theta=[[b, 0.0] for b in bands], theta_x=[[8, 1, 0, 0.0]])
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as fh:
+            json.dump(obj2, fh)
+        self.assertEqual(dfcap.load_df_policy(fh.name).theta_for(8), 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

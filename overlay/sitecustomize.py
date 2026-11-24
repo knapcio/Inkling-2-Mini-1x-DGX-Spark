@@ -36,6 +36,12 @@ try:
     if _on("INKLING_PFUSE"):  # prefill glue fusion: Inkling2DecoderLayer._forward, extend only
         import inkling_pfuse
         inkling_pfuse.install()
+    if _on("INKLING_PROLOGUE"):  # SWA prefill: K conv + L2 clip, V conv + value norm fused (FP32-order class)
+        import inkling_prologue
+        inkling_prologue.install()
+    if _on("INKLING_PFUSE_HOIST"):  # prefill loop-bank hoist over pfuse's loop_mix (FP32-order class; needs PFUSE)
+        import inkling_phoist
+        inkling_phoist.install()
     if _on("INKLING_WIDE"):  # after pico12 (reads its packs) and prefill: outermost _project_sources for 17..256 rows
         import inkling_wide
         inkling_wide.install()

@@ -5,42 +5,46 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-24, v2.8.1):** basic tests on one box; full two-box qualification follows in v2.8.x.
+**Status (2026-11-24, v2.8.2):** basic tests on one box; full two-box qualification follows in v2.8.x.
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.
 `scripts/launch.sh` checks the drafter's sha256 on the host and again inside the container on every start, and the
-drafter's SGLang compatibility patch runs only inside the throwaway (`--rm`) serving container. Nineteen overlay
-packages (`overlay/`) run on top of it by default: drafter byte cuts (MXFP8 drafter layers, an FP8 64K hot-vocabulary
+drafter's SGLang compatibility patch runs only inside the throwaway (`--rm`) serving container. Twenty-one overlay
+packages (`overlay/`; two prefill packages ship opt-in) run on top of it by default: drafter byte cuts (MXFP8 drafter layers, an FP8 64K hot-vocabulary
 plane for the candidate projection), the prefix tail that keeps the drafter's window filled on prefix-cache hits
 (v2.8.1, see "Prefix tail"), the certified greedy LM head on verify steps, the packed 12-bit global KV store,
 the exact sampled-verification fixes, block verification and a fused accept on sampled steps, a calibrated
-verify-width cap with dead-row expert skip, and the target-side kernel, prefill and memory levers of v2.7.2. The
+verify-width cap with dead-row expert skip (v2.8.2: priced separately for greedy and sampled requests, with a context
+bucket), a bit-identical sink gate in the prefill attention (v2.8.2, see "Prefill levers"; two more prefill levers
+ship opt-in), and the target-side kernel, prefill and
+memory levers of v2.7.2. The
 target distribution is unchanged. `SPEC=dspark` runs the model's own DSpark draft instead (the v2.7.2 profile, see
 "Fallback: the DSpark profile").
 
-Long context: at 32K context the DFlash2 profile decodes about 11-17 % slower than v2.7.2's DSpark profile at c1
-(v2.8.1 64.3, v2.8 60-63, v2.7.2 72 tok/s). Its acceptance falls with context (3.10-3.17 vs 3.36 tokens per step at
-32K), because the drafter sees only a 2,048-token window. At 128K both decode at about 50 tok/s. For mostly long-context single-user
+Long context: at 32K context the DFlash2 profile decodes about 8-17 % slower than v2.7.2's DSpark profile at c1
+(v2.8.2's verify-cap policy 66.1, v2.8.1 64.3, v2.8 60-63, v2.7.2 72 tok/s; different runs and boxes). Its acceptance
+falls with context (3.10-3.17 vs 3.36 tokens per step at 32K), because the drafter sees only a 2,048-token window. At
+128K both decode at about 50 tok/s. For mostly long-context single-user
 work, `SPEC=dspark` is the faster choice.
 
-Basic tests on one box; full two-box qualification follows in v2.8.x. The v2.8.1 column is one GB10 Spark on
+Basic tests on one box; full two-box qualification follows in v2.8.x. The current column is one GB10 Spark on
 2026-11-24 with the release defaults (`SPEC=dflash2`, verify-width cap on, `CTX=262144`); the stock and v2.7.2
-columns are the earlier two-box medians. v2.8.1 changes only prefix-cache hits on prompts of at most 4,096 tokens:
-speedbench full, decode at 32K / 128K and the worst case were measured on v2.8.1, the other v2.8.1 cells are the
-v2.8 runs.
+columns are the earlier two-box medians. Cells marked v2.8.2 were measured on the v2.8.2 release defaults (box B);
+the others are the v2.8.1 or v2.8 runs. v2.8.2 is a prefill and verify-policy release: decode speed on speedbench is
+unchanged.
 
-| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **v2.8.1** |
+| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.8.2)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
-| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **72.86** (v2.8: 69.59-69.66) |
+| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **72.78-72.82** (v2.8.2; v2.8.1: 72.86) |
 | decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **65.1 / 140.5 / 203.5 / 288.3** |
 | decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **79.0 / 141.6 / 211.3 / 298.2** |
 | thinking c8 / c24, aggregate tok/s (48 x 2,048 tokens, effort high, T=0.8) | - | 235.3 / 438.8 | **277.4 / 515.5** |
-| cold prefill, 8K tokens, tok/s | 3,399 | 5,439 | **5,383** |
-| decode at 32K / 128K context, c1, tok/s (512 tokens) | 55.1 / 37.1 | 71.9 / 49.0 (one box) | **64.3 / 50.7** |
-| KV pool, global-layer tokens | 843K | 2.13-2.17M | **2.37-2.42M** |
-| MemAvailable after start / worst case (thinking c24 + cold 240K needle) | ~40 GiB / - | 6.4-7.7 / 5.4 GiB | **4.5-5.5 / 4.1 GiB** |
+| cold prefill, 8K tokens, tok/s | 3,399 | 5,439 | **5,527** (v2.8.2; v2.8.1: 5,411) |
+| decode at 32K / 128K context, c1, tok/s (512 tokens) | 55.1 / 37.1 | 71.9 / 49.0 (one box) | **66.05 / 50.91** (v2.8.2 policy, box A) |
+| KV pool, global-layer tokens | 843K | 2.13-2.17M | **2,349,056** (v2.8.2, `MEM_FRACTION=0.88`; v2.8.1 at 0.89: 2,400,384) |
+| MemAvailable after start / worst case (thinking c24 + cold 240K needle) | ~40 GiB / - | 6.4-7.7 / 5.4 GiB | **4.5-5.5 (v2.8.1) / 5.0 GiB** (v2.8.2, lowest of 4 runs) |
 
 Speedbench full (73 prompts x 256 tokens) is the release-to-release comparison; quick (30 prompts x 160 tokens) is a
 different prompt set and length, used here for the cap on / off screens (the stock cell is the stock engine's screen on
@@ -69,14 +73,22 @@ decode tokens). Decode tok/s, geometric mean per category; 0 failed prompts.
 
 | | prose | code | structured | agentic | multilingual | long context | all 73 prompts |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **v2.8.1** (box B) | **64.92** | 81.88 | 77.46 | 82.74 | 57.46 | 73.53 | **72.86** |
+| **v2.8.2** (box B, two runs) | **64.99 / 64.96** | 81.52 / 81.43 | 77.62 / 77.56 | 83.32 / 83.21 | 57.63 / 57.56 | 72.15 / 72.94 | **72.78 / 72.82** |
+| v2.8.2 without the cap (box B) | - | - | - | - | - | 67.31 | 64.06 |
+| v2.8.2 with v2.8.1's cap policy (box B) | - | - | - | - | - | 73.05 | 72.42 |
+| v2.8.1 (box B) | 64.92 | 81.88 | 77.46 | 82.74 | 57.46 | 73.53 | 72.86 |
 | v2.8.1 tokens per step (median) | 2.50 | 3.62 | 3.40 | 3.38 | 2.23 | 3.27 | 2.80 |
 | v2.8, same box (box B, `MEM_FRACTION=0.85`) | 64.57 | 79.84 | 77.10 | 73.44 | 57.19 | 63.09 | 69.59 |
 | v2.8 (box A) | 64.66 | 79.89 | 77.14 | 73.57 | 57.21 | 63.12 | 69.66 |
 | v2.7.2 (two-box median) | 53.6 | 72.1 | 68.0 | 76.7 | 43.7 | 75.1 | 63.8 |
 | stock engine | 32.6 | 48.0 | 44.3 | 49.3 | 25.3 | 51.0 | 40.6 |
 
-v2.8.1 is the release defaults on box B (`results/V281s-s06/`, `MEM_FRACTION=0.89`, limit 4,096), median time to
+v2.8.2 is the release defaults on box B in two runs (`results/PF282-s06/`, `results/REL282-s06/`, 73 prompts, 0
+failed); the same tree with the cap off is `results/SBF0-s06/` and with v2.8.1's `df-SLDF1-sm` policy
+`results/SBF1-s06/`. Decode speed on speedbench is unchanged against v2.8.1: v2.8.2 is a prefill and verify-policy
+release. The new policy is +0.4 on all prompts against the old one in the same tree; the long-context spread
+(72.15-73.53) is run-to-run variation. v2.8.1 is the release defaults on box B (`results/V281s-s06/`,
+`MEM_FRACTION=0.89`, limit 4,096), median time to
 first token 162.1 ms; v2.8 on the same box is `results/N81sbfc-s06/`, v2.8 on box A `results/V28sbf-s05/` (median
 time to first token 162.8 ms; v2.7.2 156.5-157.3 ms, stock 184 ms). Long context and agentic gain; prose, structured
 and multilingual move by under 0.5 %. longctx-02 (4,930 tokens) is above the 4,096 limit and runs as on v2.8. Against
@@ -171,8 +183,51 @@ with the confidence interval in brackets.
 
 v2.8.1 (release defaults, box B, `results/V281s-s06/`): decode at 32K 64.3 tok/s (3.17 tokens per step), at 128K
 50.7 tok/s; cached time to first token at 32K / 128K 0.24 / 0.46 s (the prefix tail does not act above 4,096 tokens).
-v2.8 cold prefill at 1K / 8K / 32K / 128K (second pass): 2,753 / 5,383 / 5,083 / 3,738 tok/s. Prefill runs on the
-target-side levers only and is unchanged within noise (8K: 5,383 against the published v2.7.2 5,439).
+v2.8 cold prefill at 1K / 8K / 32K / 128K (second pass): 2,753 / 5,383 / 5,083 / 3,738 tok/s, unchanged within noise
+against v2.7.2 (8K: 5,383 against the published 5,439).
+
+v2.8.2 prefill levers, cold prefill tok/s (box B, same prompts, mean of 2 runs; release defaults
+`results/PF282-s06/`; control on the v2.8.1 tree on the same box `results/PHAc-s06/`, repeat `results/PHAc2-s06/`
+2,812 / 5,408 / 5,077 / 3,726):
+
+| | 1K | 8K | 32K | 128K |
+|---|---:|---:|---:|---:|
+| v2.8.1 control (same box) | 2,836 | 5,411 | 5,073 | 3,749 |
+| opt-in: hoist + gate (FP32-order class) | 2,833 | 5,599 (+3.5 %) | 5,254 (+3.5 %) | 3,844 (+2.6 %) |
+| opt-in: hoist + gate + prologue (FP32-order class) | - | 5,656 | - | - |
+| **v2.8.2 release defaults (gate only)** | **2,821** (flat) | **5,527** (+2.1 %) | **5,189** (+2.2 %) | **3,785** (+1.0 %) |
+
+### Prefill levers
+
+v2.8.2 adds one prefill lever on by default, the bit-identical sink gate (+2.1 % at 8K, +2.2 % at 32K, +1.0 % at
+128K in serving), and two opt-in levers that are exact up to floating-point summation order but not in the default:
+
+- `PFUSE_HOIST` (`overlay/inkling_phoist`), opt-in, default `0`: the loop controller's linear source projection (the
+  loop bank's attention-residual weights, the message normalisation and the message-only part of the controller's
+  down projection) is prepared once per loop pass instead of inside every fused visit. FP32-order class, not in the
+  default pending a bracket: in the prefill exactness gate it gave 2 long-prompt divergences that are not near-ties,
+  and the check that would place them within the normal floating-point spread is still pending. 99.96 % of elements
+  bit-equal to the existing fused path, every FP64-reference comparison within 1.5x of its error (512-8,192 rows);
+  one 8K loop pass 104.5 -> 93-94 ms. `PFUSE_HOIST=1` turns it on; a start-up self-test checks it against the
+  existing path and falls back to that path on any failure, and only the checked row-count regimes are armed.
+  `PFUSE_HOIST=exact` is a bit-identical, slower variant. It needs `PFUSE` with `loopmix` (on in `all`).
+- `ATTN_GATE=1` (`overlay/inkling_attn`): the sink gate (`gate_sink`) computed in the epilogue of the sliding-window
+  prefill attention kernel, with coalesced loads and stores. Bit-identical to SGLang's `gate_sink` (output and LSE,
+  graph replay, padded multi-request batches, padded rows zeroed). Attention plus gate 2,759 -> 1,944 us per
+  sliding-window visit at 8K (-32.6 ms per 8K chunk). In serving: cold prefill 8K / 32K / 128K +2.1 / +2.2 / +1.0 %,
+  cold time to first token 1.48 / 6.30 / 34.6 s. The gated epilogue turns itself off while `SGLANG_KERNEL_API_LOGLEVEL`
+  is non-zero (it logs "gated epilogue OFF ..."), because that kernel logging reads the FA4 FP32 output buffer that
+  the gate leaves unwritten; with the variable unset nothing changes.
+- `PROLOGUE` (`overlay/inkling_prologue`), opt-in, default `0`: the sliding-window visit's K short conv + L2 clip and
+  V short conv + value norm as one kernel each. Exact up to floating-point summation order; it flips single elements
+  by one BF16 ulp (the order of the sum of squares), so greedy outputs did not match the control in the exactness
+  gate; not in the default. 227 -> 122 us per call, -8.4 ms per 8K chunk. `PROLOGUE=1` turns it on.
+
+All three are pinned to the image's source; with any of them on (the gate is on by default), `scripts/launch.sh`
+refuses `--enable-mixed-chunk` (exit 2: mixed batches would give decode rows prefill-only math). The levers add up to
+~0.6-0.7 GB of transient memory during long prefills, so `MEM_FRACTION` is 0.88 with any of them on (0.89 with all
+three off; 0.85 above `CTX=262144`). 0.89 with the default set was tested: the memory guard stopped the server 25 s
+into the worst-case load (MemAvailable 3.3 GiB), so 0.88 stays.
 
 Stock engine (two-box median): 3,399 tok/s cold at 8K, decode 55.1 at 32K and 37.1 at 128K. Decode at long context is
 dominated by the global layers reading the whole context (4.3 GB of BF16 KV per step at 128K, at the memory-bandwidth
@@ -193,11 +248,25 @@ Box B (`results/V28kv-s06/`), release defaults (`SPEC=dflash2`, `KV12S=1`, `KV12
 | lowest MemAvailable with thinking c24 (48 x 2,048 tokens) alongside a cold 240K-token needle prefill | 4.1 GiB on v2.8.1 (`results/T81kv-s06/`; v2.8: 4.9 GiB); guard floor 3.5 GiB. The tail allocates no memory; the run generated 4 % more tokens than the v2.8 run |
 | start-up to the first answer | about 2-4.5 min (131-275 s; the first start after an update includes JIT compilation) |
 
+v2.8.2 (box B, release defaults, `MEM_FRACTION=0.88`): global-layer KV pool 2,349,056 tokens (v2.8.1 at 0.89:
+2,400,384, -2.1 %). Lowest MemAvailable over 4 release-defaults runs, each with thinking c24 (48 x 2,048 tokens)
+alongside a cold 240K needle: 5.0 GiB (5.7 / 5.0 / 5.9 / 6.4 GiB; `results/KVS282a-s06/`, `results/KVS282b-s06/`,
+`results/PF282-s06/`, `results/REL282-s06/`; 48 / 48 requests completed, 343.8 / 341.8 tok/s aggregate), guard
+floor 3.5 GiB. At 0.89 (`results/KVS282c-s06/`) the guard stopped the server 25 s into that load at 3.3 GiB.
+
 The pool differs between boots at the same fraction because the memory left after the weights and graphs differs.
 
 ### Quality checks
 
-- Needles with the passphrase at 50 % depth at 128K and 240K tokens: PASS on v2.8 and v2.8.1.
+- Needles with the passphrase at 50 % depth at 128K and 240K tokens: PASS on v2.8, v2.8.1 and v2.8.2.
+- Prefill levers: exactness gate (FP64 reference, near-tie check of greedy outputs, needles). With the opt-in hoist on,
+  2 long prompts diverged without a near-tie, so the hoist ships off pending a bracket; the prologue flips single
+  elements by one BF16 ulp and did not match the control either (27 / 30 identical, 1 near-tie, 2 not; the hoist
+  26 / 30, 2 near-ties, 2 not), so it ships off too. The default (gate only) is bit-identical in serving: greedy
+  outputs identical to the control on 30 / 30 prompts, maximum log-probability difference 0 (a control repeat is
+  also 30 / 30 bit-equal over 4,691 tokens). With the v2.8.2 cap, greedy outputs match v2.8.1 on 29 / 30; the one
+  difference (longctx-09) comes from the cap, not the gate (gate off, cap on gives the same outputs on 30 / 30), and
+  is the near-tie described below.
 - Prefix tail: greedy output with the tail is bit-identical to the same server with the radix cache off (43/43
   prompts with top-5 logprobs: 30 speedbench quick, 13 long-context and agentic). Against the default cached server
   it differs only by near-ties (13 long prompts: 3 identical, 9 top-2 swaps at gaps 0.006-0.25 nat, 1 three-way tie
@@ -211,7 +280,10 @@ The pool differs between boots at the same fraction because the memory left afte
   against cap off: 28 / 30 greedy texts bit-identical; the other two first diverge at a top-2 near-tie (log-probability
   gaps 0.026 and 0.367 nat) after a gradual drift of at most 0.17 nat on the shared prefix. With the expert remap off
   on the same schedule the outputs are bit-identical. NOEXP on against off: greedy texts identical on 30 / 30,
-  log-probabilities at rounding level (the MoE tile tactics depend on per-expert token counts).
+  log-probabilities at rounding level (the MoE tile tactics depend on per-expert token counts). v2.8.2's policy
+  against uncapped: 27 / 30 identical, 2 top-2 near-ties and 1 three-way near-tie (longctx-09 at token 93: four
+  candidates within 0.1 nat, ' It' -1.939, ' self' -1.991, ' In' -2.033, ' Need' -2.035; the capped run took the
+  third at 0.094 nat), the same class as before.
 - What "exact" means here: no lever changes the target model's weights or its output distribution. The drafter only
   proposes tokens; the target verifies them (greedy output is the target's argmax; sampled requests are accepted by
   SGLang's DFLASH accept, whose output law is the target's). The drafter byte cuts change proposals only: the
@@ -257,7 +329,7 @@ quick: 30 prompts x 160 tokens, c1, T=0; decode table; thinking load; at long co
 | Drafter byte cuts: MXFP8 copies of the drafter's five layers' linears (the W8 kernels of the DSpark draft cuts), and an FP8 row-scaled copy of the target head restricted to the 65,536 most frequent ids for the selector's candidate projection (instead of the full 200,058-row BF16 head) | `DFLASH_BYTES=mx8,hot8`, `DFLASH_HOT_N` (65536) | speedbench quick +8.4 %, prose c1 +6.5 % (ABBA, one box) | draft proposals only (the selector's q is computed from the candidates the path is drawn from) | ours; the hot-vocabulary list is the v2.1 one (idea: FR-Spec, Zhao et al.) |
 | Certified greedy LM head on DFLASH verify steps of <= 16 rows (c1 / c2): armed per step when the stock accept would take the plain argmax (no grammar, logprobs or logit adjustments) | `CERT_DFLASH=1` | c1 +2.8 % | identical argmax by construction (check mode: 34,808 rows, 0 mismatches) | ours (the v2 certified head, armed from the DFLASH worker) |
 | Certified greedy LM head for 17-192-row DFLASH verify batches: the certified token ids go straight to the DFLASH accept | `CERT_WIDE_DFLASH` (on with `CERT_DFLASH`) | code c8 +3 %, no regression elsewhere | greedy texts identical on 30 / 30 prompts; per-row proof | ours (the v2.7 wide certified head) |
-| Verify-width cap on DFLASH: per request and step, verify only the first L of the 8 rows; L grows left to right while the drafter's calibrated survival (per slot and selector-confidence bin, fitted on full-width DFLASH step logs) pays for the row; cut rows are remapped to the anchor row and get no experts at all; above 8 requests all rows are verified | `DFCAP` unset = `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json,bsmax=8`, `DFCAP_NOEXP=1`, `DFCAP_REMAP=1`; `DFCAP=off` disables it | release stack, cap on vs off, box A: speedbench quick 62.49 -> 70.61 (+13.0 %); prose c1 / c4 / c8 +17.5 / +14.4 / +6.8 %, code +16.7 / +18.8 / +12.5 %; c16 not capped | target distribution unchanged (a stopping rule on draft-side information; GPU Monte Carlo law test, chain and block verification, with wrong values on the cut rows); greedy texts differ only by reduction order (28 / 30 identical) | ours (port of the DSpark verify-width policy) |
+| Verify-width cap on DFLASH: per request and step, verify only the first L of the 8 rows; L grows left to right while the drafter's calibrated survival (per slot and selector-confidence bin, fitted on full-width DFLASH step logs) pays for the row; cut rows are remapped to the anchor row and get no experts at all. v2.8.2 policy `df-SLDF2x`: greedy and sampled requests are priced separately, with a context bucket; sampled requests verify all rows from 8 requests up, and a single greedy request at 64K tokens of context or more caps less; above 8 requests all rows are verified | `DFCAP` unset = `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8`, `DFCAP_NOEXP=1`, `DFCAP_REMAP=1`; `DFCAP=off` disables it | v2.8 stack, cap on vs off, box A: speedbench quick 62.49 -> 70.61 (+13.0 %); prose c1 / c4 / c8 +17.5 / +14.4 / +6.8 %, code +16.7 / +18.8 / +12.5 %; c16 not capped. `df-SLDF2x` against the v2.8.1 policy (box A, ABBA): speedbench quick 73.17 -> 73.75, decode at 32K 61.27 -> 66.05 (+7.8 %), c4 / c8 and 128K within noise | target distribution unchanged (a stopping rule on draft-side information; GPU Monte Carlo law test, chain and block verification, with wrong values on the cut rows); greedy texts differ only at near-ties (`df-SLDF2x`: 27 / 30 identical) | ours (port of the DSpark verify-width policy) |
 | Block verification on sampled DFLASH steps; under the cap the cut drafts enter as a stopped draft (sparse-q mask) | `DFLASH_BV=1` (`--speculative-use-block-verification`; `DFCAP_BV` under the cap); needs `RSFIX` with its `reject` part, off otherwise | thinking c1 +5.9 % (development) | target distribution unchanged (Sun et al.'s theorem; law test above) | **Sun et al.**, "Block Verification Accelerates Speculative Decoding" (ICLR 2025); SGLang's kernel |
 | Fused sampled accept for the DFlash2 selector draft: the accept computed from the logits with a sparse draft q (no dense [requests, 7, vocabulary] q or [requests, 8, vocabulary] p), at 16 or more requests without a verify-cap cutoff | `DFLASH_FUSED=1` (`INKLING_DFLASH_FUSED_MIN_BS=16`) | thinking c24 per-request decode +2.3 % (ABBA, cap off); below 16 requests the stock accept | same law as the stock accept | ours |
 | Prefix tail: on a prefix-cache hit of a prompt of at most 4,096 tokens, the last 2,048 prompt tokens are prefilled again (SGLang's own prefix bound, as for logprob requests), so the drafter's 2,048-token window is filled instead of drafting from the uncached suffix only | `DFLASH_PREFIX_TAIL=2048`, `DFLASH_PREFIX_TAIL_MAX_INPUT=4096`; `0` = off | speedbench full 69.59 -> 72.86 (long context 63.09 -> 73.53, agentic 73.44 -> 82.74), same box (v2.8.1 at `MEM_FRACTION=0.89`, v2.8 at 0.85); +0.1-0.5 s time to first token on bounded hits | prefill-only: the same positions a cold prefill computes (floating-point order of the prefill chunking only); draft-side benefit | ours |
@@ -301,12 +373,15 @@ on the DSpark profile and confirmed in the v2.7.2 full runs (`hotbase` and `RNNH
 | Dead verify rows get no experts: rows the verify cap has cut route to a phantom expert that every MoE kernel skips, so quantisation, both grouped GEMMs, SwiGLU and the combine do no work for them | `NOEXP=1` (`SPEC=dspark`; on DFLASH `DFCAP_NOEXP=1`, above); needs the verify cap's remap | DSpark: greedy decode prose c4 / c8 / c16 +2.9 / +5.0 / +5.3 %, code c16 +5.1 % (paired screens, both boxes); c1 and above 16 requests unchanged | bit-identical for every row that can be accepted (live rows bitwise in the GPU check; cut rows are never read) | ours |
 | Prefill attention with the relative-position bias computed inside the kernel (FA2-style, mma.sync, paged KV, sliding window and global layers), instead of a materialised [t, 24, 1024] bias read by FA4 | `ATTN=prefill_swa,prefill_global` | SWA attention 3.3x vs the round-1 bias_layout path; cold prefill 8K / 32K / 128K +15 / +18 / +26 % | same math; error vs FP32 reference equal to stock's | ours (FlashAttention-2 algorithm, Tri Dao) |
 | Prefill glue fusion: the loop-message mixes, attention-residual mix + RMSNorm and the MLP short conv + residual update in fused kernels that skip the FP32 [T, 2304] round trips | `PFUSE=all` | -187 ms per 8K chunk (microbench); with the fused attention: cold prefill 1K / 8K / 32K / 128K +14 / +29 / +30 / +36 % | same per-element math; only FP32 row-sum order differs (error vs FP64 equal or lower), short conv bit-identical | ours |
+| Prefill loop-bank hoist: the loop controller's source projection (attention-residual weights, message normalisation, the message-only part of the controller down projection) prepared once per loop pass | `PFUSE_HOIST=0` (opt-in: `1`) | one 8K loop pass 104.5 -> 93-94 ms; with the gate: cold prefill 8K / 32K / 128K +3.5 / +3.5 / +2.6 % | FP32-order class (99.96 % of elements bit-equal; FP64-reference error within 1.5x of the fused path); not in the default pending a bracket of 2 long-prompt divergences in the exactness gate | ours |
+| Sink gate in the sliding-window prefill attention epilogue, coalesced | `ATTN_GATE=1` | attention + gate 2,759 -> 1,944 us per sliding-window visit at 8K (-32.6 ms per chunk) | bit-identical to SGLang's `gate_sink`, padded rows zeroed | ours |
+| Sliding-window prefill prologue: K conv + L2 clip and V conv + value norm, one kernel each | `PROLOGUE=0` (opt-in: `1`) | 227 -> 122 us per call (-8.4 ms per 8K chunk) | exact up to floating-point summation order; 1-ulp flips; not in the default | ours |
 | Prefill: relative-position bias written directly in FA4's sheared layout | `PREFILL=bias_layout` | with quant_once: 8K prefill 3,781 -> 4,253 tok/s | bit-identical (attention output and LSE) | ours |
 | Prefill: MoE input quantised to NVFP4 once per token, then gathered to its 8 experts | `PREFILL=quant_once` | (with bias_layout, above) | bit-identical | ours |
 | Prefill: MoE combine writes BF16 directly | `PREFILL=partial_bf16` | combine -22 to -32 %; with qkvr_split: 8K 3,408 -> 3,781 tok/s | bit-identical | ours |
 | SGLang DSpark cookbook cell (FA4, page 128, 8 draft tokens, 4 `SGLANG_OPT_*` switches) | `SPEC=dspark` | base of the fallback profile | - | SGLang |
 | One-pass checkpoint load: SGLang reads the safetensors file directly and large frees return to the OS before KV allocation | `LOAD_NOMMAP=1` | 121-137 s warm start-up in the v2.6 full benchmarks | weights unchanged | SGLang's loader flag; [sxuff](https://github.com/sxuff/inkling-2-mini-spark) and [0xSero](https://github.com/sybil-solutions/inference-optimisation-skill) for the load-strategy idea |
-| KV pool sizing | `MEM_FRACTION=0.89` (0.85 above `CTX=262144` with DFlash2), `SWA_RATIO=0.037` | 2.37-2.42M global-layer KV tokens with 4.5-5.5 GiB MemAvailable after start, 4.1 GiB at worst (one box) | exact | ours |
+| KV pool sizing | `MEM_FRACTION=0.88` with DFlash2 and the prefill levers on (0.89 with all three off; 0.85 above `CTX=262144`), `SWA_RATIO=0.037` | 2,349,056 global-layer KV tokens, 5.0 GiB MemAvailable at worst (v2.8.1 at 0.89: 2,400,384; 0.89 with the gate stopped at the guard) | exact | ours |
 
 Tried and not adopted (details in [docs/experiments.md](docs/experiments.md)): vLLM (same decode, slower prefill,
 half the free memory), `SGLANG_ENABLE_NV_MEGA_RUNTIME_OPTIMIZATION` (flat), fixed verify caps (lose on concurrent
@@ -364,7 +439,7 @@ git clone https://github.com/knapcio/Inkling-2-Mini-1x-DGX-Spark && cd Inkling-2
 scripts/download.sh                       # weights -> ~/models/Inkling-2-Mini, drafter -> ~/models/Inkling-2-Mini-DFlash2,
                                           # both at pinned revisions, sha256-checked
 docker pull lmsysorg/sglang@sha256:efac853b46811ccb760545b7b29e7119bdf907537ccf6e863fac3011fe8b98de
-scripts/launch.sh up                      # SGLang + DFlash2 + overlays on 127.0.0.1:8000, packed KV store, mem 0.89
+scripts/launch.sh up                      # SGLang + DFlash2 + overlays on 127.0.0.1:8000, packed KV store, mem 0.88
 #   or: SPEC=dspark scripts/launch.sh up   # the model's own DSpark draft (v2.7.2 profile)
 scripts/launch.sh status                  # container, API, MemAvailable
 python3 bench/sanity.py all               # chat, effort ladder, tool call, JSON schema, 120K needle
@@ -434,7 +509,7 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   -v ~/models/Inkling-2-Mini:/model:ro -v ~/.cache/inkling-2-mini-sglang:/root/.cache \
   -e HF_HUB_OFFLINE=1 -e TRANSFORMERS_OFFLINE=1 \
   -v $PWD/overlay:/opt/inkling-overlay:ro -e PYTHONPATH=/opt/inkling-overlay \
-  -e INKLING_VERIFY_CAP=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json,bsmax=8 \
+  -e INKLING_VERIFY_CAP=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8 \
   -e INKLING_VERIFY_CAP_LOG_EVERY=0 -e INKLING_VERIFY_CAP_STEPLOG= -e INKLING_VERIFY_CAP_REMAP=1 \
   -e INKLING_DRAFT_BYTES= \
   -e INKLING_DRAFT_HOTVOCAB_FILE=/opt/inkling-overlay/inkling_draftbytes/hotvocab/inkling2-mini-hot-r2.json \
@@ -443,7 +518,8 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   -e INKLING_PICO12=dense,lmhead,stack1 \
   -e INKLING_PREFILL=qkvr_split,bias_layout,quant_once,partial_bf16 -e INKLING_PREFILL_QKVR_OUT=strided \
   -e INKLING_CERT_HEAD=1 -e INKLING_WIDE=dense,lmhead -e INKLING_WIDE_SCOPE=verify -e INKLING_VATTN=1 \
-  -e INKLING_ATTN=prefill_swa,prefill_global -e INKLING_PFUSE=all -e INKLING_MOE2=tiles -e INKLING_SCODES=1 \
+  -e INKLING_ATTN=prefill_swa,prefill_global -e INKLING_PFUSE=all \
+  -e INKLING_PFUSE_HOIST=0 -e INKLING_ATTN_GATE=1 -e INKLING_PROLOGUE=0 -e INKLING_MOE2=tiles -e INKLING_SCODES=1 \
   -e INKLING_VERIFY_CAP_FASTPROBS=0 -e INKLING_VERIFY_CAP_FUSED_ACCEPT=0 -e INKLING_NOEXP=1 \
   -e INKLING_DFLASH_BYTES=mx8,hot8 -e INKLING_DFLASH_HOT_N= \
   -e INKLING_DFLASH_PREFIX_TAIL=2048 -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT=4096 \
@@ -469,7 +545,7 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   --speculative-algorithm DFLASH --speculative-draft-model-path /draft --speculative-num-draft-tokens 8 \
   --speculative-draft-attention-backend fa4 --speculative-use-block-verification \
   --max-running-requests 48 --cuda-graph-max-bs-decode=48 \
-  --mem-fraction-static 0.89 --context-length 262144 \
+  --mem-fraction-static 0.88 --context-length 262144 \
   --grammar-backend xgrammar --reasoning-parser inkling --tool-call-parser inkling2 \
   --enable-metrics --host 127.0.0.1 --port 8000 --weight-loader-disable-mmap --swa-full-tokens-ratio 0.037 \
   --max-mamba-cache-size 512 --max-prefill-tokens 8192
@@ -504,7 +580,7 @@ Engine flags (the SGLang cookbook's DGX Spark cell, text only, with the DFlash2 
 | `--dtype bfloat16` | activations; the weights stay NVFP4 / MXFP8 as shipped |
 | `--page-size 128` | KV page size (cookbook) |
 | `--max-running-requests 48 --cuda-graph-max-bs-decode=48` | up to 48 running requests, decode CUDA graphs captured to 48 (set with the packed store) |
-| `MEM_FRACTION=0.89` (`--mem-fraction-static 0.89`) | static pool for weights, KV and CUDA graphs. With DFlash2, 0.89 up to `CTX=262144` and 0.85 above (the prefill scratch grows with `CTX`; not yet measured at 0.89 there); 2.37-2.42M global-layer KV tokens at 262,144 (see Memory budget) |
+| `MEM_FRACTION=0.88` (`--mem-fraction-static 0.88`) | static pool for weights, KV and CUDA graphs. With DFlash2 up to `CTX=262144`: 0.88 with any prefill lever on, as with the default sink gate (the levers add up to ~0.6-0.7 GB of transient memory during long prefills; at 0.89 the guard stopped the server under the worst-case load), 0.89 with `PFUSE_HOIST=0 ATTN_GATE=0 PROLOGUE=0`; 0.85 above 262,144 (the prefill scratch grows with `CTX`). `SPEC=dspark` keeps 0.89. Global-layer KV tokens at 262,144: 2,349,056 (-2.1 % against 0.89; see Memory budget) |
 | `SWA_RATIO=0.037` (`--swa-full-tokens-ratio 0.037`) | sliding-window pool as a fraction of the global-layer pool, enough for 48 requests' windows plus one prefill chunk (0.05 with `KV12S=0`; the image defaults to 0.1) |
 | `MIN_AVAIL_GIB=3.5` | host MemAvailable floor for the memory guard. Accepts decimal GiB |
 | `--max-mamba-cache-size 512`, `--max-prefill-tokens 8192` | conv-state slots (the image's default sized 1,232; peak use measured 76) and one 8,192-token prefill chunk in flight instead of two: +2.2 % KV tokens, prefill and decode unchanged |
@@ -524,7 +600,7 @@ Profile and drafter switches:
 | `DFLASH_BYTES` (`INKLING_DFLASH_BYTES`), `DFLASH_HOT_N` | `mx8,hot8` with the overlays, `65536` | drafter byte cuts: `mx8` MXFP8 drafter linears; `hot8` FP8 hot-vocabulary plane (first `DFLASH_HOT_N` ids of `HOTVOCAB_FILE`) for the selector's candidate projection; `hot16` the same in BF16; empty = stock drafter |
 | `CERT_DFLASH` (`INKLING_CERT_HEAD`) | `1` with the overlays | certified greedy LM head on DFLASH verify steps of <= 16 rows; `check` serves the full head and counts mismatches; `0` = off. Needs `PICO12` with `lmhead` |
 | `CERT_WIDE_DFLASH` (`INKLING_CERT_WIDE`) | `1` with `CERT_DFLASH=1` | certified head for 17-192-row DFLASH verify batches; its token ids go straight to the DFLASH accept (needs `CERT_DFLASH=1`) |
-| `DFCAP` (`INKLING_VERIFY_CAP`) | `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json,bsmax=8` with the overlays | DFLASH verify-width cap: calibrated survival policy, all 8 rows above 8 requests; `fixed:K` and `conf:T` exist for measurement; `off` = full width |
+| `DFCAP` (`INKLING_VERIFY_CAP`) | `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8` with the overlays | DFLASH verify-width cap: calibrated survival policy priced separately for greedy and sampled requests, with a context bucket (`theta_x`, `ctx_edges` 16,384 / 65,536); all 8 rows above 8 requests, and for sampled requests from 8 requests up; the v2.8.1 policy is `df-SLDF1-sm.json`; `fixed:K` and `conf:T` exist for measurement; `off` = full width |
 | `DFCAP_NOEXP` (`INKLING_NOEXP`), `DFCAP_REMAP` (`INKLING_VERIFY_CAP_REMAP`) | `1`, `1` | dead rows read the anchor row's experts (remap) and then get no experts at all (`inkling_noexp`) |
 | `DFLASH_BV`, `DFCAP_BV` | `1`, `DFLASH_BV` | block verification on sampled steps (`--speculative-use-block-verification`); under the cap the cut drafts are masked as a stopped draft. Only with `OVERLAY=1` and `RSFIX` including `reject` (exact only with that fix); otherwise it stays off |
 | `DFLASH_FUSED` (`INKLING_DFLASH_FUSED_ACCEPT`) | `1` with the overlays | sampled accept from the logits with a sparse draft q (`inkling_dfaccept`) for batches of `INKLING_DFLASH_FUSED_MIN_BS` (16) requests or more; smaller batches and calls with a verify-cap cutoff keep the stock accept; `0` = off |
@@ -562,6 +638,9 @@ Overlay switches (`OVERLAY=0` turns all of them off; each is described in `overl
 | `SCODES` (`INKLING_SCODES`) | `1` | NVFP4 expert scale codes (+0.81 GB: the stock scales stay resident for escapes and fallback; first start builds the modified FlashInfer kernels, ~4.5 min, then cached) |
 | `MOE2` (`INKLING_MOE2`) | `tiles` | tile tables for the routed-expert GEMMs at verify batch sizes (over `moe_tiles`); `INKLING_MOE2_NVFP4` / `INKLING_MOE2_MXFP8` override the tables |
 | `PFUSE` (`INKLING_PFUSE`) | `all` | prefill glue fusion (`loopmix,resnorm,sconvres`), extend batches of >= 512 rows only |
+| `PFUSE_HOIST` (`INKLING_PFUSE_HOIST`) | `0` (opt-in) | `1`: loop controller's source projection prepared once per loop pass (`inkling_phoist`; exact up to fp summation order; not in the default, pending a bracket; start-up self-test with fallback); `exact` = the bit-identical, slower variant; needs `PFUSE` with `loopmix` |
+| `ATTN_GATE` (`INKLING_ATTN_GATE`) | `1` | sink gate in the sliding-window prefill attention epilogue (`inkling_attn`; bit-identical to `gate_sink`); off by itself while `SGLANG_KERNEL_API_LOGLEVEL` is non-zero (that logging reads the output buffer the gate leaves unwritten); `0` = off |
+| `PROLOGUE` (`INKLING_PROLOGUE`) | `0` (opt-in) | `1`: sliding-window prefill K conv + L2 clip and V conv + value norm, one kernel each (`inkling_prologue`; exact up to fp summation order; 1-ulp flips; not in the default) |
 | `CERT_WIDE` (`INKLING_CERT_WIDE`), `CERT_WIDE_MAX_ROWS` | `SPEC=dspark`: `1`, overlay default | certified greedy head for 17-192-row verify batches (needs `CERT_HEAD`, `PICO12` and `WIDE` with `lmhead`) |
 | `INKLING_ATTN_W8_FROM` | `131072` | prefix length (keys) from which global-layer prefill uses the 8-warp fused kernel; `0` = one 4-warp launch |
 | `KV12S` (`INKLING_KV12S`), `KV12S_POOL` (`INKLING_KV12S_POOL`) | `1`, `static` | packed global KV store (see "Packed global KV store"); turns `KV12` off. `static` runs on SGLang's stock pools with prefill CUDA graphs, `MEM_FRACTION=0.89` and `SWA_RATIO=0.037` unless set; `unified` (`SPEC=dspark` only) is the v2.7.1 binding (`--enable-unified-memory --cuda-graph-backend-prefill=disabled`, 0.91 / 0.035). `0` = the BF16 store (`MEM_FRACTION` 0.85 with DFlash2, 0.93 with DSpark); vLLM and `OVERLAY=0` always use `0`. Set the store with these variables, not through `SGLANG_ENV` / `SGLANG_ARGS` (the launcher refuses the store's variables there, and with `KV12S=1` also the pool's engine flags, so the engine flags and the overlay always agree). `KV12S_OVERFLOW_HEADS` (2,048) and `KV12S_FALLBACK_PAGES` (64) size the exact overflow arena and fallback pool per layer visit |
@@ -576,7 +655,7 @@ Extra engine flags go in `SGLANG_ARGS` (or after `scripts/launch.sh up`), extra 
 
 ### Memory budget
 
-GB10 has one 121.6 GiB pool for the GPU and the operating system. `MEM_FRACTION=0.89` budgets for the weights,
+GB10 has one 121.6 GiB pool for the GPU and the operating system. `MEM_FRACTION=0.88` budgets for the weights,
 KV and CUDA graphs. With `LOAD_NOMMAP=1`, large frees from checkpoint loading return to the OS before SGLang
 sizes the static pool. The packed store's fixed buffers (prefill scratch, overflow arena, fallback pool) and the
 drafter's KV ring are charged to that budget before the pool is sized.
@@ -602,12 +681,12 @@ To leave more RAM for other work, lower `MEM_FRACTION`. Each 0.01 frees ~1.09 Gi
 |---|---|---|---|
 | engine | SGLang | vLLM | **SGLang**: the stock engines decode at the same speed on one Spark (c1 within 3 %, c16 / c24 within run noise); SGLang prefills 1.3-3.4x faster, keeps long prompts in its prefix cache more reliably and leaves twice the host memory ([docs/experiments.md](docs/experiments.md)) |
 | draft | DSpark (bundled) | DSpark (bundled) | **DFlash2** (incoai, pinned revision, sha256-checked); DSpark with `SPEC=dspark` or `ENGINE=vllm` |
-| memory | `--mem-fraction-static 0.45` (518K KV tokens) | `--gpu-memory-utilization` unset (vLLM's own suggestion would leave the host 0-2 GiB) | `MEM_FRACTION=0.89`, `SWA_RATIO=0.037` and the packed global KV store give 2.37-2.42M global-layer KV tokens, 4.1 GiB MemAvailable under stress and a 3.5 GiB guard floor |
+| memory | `--mem-fraction-static 0.45` (518K KV tokens) | `--gpu-memory-utilization` unset (vLLM's own suggestion would leave the host 0-2 GiB) | `MEM_FRACTION=0.88`, `SWA_RATIO=0.037` and the packed global KV store give 2,349,056 global-layer KV tokens, 5.0 GiB MemAvailable under stress and a 3.5 GiB guard floor |
 | context | not set (model default) | 262,144 | 262,144 (the model supports 1M; see "Longer context") |
 | multimodal | `--enable-multimodal` | on | off (text only; add `--enable-multimodal` for images) |
 | images, weights | pulled by tag, weights from the Hub at start | same | pinned image digest, weights and drafter at pinned revisions, sha256-checked, offline at start |
 | bind address | 0.0.0.0 | 0.0.0.0 | 127.0.0.1 |
-| speed overlays | - | - | nineteen packages, on by default (`overlay/`); `OVERLAY=0` disables them |
+| speed overlays | - | - | twenty-one packages (`overlay/`), on by default except the two opt-in prefill packages; `OVERLAY=0` disables them |
 
 ### Longer context: 512K and 1M
 
@@ -652,7 +731,7 @@ is the v2.7.1 binding (the same store on SGLang's unified memory pool, without p
 |---|---:|---:|
 | global-layer KV tokens, DFlash2 profile (v2.8, one box) | - | **2,371,584-2,416,896** |
 | global-layer KV tokens, DSpark profile (v2.7.2) | 1,593,088 | 2,171,392 / 2,126,720 |
-| `MEM_FRACTION` / `SWA_RATIO` defaults | 0.85 (DFlash2) or 0.93 (DSpark) / 0.05 | 0.89 / 0.037 |
+| `MEM_FRACTION` / `SWA_RATIO` defaults | 0.85 (DFlash2) or 0.93 (DSpark) / 0.05 | 0.88 (DFlash2 with the prefill levers) or 0.89 / 0.037 |
 | lowest MemAvailable, worst case (thinking c24 + cold 240K needle), DSpark profile | 5.2-5.6 GiB | 5.4 GiB |
 | greedy texts vs the BF16 store (speedbench quick, DSpark profile) | - | **32 / 32 identical** |
 
