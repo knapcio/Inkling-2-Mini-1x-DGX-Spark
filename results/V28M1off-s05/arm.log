@@ -1,0 +1,21 @@
+2026-11-24T13:56:39Z V28M1off-s05 mode warm
+V28M1off-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.73, "geomean_tok_s": 62.19, "aggregate_tok_s": 60.62, "median_ttft_ms": 157.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 49.55, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2884, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.051, "drift_pct_all": 0.051}}
+wrote results/V28M1off-s05/warm-sbquick.json (1.5 min)
+2026-11-24T13:58:12Z V28M1off-s05 mode sbq
+V28M1off-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.76, "geomean_tok_s": 62.49, "aggregate_tok_s": 60.97, "median_ttft_ms": 156.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 49.51, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2884, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.123, "drift_pct_all": 0.123}}
+wrote results/V28M1off-s05/sbquick.json (1.5 min)
+2026-11-24T13:59:44Z V28M1off-s05 mode dtp
+prose      c1  aggregate    56.3 tok/s  per-stream   55.4  ttft 0.2 s  failed 0
+prose      c4  aggregate   122.8 tok/s  per-stream   33.1  ttft 0.366 s  failed 0
+prose      c8  aggregate   190.6 tok/s  per-stream   26.4  ttft 0.427 s  failed 0
+prose      c16 aggregate   292.3 tok/s  per-stream   19.3  ttft 0.429 s  failed 0
+code       c1  aggregate    65.4 tok/s  per-stream   67.7  ttft 0.191 s  failed 0
+code       c4  aggregate   119.2 tok/s  per-stream   34.8  ttft 0.335 s  failed 0
+code       c8  aggregate   187.9 tok/s  per-stream   25.9  ttft 0.359 s  failed 0
+code       c16 aggregate   297.5 tok/s  per-stream   21.0  ttft 0.504 s  failed 0
+wrote results/V28M1off-s05/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 55.4 | 122.8 (33.1) | 190.6 (26.4) | 292.3 (19.3) |
+| code | 67.7 | 119.2 (34.8) | 187.9 (25.9) | 297.5 (21.0) |
+2026-11-24T14:02:40Z V28M1off-s05 mode think8

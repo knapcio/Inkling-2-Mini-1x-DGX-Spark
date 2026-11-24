@@ -1,7 +1,7 @@
 # Inkling-2-Mini + DSpark on one GB10: live-engine profile analysis (c1, c8)
 
 Inputs: torch-profiler traces of the live SGLang engine (`/start_profile`, 40 steps, CPU+GPU, record_shapes),
-host `spark-06`, 2026-11-21 08:48 (c1) and 08:49 (c8); greedy prose, effort none, T=0. Server log of the same boot.
+one GB10 Spark, 2026-11-21 08:48 (c1) and 08:49 (c8); greedy prose, effort none, T=0. Server log of the same boot.
 Script: `analyze_trace.py` (stdlib only). Full outputs: `report_c1.txt`,
 `work/report_c8.txt` (+ `.json`). Reproduce:
 

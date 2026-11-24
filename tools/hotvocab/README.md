@@ -1,4 +1,4 @@
-# Hot-vocabulary trace corpus (round 2, track D)
+# Hot-vocabulary trace corpus
 
 Goal: a multi-million-token corpus of Inkling-2-Mini's own outputs, so the `hotvocab:N` draft list
 (`overlay/inkling_draftbytes`) can be ranked on real target tokens and N chosen from held-out coverage.
@@ -68,7 +68,7 @@ rsync -a <box>:inkling/hotvocab/traces.jsonl tools/hotvocab/
 cd tools/hotvocab
 PY=/path/to/python-with-tokenizers   # e.g. any venv with `pip install tokenizers`
 $PY -I coverage.py --tokenizer tokenizer traces.jsonl --prior prompts.jsonl \
-    --eval-only ../../../Inkling-2-Mini-1x-DGX-Spark/results/screen/B0-base-s05-greedy.jsonl \
+    --eval-only ../../results/screen/B0-base-s05-greedy.jsonl \
     --tokens-per-step <measured> --step-ms <measured c1 step> \
     --json cov4m.json --write-hot hot.json --top 98304 | tee cov4m.txt
 
@@ -101,7 +101,7 @@ draft's confidence, which the hot set changes).
 
 Inputs: round-1 traces `results/screen/T0-*.jsonl` (27 ok) + `T0b-*.jsonl` (274) = 301 records, 274 prompts,
 191,650 target tokens, 12,791 distinct ids; eval-only: the speedbench greedy dumps (`results/screen/*greedy*.jsonl`
-and the scratchpad `m0-hot` copies, deduplicated to 14,331 tokens; never ranked on). The text rebuild of the emitted
+and an earlier hot list's copies, deduplicated to 14,331 tokens; never ranked on). The text rebuild of the emitted
 ids matches `usage.completion_tokens` exactly on 297/301 records (191,650 vs 191,636 tokens).
 
 Held-out coverage, split by prompt, 2 folds pooled (%):

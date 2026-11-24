@@ -1,0 +1,2 @@
+{"label":"V28dsp-s05","ready_utc":"2026-11-24T14:30:10Z","startup_s":132,"memavail_ready_gib":6.1,"kv":"[2026-11-24 14:30:05 PID105] max_total_num_tokens=2178816, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.30 GB"}
+{"memavail_end_gib":5.9}

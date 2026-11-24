@@ -167,6 +167,9 @@ class WideHookTest(unittest.TestCase):
             def execute(self):
                 return self.replay()
 
+            def _process_output_after_replay(self, output, forward_batch):
+                return output
+
         wide = mock.Mock()
         with mock.patch.dict(patches.STATE, cert=types.SimpleNamespace(wide=wide), patched=[]):
             patches.patch_graph_runner(types.SimpleNamespace(DecodeCudaGraphRunner=Runner))

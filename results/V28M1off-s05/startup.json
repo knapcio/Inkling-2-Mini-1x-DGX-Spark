@@ -1,0 +1,2 @@
+{"label":"V28M1off-s05","ready_utc":"2026-11-24T13:56:39Z","startup_s":219,"memavail_ready_gib":4.9,"kv":"[2026-11-24 13:55:07 PID129] max_total_num_tokens=2396288, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.05 GB"}
+{"memavail_end_gib":4.8}

@@ -114,7 +114,7 @@ expect about ±30 % until the trace confirms them.
 
 ### 1.3 Measured: rates, per-layer-type budget, ceiling
 
-**Rates on GB10 (Spark_06, clocks untouched, SM 2177 MHz at idle).**
+**Rates on GB10 (clocks untouched, SM 2177 MHz at idle).**
 
 | what | measured |
 |---|---|

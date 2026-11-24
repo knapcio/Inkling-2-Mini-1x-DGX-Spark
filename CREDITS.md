@@ -3,6 +3,13 @@
 - **Thinking Machines Lab** for Inkling-2-Mini, its NVFP4 / MXFP8 checkpoint and the bundled DSpark draft model
   (`mtp.safetensors`) ([model card](https://huggingface.co/thinkingmachines/Inkling-2-Mini),
   [announcement](https://thinkingmachines.ai/news/inkling-2-mini/), Apache-2.0).
+- **incoai**, [Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2) (Apache-2.0): the
+  DFlash2 draft model that is this recipe's default drafter, and its SGLang compatibility patch
+  (`sglang_inkling_dflash2.py`), both used as published at revision `4f9088ea`, fetched by `scripts/download.sh` and
+  not distributed here. The drafter byte cuts, the DFLASH verify-width cap, the certified head on DFLASH steps and the
+  selector fix are ours, on top of it.
+- **The DFlash authors** ([z-lab/dflash](https://github.com/z-lab/dflash)): block-diffusion drafting for speculative
+  decoding, the method behind the DFlash2 drafter, and SGLang's DFLASH worker that serves it.
 - **SGLang** project for the Inkling-2-Mini support, the `lmsysorg/sglang:inkling-2-mini` image and the
   [Inkling-2-Mini cookbook](https://docs.sglang.io/cookbook/autoregressive/ThinkingMachines/Inkling-2-Mini), whose DGX
   Spark DSpark cell (TP1/EP1, FA4, page 128, 8 draft tokens, the four `SGLANG_OPT_*` switches, `MAX_JOBS=4`, the
@@ -45,8 +52,11 @@
   `overlay/inkling_kv12/` follows with its K / V tile loads replaced, the split softmax kernels that
   `VCAP_FASTPROBS` calls, the block-verification accept kernel behind `--speculative-use-block-verification`, and the
   fused loop-controller kernels of sgl-project/sglang PR #51926, already in the image.
+- **SGLang PR #51681** (DSpark Markov sampler: Philox words that rounded to u == 1) and **SGLang PR #51692** (blockwise
+  rejection precision): their fixes are carried verbatim in `overlay/inkling_rsfix/` (`RSFIX`) until the image has
+  them. The reject-sampler CDF fix and the DFLASH selector no-match fix in the same package are ours.
 - **Sun et al.**, "Block Verification Accelerates Speculative Decoding" (ICLR 2025): the block-verification algorithm
-  that sampled requests use (`VCAP_BV`). Running it under the verify cap (dead drafts as a stopped draft) and its
+  that sampled requests use (`VCAP_BV`, `DFLASH_BV`). Running it under the verify cap (dead drafts as a stopped draft) and its
   logits-only form in the fused accept are ours.
 - **Xiao et al.**, StreamingLLM (2023): the attention sink kept by the optional drafter global-attention window
   (`dwin`, 128 sink tokens by default).

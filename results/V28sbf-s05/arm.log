@@ -1,0 +1,6 @@
+2026-11-24T14:21:25Z V28sbf-s05 mode warm
+V28sbf-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 67.31, "geomean_tok_s": 70.09, "aggregate_tok_s": 68.97, "median_ttft_ms": 165.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 40.68, "median_tokens_per_step": 2.718, "steps_source": "response", "median_accept_rate": 0.2503, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.028, "drift_pct_all": -0.028}}
+wrote results/V28sbf-s05/warm-sbquick.json (1.4 min)
+2026-11-24T14:22:51Z V28sbf-s05 mode sbf
+V28sbf-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 67.6, "geomean_tok_s": 69.66, "aggregate_tok_s": 68.66, "median_ttft_ms": 162.8, "truncated_frac": 0.904, "reasoning_token_frac": 0.654, "reasoning_char_frac": 0.722, "median_step_ms": 40.68, "median_tokens_per_step": 2.772, "steps_source": "response", "median_accept_rate": 0.2531, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.06, "drift_pct_all": -0.06}}
+wrote results/V28sbf-s05/speedbench.json (4.9 min)

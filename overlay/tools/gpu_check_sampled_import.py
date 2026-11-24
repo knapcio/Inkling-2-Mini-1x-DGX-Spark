@@ -1,5 +1,5 @@
 # Usage (inside the SGLang image, overlay on PYTHONPATH): INKLING_DRAFT_BYTES=...,tau:0.7 INKLING_VERIFY_CAP=policy:... python3 tools/gpu_check_sampled_import.py
-"""Run inside the SGLang image (kbrun), with PYTHONPATH=/work/overlay so sitecustomize arms the
+"""Run inside the SGLang image (no server), with PYTHONPATH=/work/overlay so sitecustomize arms the
 overlays from the env. Checks the tau patch (and, with --bv, the vcap block-verify patch) against
 the real engine modules. No model is loaded."""
 import json

@@ -1,0 +1,9 @@
+2026-11-24T13:15:08Z R272lc-s05 mode warm
+R272lc-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.23, "geomean_tok_s": 63.24, "aggregate_tok_s": 61.26, "median_ttft_ms": 157.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.05, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.048, "drift_pct_all": -0.048}}
+wrote results/R272lc-s05/warm-sbquick.json (1.6 min)
+2026-11-24T13:16:42Z R272lc-s05 mode lc32
+R272lc-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32700    6.335      5161.8      0.255        None      71.9 [58.7, 88.1]        47.437    3.363
+128K     130841   35.184     3718.8      0.438        None      49.0 [41.4, 57.9]        60.814    3.202
+wrote results/R272lc-s05/longctx-lc32.json (5.1 min)

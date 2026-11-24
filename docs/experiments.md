@@ -7,7 +7,7 @@ was screened, and what was rejected and why. Raw files are in `results/screen/` 
 ## Setup
 
 - Two DGX Spark (GB10, 121.6 GiB unified memory, driver 580.178.04, kernel 6.17.0-1032-nvidia), used standalone
-  (`Spark_05`, `Spark_06`); one model server per box, nothing else running. GPU clock capped at 2200 MHz by the
+  (box A and box B; result directories end in `-s05` / `-s06`); one model server per box, nothing else running. GPU clock capped at 2200 MHz by the
   hosts' own timer (not changed for these runs).
 - Model `thinkingmachines/Inkling-2-Mini` revision `ed40e7da` (sha256-checked), bundled DSpark draft.
 - SGLang image `lmsysorg/sglang:inkling-2-mini` (`sha256:efac853b…`, arm64 `sha256:bc811ac7…`).
@@ -36,10 +36,10 @@ effort low); thinking c8 = aggregate tok/s; prefill / decode at 32K from speedbe
 
 | arm | box | speedbench quick all (prose) | tokens / step | thinking c8 | 32K prefill tok/s | 32K decode tok/s | KV pool, tokens | MemAvailable after start | start-up |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| V1 vLLM, recipe settings (util 0.80) | 06 | 42.82 (33.32) | 2.448 | 199.6 | 2,429 | 53.7 | 1,347,359 | 20.0 GiB | 313 s (cold) |
-| V2 vLLM + `--max-num-batched-tokens 8192` | 06 | 41.47 (32.45) | 2.448 | 195.0 | 2,763 | 53.1 | 693,420 | 24.9 GiB | 360 s |
-| S1 SGLang, cookbook cell, mem 0.62 | 05 | 41.86 (33.18) | 2.448 | 189.3 | 3,245 | 51.9 | 844,928 | 39.0 GiB | 378 s (cold) |
-| S2 SGLang + `SGLANG_ENABLE_NV_MEGA_RUNTIME_OPTIMIZATION=1` | 05 | 41.07 (32.59) | 2.448 | 191.6 | 3,255 | 57.2 | 845,952 | 39.9 GiB | 237 s (warm) |
+| V1 vLLM, recipe settings (util 0.80) | B | 42.82 (33.32) | 2.448 | 199.6 | 2,429 | 53.7 | 1,347,359 | 20.0 GiB | 313 s (cold) |
+| V2 vLLM + `--max-num-batched-tokens 8192` | B | 41.47 (32.45) | 2.448 | 195.0 | 2,763 | 53.1 | 693,420 | 24.9 GiB | 360 s |
+| S1 SGLang, cookbook cell, mem 0.62 | A | 41.86 (33.18) | 2.448 | 189.3 | 3,245 | 51.9 | 844,928 | 39.0 GiB | 378 s (cold) |
+| S2 SGLang + `SGLANG_ENABLE_NV_MEGA_RUNTIME_OPTIMIZATION=1` | A | 41.07 (32.59) | 2.448 | 191.6 | 3,255 | 57.2 | 845,952 | 39.9 GiB | 237 s (warm) |
 
 - vLLM's `--max-num-batched-tokens 8192` lifts 32K prefill by 14 % (vLLM caps scheduled tokens at 2048 with
   speculative decoding) but halves the reported KV pool (the per-request sliding-window and conv blocks grow with
@@ -51,16 +51,16 @@ effort low); thinking c8 = aggregate tok/s; prefill / decode at 32K from speedbe
 
 Full runs (`bench/full.sh`), stock recipe settings of each engine (SGLang: cookbook DSpark cell with mem 0.62;
 vLLM: official recipe + `--gpu-memory-utilization 0.80`, `--enable-auto-tool-choice --tool-call-parser inkling`),
-F1 = SGLang on Spark_05 / vLLM on Spark_06, F2 = swapped.
+F1 = SGLang on box A / vLLM on box B, F2 = swapped.
 
 speedbench full (73 prompts x 256 tokens, c1, T=0, effort low), decode tok/s geomean:
 
 | engine | box | prose | code | structured | agentic | multilingual | long context | all 73 | TTFT median |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| SGLang | 05 | 33.0 | 48.5 | 44.9 | 49.9 | 25.6 | 51.5 | **41.09** | 182 ms |
-| SGLang | 06 | 32.3 | 47.5 | 43.8 | 48.7 | 25.0 | 50.4 | **40.16** | 186 ms |
-| vLLM | 06 | 32.8 | 47.9 | 42.4 | 52.7 | 25.0 | 54.4 | **41.11** | 163 ms |
-| vLLM | 05 | 33.0 | 48.2 | 42.7 | 53.2 | 25.2 | 54.8 | **41.38** | 163 ms |
+| SGLang | A | 33.0 | 48.5 | 44.9 | 49.9 | 25.6 | 51.5 | **41.09** | 182 ms |
+| SGLang | B | 32.3 | 47.5 | 43.8 | 48.7 | 25.0 | 50.4 | **40.16** | 186 ms |
+| vLLM | B | 32.8 | 47.9 | 42.4 | 52.7 | 25.0 | 54.4 | **41.11** | 163 ms |
+| vLLM | A | 33.0 | 48.2 | 42.7 | 53.2 | 25.2 | 54.8 | **41.38** | 163 ms |
 
 Decode table (T=0, 256 tokens, effort none; c1 per-stream, higher concurrency aggregate):
 
@@ -78,8 +78,8 @@ Cold prefill (speedbench longctx, tok/s; TTFT in brackets):
 
 | engine | 1K | 8K | 32K | 128K | 128K cached TTFT |
 |---|---:|---:|---:|---:|---:|
-| SGLang (05 / 06) | 2,190 / 2,137 (0.5 s) | 3,400 / 3,399 (2.4 s) | 3,234 / 3,230 (10.1 s) | 2,419 / 2,426 (54 s) | 27 s (1 of 2 hits) |
-| vLLM (06 / 05) | 644 / 649 (1.6 s) | 1,803 / 1,762 (4.5 s) | 2,437 / 2,427 (13.4 s) | 1,979 / 1,952 (66 s) | 66 s (0 of 2 hits) |
+| SGLang (A / B) | 2,190 / 2,137 (0.5 s) | 3,400 / 3,399 (2.4 s) | 3,234 / 3,230 (10.1 s) | 2,419 / 2,426 (54 s) | 27 s (1 of 2 hits) |
+| vLLM (B / A) | 644 / 649 (1.6 s) | 1,803 / 1,762 (4.5 s) | 2,437 / 2,427 (13.4 s) | 1,979 / 1,952 (66 s) | 66 s (0 of 2 hits) |
 
 Memory after start-up: SGLang ~39-40 GiB MemAvailable with an 845K-token KV pool; vLLM ~20 GiB with a 1.35M-token
 pool (its own suggestion, `--gpu-memory-utilization` unset, would leave the host 0-2 GiB). Start-up: vLLM 5.2-5.6 min,
@@ -108,7 +108,7 @@ fewer bytes per accepted token can make decode faster: verify fewer rows (MoE un
 read the dense weights in fewer bits (exactly), or accept more tokens per step (a better draft, which needs training
 and is out of scope).
 
-## Decode levers (all screens on Spark_05 unless noted)
+## Decode levers (all screens on box A unless noted)
 
 `vscreen`: 16 greedy prompts dumped for a text comparison against the base, speedbench quick (30 x 160, c1, T=0,
 effort low), thinking load c8 (16 x 2048, T=0.8, effort high); thinking c1 (4 x 2048) for the combined arms.
@@ -123,10 +123,10 @@ effort low), thinking load c8 (16 x 2048, T=0.8, effort high); thinking c1 (4 x 
 | verify cap v2 fixed:8 fused remap (overhead) | 40.38 (32.01) | 61.9 | 2.448 | 190.9 | - | 16/16 |
 | verify cap cost 0.30/0.25/0.15/0 | 46.39 (38.53) | 50.9 | 2.356 | 186.6 | - | 15/16 |
 | verify cap fixed:4 only at bs 1 | 43.01 (36.40) | 51.6 | 2.210 | 185.6 | - | 15/16 |
-| draft gemv + fold8 + head8 (Spark_06) | 41.96 (33.68) | 59.1 | 2.487 | 187.5 | - | 15/16 |
-| draft + MXFP8 draft layers (Spark_06) | 42.44 (34.21) | 58.6 | 2.451 | 192.3 | - | 14/16 |
-| MoE tiles (Spark_06) | 40.84 (32.39) | 61.2 | 2.448 | 186.5 | - | 16/16 |
-| MoE tiles + QKVR GEMV (Spark_06) | 41.10 (32.56) | 60.7 | 2.448 | 190.8 | - | 16/16 |
+| draft gemv + fold8 + head8 (box B) | 41.96 (33.68) | 59.1 | 2.487 | 187.5 | - | 15/16 |
+| draft + MXFP8 draft layers (box B) | 42.44 (34.21) | 58.6 | 2.451 | 192.3 | - | 14/16 |
+| MoE tiles (box B) | 40.84 (32.39) | 61.2 | 2.448 | 186.5 | - | 16/16 |
+| MoE tiles + QKVR GEMV (box B) | 41.10 (32.56) | 60.7 | 2.448 | 190.8 | - | 16/16 |
 | C1: cost 0.30 + draft (no mx8) + tiles + QKVR | 51.22 (42.73) | 46.5 | 2.409 | 189.6 | 57.6 | 15/16 |
 | C2: C1 + MXFP8 draft layers | 51.90 (43.57) | 45.8 | 2.356 | 199.9 | 58.7 | 14/16 |
 | C3: C2 with cost 0.40/0.30/0.20/0 | 52.14 (44.01) | 44.2 | 2.255 | 192.3 | 59.2 | 13/16 |
@@ -181,7 +181,7 @@ Exact prefill levers (`overlay/inkling_prefill/`, all bit-identical to stock in 
 
 | arm (speedbench longctx, cold, tok/s) | 1K | 8K | 32K | 128K |
 |---|---:|---:|---:|---:|
-| base (PF0, Spark_06) | 2,151 | 3,408 | 3,235 | 2,409 |
+| base (PF0, box B) | 2,151 | 3,408 | 3,235 | 2,409 |
 | qkvr_split + partial_bf16 (PFO2) | 2,336 | 3,781 | 3,558 | 2,537 |
 | all four: + bias_layout + quant_once (PFO3) | **2,363** | **4,253** | **3,958** | **2,749** |
 | `--chunked-prefill-size 16384` alone (PF1) | 2,160 | 3,399 | 3,310 | 2,493 |
@@ -203,7 +203,7 @@ The shipped configuration (`scripts/launch.sh` defaults) ran `bench/full.sh` onc
 (`results/FINAL-s06/`, `results/FINAL-s05/`), against the stock engine's full runs on the same boxes
 (`results/F2-sglang-base-s06/`, `results/F1-sglang-base-s05/`):
 
-| | stock (06 / 05) | final (06 / 05) |
+| | stock (B / A) | final (B / A) |
 |---|---|---|
 | speedbench full, all 73 | 40.16 / 41.09 | 55.51 / 56.06 |
 | speedbench prose | 32.3 / 33.0 | 46.4 / 46.8 |
@@ -245,7 +245,7 @@ Measured expert unions (stock engine with the read-only counter, 36K logged requ
 and 51.4 / 79.0 / 91.2 at 16 requests, far from the 128 experts. The round-1 rule verified all 8 rows from 5 requests
 up because the union was assumed saturated; it is not.
 
-### Decode levers (screens on Spark_05, same day)
+### Decode levers (screens on box A, same day)
 
 Controls: C0a and C0b (round-1 stack, booted before and after the arms) agree within 1-3 % except the sampled thinking
 cells (+-5 %).
@@ -278,7 +278,7 @@ cells (+-5 %).
   2.304 tokens per step vs 2.272 in every other arm); it ships restricted to decode / verify forwards
   (`INKLING_WIDE_SCOPE=verify`), confirmed in the full runs (c1 decode unchanged).
 
-### Prefill levers (Spark_05, same day, speedbench longctx, cold)
+### Prefill levers (box A, same day, speedbench longctx, cold)
 
 | arm | 1K | 8K | 32K | 128K | guard / sanity / needles |
 |---|---:|---:|---:|---:|---|
@@ -294,7 +294,7 @@ measured 164 TFLOP/s NVFP4 rate, `results/kbench/round2/residual/out/prefill.txt
 (loop-message mixes 233, attention-residual mixes 143, norms 74, ...), routed-expert GEMMs 317, dense 250, MoE glue 211,
 relative bias 219, attention main loop 119.
 
-### KV pool (Spark_06, MemAvailable logged every 5 s from container start)
+### KV pool (box B, MemAvailable logged every 5 s from container start)
 
 Worst case per setting: thinking load c24 (48 x 2,048 tokens) together with a cold 240,104-token needle prompt, then
 40 min of 28 concurrent mixed requests.
@@ -326,7 +326,7 @@ case above. The start-up peak is not lower than the steady state at any setting.
 
 ### Confirmation (both boxes, `bench/full.sh`)
 
-| | round 1 (06 / 05) | v2 (05 / 06) |
+| | round 1 (B / A) | v2 (A / B) |
 |---|---|---|
 | speedbench full, all 73 | 55.51 / 56.06 | 58.19 / 58.10 |
 | decode table prose c1 / c4 / c8 / c16 | 47.3 / 90.6 / 120.3 / 188.9 ; 47.8 / 89.6 / 122.8 / 192.3 | 47.5 / 98.7 / 148.1 / 213.2 ; 47.5 / 100.6 / 150.2 / 211.0 |
@@ -358,14 +358,14 @@ The modelled c1 optimum is flat between 48K and 80K (+5.4 % at 64K); 64K was scr
 
 | box | sbquick | prose c1 / c4 / c8 / c16 | thinking c1 / c4 / c8 / c24 | greedy texts identical |
 |---|---|---|---|---|
-| Spark_05 | 61.08 vs 57.64 | 51.0 / 103.2 / 150.5 / 219.3 vs 47.7 / 100.2 / 145.6 / 216.2 | 68.2 / 157.1 / 220.5 / 408.4 vs 62.3 / 146.9 / 212.4 / 388.8 | 30 / 30 |
-| Spark_06 | 60.70 vs 57.20 | 50.6 / 102.2 / 149.5 / 218.1 vs 47.4 / 101.2 / 150.4 / 212.7 | 66.8 / 143.3 / 214.7 / 399.7 vs 65.5 / 143.0 / 205.9 / 292.1 (control c24 outlier) | 30 / 30 |
+| box A | 61.08 vs 57.64 | 51.0 / 103.2 / 150.5 / 219.3 vs 47.7 / 100.2 / 145.6 / 216.2 | 68.2 / 157.1 / 220.5 / 408.4 vs 62.3 / 146.9 / 212.4 / 388.8 | 30 / 30 |
+| box B | 60.70 vs 57.20 | 50.6 / 102.2 / 149.5 / 218.1 vs 47.4 / 101.2 / 150.4 / 212.7 | 66.8 / 143.3 / 214.7 / 399.7 vs 65.5 / 143.0 / 205.9 / 292.1 (control c24 outlier) | 30 / 30 |
 
 Speedbench quick c1 step 37.5 vs 39.8 ms at equal tokens per step (2.14 median in both; multilingual 1.74 vs 1.73).
 `wide8` (in the same arm) only changes calls above 64 rows (c9+ draft head) and is bit-identical to the previous
 kernel. Confirmed with `bench/full.sh` on both boxes (CHANGELOG v2.1).
 
-KV page size 16 (thefullctx measured +19 % decode at 15.6K context on their stack), on v2, Spark_06: speedbench quick
+KV page size 16 (thefullctx measured +19 % decode at 15.6K context on their stack), on v2, box B: speedbench quick
 57.05 vs 57.20, thinking c8 211.6, decode at 32K / 128K 66.0 / 42.5 (no gain), cold prefill 8K 4,210 vs ~5,300 (the
 fused prefill attention covers page 128 only and falls back). Not adopted.
 
@@ -381,7 +381,7 @@ per verify step: c4 55.6 -> 54.1, c8 77.8 -> 75.0, c16 112.9 -> 105.8, c24 125.0
 (`results/kbench/round2/moe/`). A multi-row SwiGLU-quantize kernel (bit-identical) saved only 0.13 ms at c24 and was
 slower below; not adopted.
 
-Same-day A/B on Spark_05 (`results/screen-r2/R3C-s05`, `R3M-s05`, `R3Cb-s05`; v2.1 control / + moe2 / control):
+Same-day A/B on box A (`results/screen-r2/R3C-s05`, `R3M-s05`, `R3Cb-s05`; v2.1 control / + moe2 / control):
 
 | | control (mean of 2) | moe2 |
 |---|---|---|
@@ -391,9 +391,9 @@ Same-day A/B on Spark_05 (`results/screen-r2/R3C-s05`, `R3M-s05`, `R3Cb-s05`; v2
 | thinking c4 / c8 / c24 | 141.4 / 213.6 / 411.8 | 141.1 / 216.3 / 418.7 |
 | speedbench quick c1 | 61.07 | 60.93 |
 
-Confirmed with full runs on both boxes (CHANGELOG v2.2). During the Spark_06 full run an unrelated CPU compile job
+Confirmed with full runs on both boxes (CHANGELOG v2.2). During the box B full run an unrelated CPU compile job
 ran on the host for 8 minutes (thinking c24 and long-context cells; MemAvailable down to 4.05 GiB); those cells agree
-with Spark_05 within run noise and every check passed, but they are the less clean of the two.
+with box A within run noise and every check passed, but they are the less clean of the two.
 
 ## v2.3: scale codes and two c1 byte leaks
 
@@ -408,7 +408,7 @@ real weights and routing at 8 / 64 / 192 tokens (layers 0, 6, 17, 19, w13 and w2
 CUDA-graph replay included. Cold-L2 GEMM time -3.5 to -4.5 % per call (layer 17, with the most escape rows, -2.2 to
 -3 %).
 
-A/B on Spark_05 (`results/screen-r2/R4C-s05`, `R4S-s05`, `R4Cb-s05`):
+A/B on box A (`results/screen-r2/R4C-s05`, `R4S-s05`, `R4Cb-s05`):
 
 | | control (2 runs) | scale codes |
 |---|---|---|
@@ -424,7 +424,7 @@ over column ranges of the one coded matrix: 178 -> 144 us per stacked call at 8 
 **Draft MXFP8 layers**: the o / down shapes (2,304 outputs) streamed at 117-124 GB/s with 32-wide output tiles; 16-wide
 tiles reach 198 GB/s per layer, bit-identical (48 / 48 configurations checked).
 
-A/B on Spark_05 (`R6C-s05` control, `R6L-s05` stack1 + w8tile): speedbench quick 62.35 / 62.22 vs 60.48 / 61.05
+A/B on box A (`R6C-s05` control, `R6L-s05` stack1 + w8tile): speedbench quick 62.35 / 62.22 vs 60.48 / 61.05
 (+2.5 %), decode c1 prose / code / structured / json 52.1 / 61.3 / 68.9 / 61.2 vs 51.1 / 60.3 / 67.8 / 60.0, c4-c16
 unchanged (these paths only run at <= 16 rows per source).
 
@@ -474,12 +474,12 @@ Screens (aggregate tok/s; two runs per arm, two controls):
 
 | arm (box) | thinking c1 / c8 / c24 | greedy prose c8 / c16 | code c16 |
 |---|---|---|---|
-| controls T0c, T0d (Spark_05) | 69.3 / 220.1 / 423.7 ; 69.8 / 221.1 / 415.8 | - | - |
-| block verification BVa, BVb (Spark_05) | 69.5 / 227.7 / 429.3 ; 73.8 / 234.7 / 443.4 | - | - |
-| BV + draft temperature 0.7 (Spark_05) | 67.2 / 229.1 / 428.6 ; 67.8 / 211.1 / 418.8 | - | - |
-| controls FPc, FPcb (Spark_06) | - / 225.3 / 428.8 ; - / 213.2 / 425.2 | 156.3, 158.8 / 232.7, 229.4 | 255.9 / 256.6 |
-| FASTPROBS FPa, FPb (Spark_06) | - / 228.3 / 435.6 ; - / 224.6 / 418.9 | 160.8, 159.6 / 235.5, 238.9 | 262.1 / 261.1 |
-| FASTPROBS + FUSED_ACCEPT FAa, FAb (Spark_06) | - / 229.2 / 418.9 ; - / 234.0 / 436.0 | - | 269.5 / 266.2 |
+| controls T0c, T0d (box A) | 69.3 / 220.1 / 423.7 ; 69.8 / 221.1 / 415.8 | - | - |
+| block verification BVa, BVb (box A) | 69.5 / 227.7 / 429.3 ; 73.8 / 234.7 / 443.4 | - | - |
+| BV + draft temperature 0.7 (box A) | 67.2 / 229.1 / 428.6 ; 67.8 / 211.1 / 418.8 | - | - |
+| controls FPc, FPcb (box B) | - / 225.3 / 428.8 ; - / 213.2 / 425.2 | 156.3, 158.8 / 232.7, 229.4 | 255.9 / 256.6 |
+| FASTPROBS FPa, FPb (box B) | - / 228.3 / 435.6 ; - / 224.6 / 418.9 | 160.8, 159.6 / 235.5, 238.9 | 262.1 / 261.1 |
+| FASTPROBS + FUSED_ACCEPT FAa, FAb (box B) | - / 229.2 / 418.9 ; - / 234.0 / 436.0 | - | 269.5 / 266.2 |
 
 Block verification: thinking c1 / c8 / c24 +3.0 / +4.8 / +4.0 %; with a draft temperature of 0.7 the gain is gone.
 FASTPROBS: thinking c8 +3.5 %, c24 flat, greedy prose c8 / c16 +1.7 / +2.6 %, code c16 +2 % (the max-probability
@@ -489,8 +489,8 @@ Confirmation of block verification + FASTPROBS on both boxes (`U2a` vs control `
 
 | box | thinking c1 / c8 / c24 | greedy prose c8 / c16 | code c16 |
 |---|---|---|---|
-| Spark_06 | 68.5 / 234.1 / 440.6 vs 70.5 / 226.7 / 426.2 | - / 238.3 vs - / 230.0 | 265.4 vs 255.6 |
-| Spark_05 | 70.5 / 227.3 / 422.0 vs 68.3 / 234.9 / 418.2 (sampled c8 noisy) | 161.1 / 235.1 vs 155.1 / 229.7 | - |
+| box B | 68.5 / 234.1 / 440.6 vs 70.5 / 226.7 / 426.2 | - / 238.3 vs - / 230.0 | 265.4 vs 255.6 |
+| box A | 70.5 / 227.3 / 422.0 vs 68.3 / 234.9 / 418.2 (sampled c8 noisy) | 161.1 / 235.1 vs 155.1 / 229.7 | - |
 
 ### Drafter global-attention window (`dwin:16384`)
 
@@ -503,10 +503,10 @@ before.
 
 | box | context | step ms, controls | step ms, `dwin:16384` | tokens per step, dwin vs controls |
 |---|---|---:|---:|---|
-| Spark_05 | 128K | 60.1 / 60.2 | **57.7** | 2.44 vs 2.45 / 2.66 |
-| Spark_05 | 250K | 80.0 / 79.7 | **76.0** | 2.54 vs 2.48 / 2.47 |
-| Spark_06 | 128K | 59.5 | **58.1** | unchanged |
-| Spark_06 | 250K | 80.0 | **75.2** | unchanged |
+| box A | 128K | 60.1 / 60.2 | **57.7** | 2.44 vs 2.45 / 2.66 |
+| box A | 250K | 80.0 / 79.7 | **76.0** | 2.54 vs 2.48 / 2.47 |
+| box B | 128K | 59.5 | **58.1** | unchanged |
+| box B | 250K | 80.0 | **75.2** | unchanged |
 
 32K step time is flat (the window saves at most 67 MB per step there).
 `dwin:8192` gave a similar step time with fewer tokens per step at 32K.
@@ -527,7 +527,7 @@ Exactness: decoded tiles equal the BF16 cache for all 65,536 BF16 patterns, inf 
 K / V; attention partials are bit-identical to stock at the stock launch configuration (packed, mixed and raw tiles,
 eager and graph-replayed, 60-step verify loop with page reuse).
 
-Microbenchmark, one global verify visit (find / pack steady state + attention + combine), Spark_06, cold, CUDA-graph
+Microbenchmark, one global verify visit (find / pack steady state + attention + combine), box B, cold, CUDA-graph
 medians:
 
 | shape | stock us | kv12 us | speedup |
@@ -537,7 +537,7 @@ medians:
 | 128K, 4 x 8, synthetic | 9,123 | 7,149 | 1.28 |
 | 256K, 1 x 8, synthetic | 4,572 | 3,623 | 1.26 |
 
-Serving screens (Spark_05, c1 step ms from speedbench longctx):
+Serving screens (box A, c1 step ms from speedbench longctx):
 
 | arm | 128K | 250K | note |
 |---|---:|---:|---|
@@ -554,7 +554,7 @@ request or the recently decoded pages of many shorter ones. Sanity 11/11 and nee
 Four arms per box, booted back to back the same day (`results/screen-r2/AB1all-*`, `AB1nokv-*`, `AB1nodw-*`,
 `AB1v23-*`; all at mem 0.80). Step ms = tokens per step / speedbench quick tok/s, c1; greedy decode table at c16:
 
-| arm | c1 step ms (Spark_06 / Spark_05) | prose c16 (06 / 05) | code c16 (06 / 05) |
+| arm | c1 step ms (box B / box A) | prose c16 (B / A) | code c16 (B / A) |
 |---|---|---|---|
 | all v2.4 levers | 34.78 / 34.72 | 239.3 / 235.8 | 263.4 / 262.3 |
 | without kv12 | 34.78 / 34.75 | 236.8 / 239.0 | 263.6 / 262.0 |
@@ -566,7 +566,7 @@ prose and +1.2 / +2.2 % on code.
 
 ### Confirmation (both boxes, `bench/full.sh`)
 
-| | v2.3 (05 / 06) | v2.4 (05 / 06) |
+| | v2.3 (A / B) | v2.4 (A / B) |
 |---|---|---|
 | speedbench full, all 73 | 64.88 / 64.54 | 63.88 / 64.28 |
 | tokens per step / step ms (speedbench, c1) | 2.383 / 36.94 ; 2.383 / 37.14 | 2.383 / 37.51 ; 2.383 / 37.25 |
@@ -581,7 +581,7 @@ prose and +1.2 / +2.2 % on code.
 
 The full-run speedbench is 0.9 % below v2.3 at identical tokens per step. The same-session ablation shows that this is
 run-to-run variation between boots, not the levers. Decode at 32K reads 63.3 vs 69.6 (median of both boxes); these
-cells are 256 tokens x 2 documents with a confidence interval of about +-25 %. A same-session 32K ablation on Spark_05
+cells are 256 tokens x 2 documents with a confidence interval of about +-25 %. A same-session 32K ablation on box A
 (`results/screen-r2/AB32*`: 4 reps x cold + cached document, 512 tokens each, step time from the engine metrics) settles it:
 
 | arm | step ms (median of 8) | tokens per step (median) | decode tok/s |
@@ -594,21 +594,21 @@ cells are 256 tokens x 2 documents with a confidence interval of about +-25 %. A
 The step time is the same in all four arms. Tokens per step vary with the salted documents' generated texts (2.3
 to 5.5 per request). The v2.5 window screen below measures the effect on acceptance with more requests per cell.
 
-Long context (`results/V24-s06/K/`, `results/V24-s05/K/`): at 200K / 250K Spark_06 decodes 44.1 / 38.9 tok/s at c1
-(v2.3 on Spark_05: 38.1 / 35.1), cold prefill 3,142 / 2,799 tok/s, TTFT 65.4 / 91.2 s; Spark_05's 40.9 / 46.7 come
+Long context (`results/V24-s06/K/`, `results/V24-s05/K/`): at 200K / 250K box B decodes 44.1 / 38.9 tok/s at c1
+(v2.3 on box A: 38.1 / 35.1), cold prefill 3,142 / 2,799 tok/s, TTFT 65.4 / 91.2 s; box A's 40.9 / 46.7 come
 from one cold and one cached request each and have confidence intervals too wide to use. Worst case for memory
 (thinking c24, 48 x 2,048 tokens, together with a cold 240,104-token needle prompt): lowest MemAvailable 14.8 GiB
-(Spark_06) / 15.6 GiB (Spark_05), KV pool 1,121,792 / 1,121,280 tokens, thinking 308.2 / 309.6 tok/s alongside the
+(box B) / 15.6 GiB (box A), KV pool 1,121,792 / 1,121,280 tokens, thinking 308.2 / 309.6 tok/s alongside the
 prefill, needle PASS on both.
 
 ### Not adopted in v2.4
 
-- Draft sampling temperature below the request's (Spark_06): tau 0.7 66.5 / 218.7 / 417.6 and 67.8 / 223.6 / 415.0,
+- Draft sampling temperature below the request's (box B): tau 0.7 66.5 / 218.7 / 417.6 and 67.8 / 223.6 / 415.0,
   tau 0.8 70.0 / 216.1 / 413.2 vs controls 69.9 / 240.4 / 415.6 and 68.3 / 225.6 / 425.0 (thinking c1 / c8 / c24): no
   gain or worse, also on top of block verification (above).
-- 4-bit draft MLP: speedbench quick 64.12 / 64.56 vs 63.84 / 63.65 (+0.9 %) and decode c1 +1-3 % on Spark_05, the same
-  pattern on Spark_06, but the gain is tokens per step only (2.225 vs 2.194); the step time is unchanged (Spark_06
-  34.70 / 34.86 vs 34.69 / 34.75 ms, Spark_05 34.72 / 34.47 vs 34.39 / 34.47 ms). The same configuration moves between
+- 4-bit draft MLP: speedbench quick 64.12 / 64.56 vs 63.84 / 63.65 (+0.9 %) and decode c1 +1-3 % on box A, the same
+  pattern on box B, but the gain is tokens per step only (2.225 vs 2.194); the step time is unchanged (box B
+  34.70 / 34.86 vs 34.69 / 34.75 ms, box A 34.72 / 34.47 vs 34.39 / 34.47 ms). The same configuration moves between
   2.224 and 2.194 tokens per step from boot to boot, and an offline acceptance check on 1.6M tokens gives -0.17 % with a
   confidence interval that includes 0.
 - Late kill of doomed verify rows from a mid-stack LM-head readout (after layer visit 17 / 29 / 41 of 48): on T=0
@@ -647,8 +647,8 @@ Seven steps, CUDA graph, cold L2. Same-session serving (`sbquick`, c1 step ms = 
 
 | box | `rnnhoist` step ms | control step ms |
 |---|---|---|
-| Spark_06 | 34.46 / 34.55 | 34.79 / 34.82 / 35.12 |
-| Spark_05 | 34.53 / 34.78 / 34.67 / 34.59 | 34.61 / 34.65 / 35.04 / 34.90 |
+| box B | 34.46 / 34.55 | 34.79 / 34.82 / 35.12 |
+| box A | 34.53 / 34.78 / 34.67 / 34.59 | 34.61 / 34.65 / 35.04 / 34.90 |
 
 Our implementation follows the walk-fusion idea of the one-kernel DSpark Markov walk in
 [vLLM PR #62958](https://github.com/vllm-project/vllm/pull/62958)
@@ -694,12 +694,12 @@ and `python3 bench/report.py results/V24-s05 results/V24-s06`.
 | thinking c1 / c8 / c24 | 68.2 / 239.9 / 439.4 | 70.5 / 235.6 / 445.2 |
 | cold prefill 1K / 8K / 32K / 128K | 2,939 / 5,456 / 5,148 / 3,805 | 2,893 / 5,464 / 5,143 / 3,806 |
 | decode at 32K / 128K | 63.3 / 48.2 | 71.0 / 46.4 |
-| KV pool (Spark_05 / Spark_06) | 1,113,984 / 1,117,184 | 1,105,792 / 1,106,816 |
+| KV pool (box A / box B) | 1,113,984 / 1,117,184 | 1,105,792 / 1,106,816 |
 | lowest MemAvailable in the full runs | 15.6-16.0 GiB | 16.1-16.3 GiB |
 | quality guard / sanity / needles 120K + 240K | 30/30 / 11/11 / PASS on both | 30/30 / 11/11 / PASS on both |
 
-Warm start-up was 137 / 131 s (Spark_05 / Spark_06), with 16.5-16.6 GiB MemAvailable after start. The global-layer
-KV pool ranges from 1.11M to 1.13M tokens across boots. On Spark_06 (`results/V25-s06/K/`), c1 at 200K / 250K
+Warm start-up was 137 / 131 s (box A / box B), with 16.5-16.6 GiB MemAvailable after start. The global-layer
+KV pool ranges from 1.11M to 1.13M tokens across boots. On box B (`results/V25-s06/K/`), c1 at 200K / 250K
 decoded at 43.8 / 37.9 tok/s and cold prefill reached 3,105 / 2,655 tok/s. With thinking c24 (48 x 2,048 tokens)
 alongside a cold 240K-token needle prefill, MemAvailable reached 14.5 GiB, thinking ran at 309.2 tok/s, and the
 needle passed.
@@ -723,7 +723,7 @@ needle passed.
 ### Other recipes, same harness
 
 [sxuff/inkling-2-mini-spark](https://github.com/sxuff/inkling-2-mini-spark) (vLLM + DSpark + INT8 draft,
-`serve.sh q8`, pinned image) and our v2.4 recipe ran on Spark_06 the same day
+`serve.sh q8`, pinned image) and our v2.4 recipe ran on box B the same day
 (`results/screen-r2/SXQ8-s06`, `results/screen-r2/SXOUR-s06`).
 
 | | sxuff q8 | our v2.4 |
@@ -747,7 +747,7 @@ The image's 0.1 ratio gave 110,592 sliding-window tokens from a 1.1M-token globa
 
 The stress run pairs thinking c24 (48 x 2,048 tokens) with a cold 240,104-token needle prefill. MemAvailable was
 logged every 5 s from container start. The sliding-window ratio was 0.1 at 0.81, 0.055 at 0.86 and 0.88, and 0.05
-from 0.91 up. The pairs below are Spark_05 / Spark_06. Raw files are in `results/screen-r2/`: `KVa-s0*` (0.86), `KVb-s0*` (0.88), `KVd-s0*` (0.91), `KVf093-s0*`
+from 0.91 up. The pairs below are box A / box B. Raw files are in `results/screen-r2/`: `KVa-s0*` (0.86), `KVb-s0*` (0.88), `KVd-s0*` (0.91), `KVf093-s0*`
 (0.93) and `KVg-s0*` (0.945), plus `results/V25-s05/`, `results/V25-s06/`, `results/V26-s05/` and `results/V26-s06/`. The 0.94 stress
 runs are in the `K/` subdirectories of the v2.6 runs.
 
@@ -765,7 +765,7 @@ Throughput was flat across the sweep. Thinking c24 alongside the prefill ran at 
 at 221-238 tok/s. At 200K / 250K, c1 decode was 40-47 / 34-40 tok/s, varying with the generated text. The full
 `bench/full.sh` speed and quality runs used `MEM_FRACTION=0.94` on both boxes.
 
-Other GB10 memory-cliff measurements put the worst-case target at 3.5 GiB MemAvailable. At 0.94, Spark_06 had
+Other GB10 memory-cliff measurements put the worst-case target at 3.5 GiB MemAvailable. At 0.94, box B had
 only 0.2 GiB of margin, and MemAvailable after start varied by up to ~1 GiB between boots at the same fraction.
 The release uses 0.93 for that spread, with a 3.5 GiB memory guard floor and 40 % more global-layer KV than v2.5.
 Both pool sizing changes preserve exactness.
@@ -775,7 +775,7 @@ Both pool sizing changes preserve exactness.
 - **INT8 draft weights.** The speedbench quick differences tracked the generated text. Thinking and decode
   throughput were flat, so the INT8 variant was dropped.
 - **Small kernels.** Router / wproj split-K and controller re-tiling saved 0.35 ms per c1 step in the microbench.
-  Serving was flat on Spark_05 and Spark_06, so the kernel variant was dropped. The screen drew on Thien Tran's
+  Serving was flat on box A and box B, so the kernel variant was dropped. The screen drew on Thien Tran's
   [vLLM PR #69168](https://github.com/vllm-project/vllm/pull/69168).
 
 ### Future work
@@ -790,14 +790,14 @@ Certified head for 17-192 rows (GPU check on real hidden states, every row band 
 budget; cold timing head + softcap + argmax vs certified): 64 rows 3.99 -> 1.72 ms, 128 rows 5.09 -> 3.19 ms,
 192 rows 6.14 -> 6.02 ms (the screen is compute-bound there); overflow fallback costs +1.5 to +5.7 ms but did not
 trigger on real states. Serving A/B on v2.6 (`results/screen-r2/CW*`), greedy decode table, mean over four prompt
-types, on vs off: c1 +0.3 / +0.1 %, c4 +2.1 / +1.6 %, c8 +1.0 / +1.5 %, c16 -0.3 / -0.7 % (Spark_05 / Spark_06).
+types, on vs off: c1 +0.3 / +0.1 %, c4 +2.1 / +1.6 %, c8 +1.0 / +1.5 %, c16 -0.3 / -0.7 % (box A / box B).
 
 Long-prefix prefill: 512K / 1M cold prefill timings fitted the fused kernel slowing down, not a fallback. Per global
-layer and 8K chunk (cold L2, Spark_06): 4-warp kernel 70.7 TF/s at 120-256K, 49.2 at 512K, 46.5 at 1M; 8-warp variant
+layer and 8K chunk (cold L2, box B): 4-warp kernel 70.7 TF/s at 120-256K, 49.2 at 512K, 46.5 at 1M; 8-warp variant
 68.4-68.9 TF/s at every prefix. Splitting the launch at 131,072 keys: 512K 1,082 -> 777 ms, 1M 2,281 -> 1,547 ms,
 bit-identical to the single launch.
 
-512K / 1M option (v2.6 build, default store, Spark_05): see the README table; 1M cold prefill 1,285 s, 512K 358 s.
+512K / 1M option (v2.6 build, default store, box A): see the README table; 1M cold prefill 1,285 s, 512K 358 s.
 
 Memory flags (`results/screen-r2/K1a-s05`): conv-state slots 1,232 -> 512 (peak use 76), one prefill chunk in flight:
 pool 1,559,424 -> 1,593,088 tokens, worst case 5.2 GiB, sbquick 63.56, prefill 1K-128K 2,962 / 5,490 / 5,163 / 3,808.
@@ -887,7 +887,7 @@ sliding-window lanes at window size. Charging those lanes per window token (star
 global plus two window layers) and `MEM_FRACTION=0.89` gives 2.13-2.17M global-layer tokens with 5.4 GiB at worst.
 
 Dead-row expert skip (`inkling_noexp`). Paired screens on the release tree, two boxes (ABBA, then a component split
-on Spark_06):
+on box B):
 
 | arm | prose c4 / c8 / c16 | code c16 | thinking c24 |
 |---|---|---:|---:|
@@ -896,7 +896,145 @@ on Spark_06):
 | quant-once + controller-mix launch | 112.4 / 159.7 / 234.3 | 268.0 | 438.6 |
 | all four candidate overlays (2 runs) | 112.4 / 164.8 / 247.8 | 272.6 | - |
 
-Spark_05 confirmed the bundle against its own controls: prose c4 / c8 / c16 +3.5 / +2.3 / +5.8 %. Thinking at c4
+Box A confirmed the bundle against its own controls: prose c4 / c8 / c16 +3.5 / +2.3 / +5.8 %. Thinking at c4
 looked 3 % lower in aggregate but its per-request decode was 1.8 % higher (8 requests in two waves; the wall time
 follows the slowest request). NOEXP shipped; the quant-once and controller-mix launch configs (bit-identical) and the
 pfuse mix launch config (+0.7 % prefill, different FP32 order on long prompts) did not.
+
+## v2.8: DFlash2 drafter as the default
+
+Basic tests on one box; full two-box qualification follows in v2.8.x. Results: `results/V28sbf-s05/` (speedbench full),
+`results/V28M1v28-s05/` (release defaults), `results/V28M1off-s05/` (`DFCAP=off`), `results/V28M1nonx-s05/` (NOEXP off), `results/V28lc-s05/` and
+`results/R272lc-s05/` (long context, v2.8 and v2.7.2 on the same box), `results/V28dsp-s05/` (`SPEC=dspark`), all on
+box A; `results/V28kv-s06/` (memory and worst case) on box B.
+
+Drafter: [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2) at revision
+`4f9088ea`, a 5-layer block-diffusion draft over a 2,048-token sliding window of target features (layer visits 5,
+23, 41, 48), 16 candidates per position and a selector that traces one path (block size 8, 7 drafts per verify step).
+It runs on SGLang's DFLASH worker after the drafter's compatibility patch, applied inside the serving container only.
+
+Development measurement, stock against stock (`OVERLAY=0`, DFlash2 vs DSpark, same harness):
+
+| | stock DSpark | stock DFlash2 | ratio |
+|---|---:|---:|---:|
+| tokens per verify step | - | - | x1.25 |
+| prose decode c1 / c4 / c8 / c16, tok/s | 32.4 / 74.8 / 115.2 / 183.3 | 46.2 / 109.4 / 161.4 / 254.8 | x1.43 / x1.46 / x1.40 / x1.39 |
+| code decode, c1-c16 | - | - | x1.22-1.25 |
+| thinking c8, aggregate tok/s | 187.2 | 223.1 | x1.19 |
+
+Long context, release stack (box A, speedbench longctx, 512 decode tokens, c1; v2.7.2 control on the same box, 3
+reps; v2.8 two passes, the second with 2 reps; confidence intervals in brackets):
+
+| | v2.7.2 (DSpark) | v2.8, first pass | v2.8, second pass |
+|---|---:|---:|---:|
+| decode at 32K, tok/s | 71.9 [58.7, 88.1] | 63.1 [57.7, 69.0] | 59.9 [53.9, 66.5] |
+| tokens per step / step ms at 32K | 3.36 / 47.4 | 3.10 / 48.3 | - |
+| decode at 128K, tok/s | 49.0 [41.4, 57.9] | 50.2 [38.1, 66.1] | 49.7 [39.5, 62.5] |
+| tokens per step / step ms at 128K | 3.20 / 60.8 | 2.68 / 59.0 | - |
+| cold prefill 32K / 128K, tok/s | 5,162 / 3,719 | 5,132 / 3,714 | 5,083 / 3,738 |
+
+At 32K context the DFlash2 profile decodes about 12 % slower than v2.7.2's DSpark profile at c1 (60-63 vs 72 tok/s, same box). Its acceptance falls with context (3.10 vs 3.36 tokens per step at 32K), because the drafter sees only a 2,048-token window. At 128K both decode at about 50 tok/s. For mostly long-context single-user work, `SPEC=dspark` is the faster choice. v2.8 cold prefill 1K / 8K: 2,753 / 5,383 tok/s, unchanged within noise (prefill
+is target-side).
+
+Levers on the DFLASH path in development screens, each on against the same build with it off:
+
+| lever | switch | measured |
+|---|---|---|
+| drafter byte cuts: MXFP8 drafter linears, FP8 64K hot-vocabulary plane for the candidate projection | `DFLASH_BYTES=mx8,hot8` | speedbench quick +8.4 %, prose c1 +6.5 % (ABBA, box A) |
+| certified greedy head on verify steps of <= 16 rows | `CERT_DFLASH=1` | c1 +2.8 %; check mode (`CERT_DFLASH=check`): 0 mismatches in 34,808 rows (box A) |
+| certified head for 17-192-row verify batches | `CERT_WIDE_DFLASH` (on with `CERT_DFLASH`) | code c8 +3 %, no regression elsewhere; greedy texts identical 30 / 30 |
+| block verification on sampled steps | `DFLASH_BV=1` | thinking c1 +5.9 % |
+| fused sampled accept with a sparse draft q, 16 or more requests | `DFLASH_FUSED=1` | thinking c24 per-request decode +2.3 % (ABBA, cap off); c8 not shown to gain, so batches below 16 keep the stock accept |
+
+### Verify-width cap on DFlash2
+
+**Mechanism.** DFlash2 drafts 7 tokens per step by walking a 16-candidate lattice; the row walked at slot j is chosen
+by the token drafted at slot j-1. Per slot the cap reads the walked row's maximum probability (temperature 1 for
+greedy requests, the request temperature for sampled ones) and looks up a survival table (slot x probability bin,
+separate for greedy and sampled): the probability that draft j is accepted given that drafts 0..j-1 were. Draft j stays
+live while the product of these probabilities is at least a per-batch-size price times the modelled cost of
+verifying row j+1 (milliseconds per expert of MoE union times the row's expected new experts). Whether draft j is
+verified depends only on drafts 0..j-1, so the cut is a stopping rule. Dead rows are routed to their anchor row's
+experts (the expert union shrinks to that of the live rows) or, with NOEXP, to no expert. The accept takes at most L-1
+drafts and the bonus from the last live row; block verification sees the dead drafts as a stopped draft. All of it runs
+inside the static CUDA graphs. Batches above 8 verify every row (`bsmax=8`).
+
+**Fitting.** A measurement-only capture (`STEPLOG`) of 15,400 decode steps (89,098 request-steps: chat, code,
+thinking, agentic, long context; greedy and sampled; 0.5 % overhead) recorded the walked rows, full-width acceptance,
+per-visit expert unions for widths 1-8 and per-step GPU times. Verify time against expert union gives about 0.02 ms
+per expert at batch 1. Tables, prices and row costs were fitted and scored with two-fold cross-fitting over request
+clusters (`tools/dfreplay.py`; held-out batch-1 projection +8.5 to +11 %). The shipped policy is
+`overlay/inkling_vcap/policies/df-SLDF1-sm.json`.
+
+**Sampled law.** Monte Carlo through the engine's own selector walk and sampled accept
+(`tools/gpu_check_dflash2_cap_law.py`, `RSFIX=1`; about 1M steps per arm, a 24-token Markov target, deliberately wrong
+values in every dead target row): chain and block verification with the stopped-draft mask at temperature 1.0 and
+0.7, target top-k 5, block verification without the mask and a look-ahead cut rule all pass (chi-square z from -1.3 to
++0.9, no invalid token); withholding the cutoff fails as it must (z = 142).
+
+**Greedy exactness** (30 prompts, greedy, per-token logprobs).
+- The expert remap never changes a live row: capped runs with and without it are bit-identical on all 30 prompts.
+- Differences from uncapped serving come from the step schedule: under the cap a token position lands in a different
+  row of a differently placed verify block, which changes the floating-point reduction order. With the remap disabled
+  (same schedule) the shipped policy is bit-identical to the remapped run on all 30 prompts (box B).
+- Full v2.8 stack, cap on vs off (box A): 28/30 identical. The other two first diverge where the capped run takes the
+  uncapped run's second-ranked token, at top-2 log-probability gaps of 0.026 and 0.367 nats, after a gradual
+  sub-nat drift on the shared prefix. NOEXP on vs off: output hashes identical on 30/30 (logprobs within 0.12 nats on
+  one prompt; MoE tile tactics depend on per-expert token counts).
+
+**Speed** (box A, v2.8 stack, cap on vs off; NOEXP and block verification on).
+
+| | cap off | cap on | change |
+|---|---:|---:|---:|
+| speedbench quick, tok/s | 62.49 | 70.61 | +13.0 % |
+| median step, ms (tokens/step) | 49.51 (3.000) | 40.54 (2.741) | -8.97 ms |
+| decode prose c1 / c4 / c8 | 55.4 / 122.8 / 190.6 | 65.1 / 140.5 / 203.5 | +17.5 / +14.4 / +6.8 % |
+| decode code c1 / c4 / c8 | 67.7 / 119.2 / 187.9 | 79.0 / 141.6 / 211.3 | +16.7 / +18.8 / +12.5 % |
+| decode prose / code c16 (not capped) | 292.3 / 297.5 | 288.3 / 298.2 | within noise |
+| thinking c8, sampled: aggregate (per-request median) | 280.1 (39.1) | 277.4 (38.2) | -1.0 % (one run each) |
+
+NOEXP adds +0.6 % to speedbench quick with the cap on (70.20 -> 70.61 tok/s). A second boot of the release defaults
+on box B gave 70.17 (prose 65.48).
+
+### Release stack, one box
+
+speedbench full (73 prompts x 256 tokens, box A, 0 failed prompts), v2.8 against the published v2.7.2 two-box median,
+v2.8 tokens per step in brackets: prose 64.66 vs 53.6 (+20.6 %, 2.50), code 79.89 vs 72.1 (+10.8 %, 3.32), structured
+77.14 vs 68.0 (+13.4 %, 3.40), agentic 73.57 vs 76.7 (-4.1 %, 3.18), multilingual 57.21 vs 43.7 (+30.9 %, 2.23), long
+context 63.12 vs 75.1 (-16.0 %, 2.66), all 73 prompts 69.66 vs 63.8 (+9.2 %, 2.77); median TTFT 162.8 ms. The
+long-context category trails because the drafter sees only a 2,048-token window (32K: 3.10 vs 3.36 tokens per step,
+long-context table above); agentic trails slightly (-4.1 %).
+
+speedbench quick per category, release defaults (cap off in brackets): prose 65.67 (55.88), code 80.16 (73.69),
+structured 77.26 (69.00), agentic 75.72 (68.21), multilingual 64.47 (56.50), long context 63.00 (56.02); 0 failed
+prompts. Thinking (T=0.8, 48 x 2,048 max tokens at c8 and c24): c8 277.4 aggregate (38.2 per request), c24 515.5
+(24.0); v2.7.2 with the same protocol 235.3 / 438.8. An earlier boot of the same stack with the cap off gave c1 / c4 /
+c8 / c24 82.5 / 177.9 / 288.4 / 518.9 aggregate. The aggregate depends on how long the completions run, so the
+per-request decode is the better comparison.
+
+### Sampled-verification fixes (`RSFIX`)
+
+SGLang's reject sampler picks the residual / bonus token as the first lane whose running sum exceeds the coin, with no
+range or positive-mass condition. FP32 rounding between the normalizer and the scan can let a zero-mass lane match: a
+padded vocabulary row (ids 200,058-201,023 of the 201,024-wide logits have p = 0) or a lane past the vocabulary (seen
+on the GPU at a 24-token test vocabulary). The fix takes the first in-range lane with positive mass, then the last
+positive residual lane, then the last positive target lane. The DFLASH selector walk clamped a coin past the end of
+its scan to the last candidate, which can have q = 0; the fix takes the last candidate with q > 0. SGLang PR #51681
+(DSpark Markov sampler) and PR #51692 (blockwise rejection, not on the recipe's path) are carried verbatim. None of
+these changes the law in exact arithmetic. Block verification on DFLASH is enabled only together with the `reject`
+fix.
+
+### Memory
+
+The drafter's KV is a fixed ~2.16 GB ring over its window instead of a per-token draft lane, so the packed store holds
+more global-layer tokens at the same fraction than with DSpark. Box B, `MEM_FRACTION=0.89`, `CTX=262144`:
+2,371,584-2,416,896 tokens across boots, MemAvailable 4.5-5.5 GiB when the API is ready, 4.9 GiB at worst with thinking
+c24 (48 x 2,048 tokens) alongside a cold 240K needle (guard floor 3.5 GiB); start-up 131-275 s. In development,
+`MEM_FRACTION=0.90` gave 2.42M tokens with 4.6 GiB at worst. Above `CTX=262144` the release keeps 0.85 (larger
+prefill scratch) until measured.
+
+### Folded in
+
+v2.7.3 and v2.7.4 were not released separately: `RSFIX=1` in both profiles; for `SPEC=dspark`, `hotbase` (compact
+hot-vocabulary base logits inside the captured Markov walk, bit-identical step logits and tokens) and
+`RNNHOIST_MAX_BS=32` (the Markov-walk hoist for up to 32 rows; c17-c32 drafts change by FP32 order, proposals only).

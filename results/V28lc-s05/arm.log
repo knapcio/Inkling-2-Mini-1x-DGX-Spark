@@ -1,0 +1,17 @@
+2026-11-24T14:09:03Z V28lc-s05 mode warm
+V28lc-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 67.55, "geomean_tok_s": 70.28, "aggregate_tok_s": 69.16, "median_ttft_ms": 161.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 40.52, "median_tokens_per_step": 2.718, "steps_source": "response", "median_accept_rate": 0.2503, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.052, "drift_pct_all": 0.052}}
+wrote results/V28lc-s05/warm-sbquick.json (1.4 min)
+2026-11-24T14:10:30Z V28lc-s05 mode lc32
+V28lc-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32699    6.372      5131.7      0.262        None      63.1 [57.7, 69.0]        48.259    3.097
+128K     130840   35.234     3713.5      0.448        None      50.2 [38.1, 66.1]        58.984    2.682
+wrote results/V28lc-s05/longctx-lc32.json (5.2 min)
+2026-11-24T14:15:41Z V28lc-s05 mode pf
+V28lc-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1K       1002.0   0.364      2752.7      0.232        None      -                        -         -
+8K       8144.0   1.513      5382.7      0.248        None      -                        -         -
+32K      32705.0  6.434      5083.2      0.266        None      59.9 [53.9, 66.5]        -         -
+128K     130924.0 35.022     3738.3      17.632       None      49.7 [39.5, 62.5]        -         -
+wrote results/V28lc-s05/longctx.json (3.3 min)

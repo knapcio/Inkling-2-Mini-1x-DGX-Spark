@@ -24,7 +24,7 @@ def server_args(**kw):
 
 def kvc(local=(0, 2), layers=3):
     hf = SimpleNamespace(local_layer_ids=list(local), num_hidden_layers=layers)
-    return SimpleNamespace(is_draft_worker=False,
+    return SimpleNamespace(is_draft_worker=False, spec_algorithm=SimpleNamespace(is_dspark=lambda: True),
                            spec_aux_config=SimpleNamespace(draft_model_config=SimpleNamespace(hf_config=hf)))
 
 
@@ -368,3 +368,62 @@ class CapturedScratchTests(unittest.TestCase):
         self.assertFalse(bool(fits))
         self.assertEqual(int(stable.abs().sum()), 0)
         self.assertTrue(bool((small.buffer == 77).all()))
+
+
+class DFlashTests(unittest.TestCase):
+    def test_dflash_verify_is_settled_and_extends_are_not(self):
+        settled = []
+        lane = SimpleNamespace(settle=lambda ids, commit: settled.append((ids.tolist(), commit.tolist())))
+        view = SimpleNamespace(is_inkling_kv12s=True, owned_layers=(lane, lane))
+        pool = SimpleNamespace(full_kv_pool=view)
+
+        class DFlashWorkerV2:
+            block_size = 4
+            _hosts_draft = True
+
+            def __init__(self):
+                self.target_worker = SimpleNamespace(model_runner=SimpleNamespace(token_to_kv_pool=pool))
+                self._draft_verify_out_cache_loc_buf = torch.arange(3 * 4).reshape(3, 4) + 256
+
+            def forward_batch_generation(self, batch, on_publish=None, grammar_barrier=None, pp_proxy_tensors=None):
+                # prepare_for_verify switches the batch to TARGET_VERIFY, an extend mode.
+                batch.forward_mode = SimpleNamespace(is_extend=lambda: True, is_idle=lambda: False)
+                return SimpleNamespace(accept_lens=torch.tensor([2, 1], dtype=torch.int32))
+
+        def batch(extend=False, idle=False):
+            mode = SimpleNamespace(is_extend=lambda: extend, is_idle=lambda: idle)
+            return SimpleNamespace(forward_mode=mode, is_extend_in_batch=False, reqs=[])
+
+        hooks._register_dflash(SimpleNamespace(DFlashWorkerV2=DFlashWorkerV2))
+        worker = DFlashWorkerV2()
+        with patch("inkling_kv12s.pressure.GUARD", []):
+            worker.forward_batch_generation(batch())
+            worker.forward_batch_generation(batch(extend=True))
+            worker.forward_batch_generation(batch(idle=True))
+        rows = [[256, 257, 258, 259], [260, 261, 262, 263]]
+        self.assertEqual(settled, [(rows, [2, 1]), (rows, [2, 1])])
+
+    def test_dflash_is_accepted_only_on_static_pools(self):
+        memory = SimpleNamespace(enable_flexkv=False, radix_cache_backend=None)
+        with patch.object(hooks, "_POOL", "static"):
+            hooks._check_cache_selectors(memory, "DFLASH", None)
+            with self.assertRaises(IncompatibleImage):
+                hooks._check_cache_selectors(memory, "EAGLE", None)
+        with patch.object(hooks, "_POOL", "unified"), self.assertRaises(IncompatibleImage):
+            hooks._check_cache_selectors(memory, "DFLASH", None)
+
+    def test_a_dflash_draft_ring_keeps_stock_pricing(self):
+        cls = SizingTests._configurator(SizingTests())
+        ring = SimpleNamespace(is_draft_worker=False, spec_algorithm=SimpleNamespace(is_dspark=lambda: False))
+
+        class Ring(cls):
+            def __init__(self, kvc):
+                super().__init__(kvc)
+                self._draft_cell_size = 0  # the ring is a fixed charge
+                self._recompute_cell_size()
+
+        with patch.dict(sys.modules, runtime(server_args())):
+            hooks._register_static_sizing(SimpleNamespace(HybridSWAPoolConfigurator=Ring))
+            target = Ring(ring)
+        self.assertEqual((target._draft_cell_size, target._draft_swa_cell_size), (0, 0))
+        self.assertEqual(target._full_cell_bytes(), 8 * 3108 + 1)

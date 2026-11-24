@@ -1,0 +1,9 @@
+2026-11-24T13:51:53Z V28kv-s06 mode warm
+V28kv-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 67.32, "geomean_tok_s": 70.17, "aggregate_tok_s": 69.05, "median_ttft_ms": 163.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 40.54, "median_tokens_per_step": 2.718, "steps_source": "response", "median_accept_rate": 0.2503, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.654, "drift_pct_all": -0.654}}
+wrote results/V28kv-s06/warm-sbquick.json (1.7 min)
+2026-11-24T13:53:33Z V28kv-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 92.9, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-24T13:58:00Z V28kv-s06 mode nd128
+needle 128K                  PASS  {"prompt_tokens": 128023, "seconds": 35.2, "expected": "JUNIPER-COBALT-2002", "answer": "JUNIPER-COBALT-2002"}
+1 / 1 passed

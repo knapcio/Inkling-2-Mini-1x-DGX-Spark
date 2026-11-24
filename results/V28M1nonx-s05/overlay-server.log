@@ -1,0 +1,21 @@
+[inkling_kv12s pid=1] enabled packed-only global KV
+[inkling_dfbytes pid=1] armed: mx8,hot8 (hot set: first 65536 ids)
+[inkling_kv12s pid=129] enabled packed-only global KV
+[inkling_dfbytes pid=129] armed: mx8,hot8 (hot set: first 65536 ids)
+[inkling_kv12s pid=130] enabled packed-only global KV
+[inkling_kv12s pid=128] enabled packed-only global KV
+[inkling_dfbytes pid=130] armed: mx8,hot8 (hot set: first 65536 ids)
+[inkling_dfbytes pid=128] armed: mx8,hot8 (hot set: first 65536 ids)
+[inkling_cert pid=129] wide certified packed head armed (17–128 rows, compact capacity 2048 tiles)
+[inkling_cert pid=129] active (mode 1): 6-bit screen of the [201024x2304] head, 357.8 MB read per certified step (pico's coded head: 715.1 MB), eps 2.82 %; patched unquant.sm12x_fp32_lm_head (outside inkling_pico12), DecodeCudaGraphRunner.execute, DecodeCudaGraphRunner._process_output_after_replay (DFLASH wide IDs), TpModelWorker.forward_batch_generation (DFLASH verify arming), Inkling2LogitsProcessor._get_logits, Inkling2ForConditionalGeneration.post_load_weights; ext reused in 0.0 s; tables 2.1 s; wk=16
+[inkling_dfbytes pid=129] mx8: 30 drafter linears [(576, 2304), (2304, 4096), (2304, 6912), (6144, 2304), (13824, 2304)] -> 381.7 MB MXFP8
+[inkling-vcap] DFLASH attached: mode=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json min=1 max=width bsmax=8 remap=on fused=on union=off log_every=0 capping=on block_verification=on bv_mask=on fused_remap=on (self-check passed) stride=8 capacity=48 top_k=16 moe_layers=24 steplog_run=-; patched: Inkling2MoE.forward, Inkling2Gate.forward, DFlashWorkerV2.__init__, DFlashWorkerV2._stage_draft_sampler, DFlashWorkerV2._plan_verify, DFlashWorkerV2._accept_block, DFlashWorkerV2.forward_batch_generation, DFlashWorkerV2._selector_sampling_accept, selector.sample_path (instance)
+[2026-11-24 13:44:45 PID129] inkling_kv12s: static sizing: 2.67 GiB fixed packed bytes, 30927 B per full token
+[2026-11-24 13:44:48 PID129] inkling_kv12s: static packed store, 8 visits x 18754 pages, 24864 B/token, 194 staging slots per visit, prefix scratch 2113 pages
+[inkling_dfbytes pid=129] hot plane: 65536 of 200058 ids, FP8 row 151.3 MB
+[2026-11-24 13:46:11 PID129] inkling_kv12s: side-slot high water per visit: stage 1 of 194, overflow 0 of 2048, fallback 0 of 64
+[inkling_cert pid=129] steps certified 314 (tiles/step 70.8), not certifiable 0, not eligible 1687
+[2026-11-24 13:50:34 PID129] inkling_kv12s: side-slot high water per visit: stage 3 of 194, overflow 0 of 2048, fallback 0 of 64
+[inkling_cert pid=129] steps certified 2314 (tiles/step 56.1), not certifiable 0, not eligible 1687
+[2026-11-24 13:50:57 PID129] inkling_kv12s: side-slot high water per visit: stage 7 of 194, overflow 0 of 2048, fallback 0 of 64
+[2026-11-24 13:52:13 PID129] inkling_kv12s: side-slot high water per visit: stage 8 of 194, overflow 0 of 2048, fallback 0 of 64

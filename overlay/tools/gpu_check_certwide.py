@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check and time the batched certified head in the GB10 SGLang image.
 
-Run from the track directory with the server stopped. For example:
+Run from overlay/ (or a development checkout's root) with the server stopped. For example:
   python3 tools/gpu_check_certwide.py --model /model --hidden /work/hid
   python3 tools/gpu_check_certwide.py --model /model --synthetic
   python3 tools/gpu_check_certwide.py --fixture-only
@@ -31,13 +31,13 @@ import numpy as np
 import torch
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "overlay"))
+sys.path.insert(0, str(ROOT if (ROOT / "inkling_cert").is_dir() else ROOT / "overlay"))  # overlay/ or a development checkout's root
 
 from inkling_cert import build as cert_build, cert_math as cm, certwide as cw, certwide_math as wm, quant
 from inkling_pico12 import build as pico_build, ops as pico
 from inkling_wide import build as wide_build, ops as wide
 
-ROWS = (24, 64, 128, 192)
+ROWS = tuple(int(r) for r in os.environ.get("CW_ROWS", "24,64,128,192").split(","))  # CW_ROWS: crossover sweep
 FIXTURE_ROWS = (17, 24, 33, 49, 64, 65, 97, 128, 129, 192)
 KEY = "model.llm.unembed.weight"
 REASON = {cw.CERTIFIED: "certified", cw.UNSAFE: "unsafe", cw.TOO_MANY: "too_many", cw.OFF: "off", cw.INVALID: "invalid"}

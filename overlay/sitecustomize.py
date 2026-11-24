@@ -63,6 +63,15 @@ try:
     if _on("INKLING_NOEXP"):  # dead verify rows get no experts (exact for live rows; needs INKLING_VERIFY_CAP)
         import inkling_noexp
         inkling_noexp.install()
+    if _on("INKLING_DFLASH_BYTES"):  # DFlash2 drafter byte cuts (draft-only; needs SPEC=dflash2, exclusive with DRAFT_BYTES)
+        import inkling_dfbytes
+        inkling_dfbytes.install()
+    if _on("INKLING_DFLASH_FUSED_ACCEPT"):  # DFLASH sampled accept from the logits with sparse q (same law)
+        import inkling_dfaccept
+        inkling_dfaccept.install()
+    if _on("INKLING_RSFIX"):  # exact residual / bonus lane rule (+ SGLang PR #51681 / #51692 fixes)
+        import inkling_rsfix
+        inkling_rsfix.install()
 except BaseException as exc:  # noqa: BLE001
     sys.stderr.write("[inkling-overlay pid=%d] FATAL at startup: %r\n" % (os.getpid(), exc))
     sys.stderr.flush()

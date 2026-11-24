@@ -105,5 +105,84 @@ class Routing(unittest.TestCase):
         self.assertEqual(calls, [1])  # no vcap state / not capturing: stock
 
 
+
+
+@unittest.skipIf(torch is None, "needs torch")
+class FusedMask(unittest.TestCase):
+    """The vcap-remap wrapper (one launch, masked ids as a side output) and its hand-off to _sm120_route."""
+
+    def setUp(self):
+        import unittest.mock as um
+
+        self.um = um
+        ne.STATE.update(applied=True, masked=None, fused_mask=0, calls=0, mask_ok=True)
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        fake = types.ModuleType("inkling_noexp._mask")
+
+        def remap_mask(w, i, src, ph):
+            m = i.shape[0]
+            live = src[:m] == torch.arange(m)
+            return w[src[:m]], i[src[:m]], torch.where(live[:, None], i[src[:m]], torch.full_like(i, ph))
+
+        fake.remap_mask = remap_mask
+        sys.modules["inkling_noexp._mask"] = fake
+        model = types.ModuleType(ne.MODEL_MODULE)
+        model.ROUTE_MAX_IDS = 4096
+        self._saved_model = sys.modules.get(ne.MODEL_MODULE)
+        sys.modules[ne.MODEL_MODULE] = model
+
+    def tearDown(self):
+        sys.modules.pop("inkling_noexp._mask", None)
+        if self._saved_model is None:
+            sys.modules.pop(ne.MODEL_MODULE, None)
+        else:
+            sys.modules[ne.MODEL_MODULE] = self._saved_model
+        ne.STATE.update(masked=None, mask_ok=None)
+
+    def obj(self, use_fused=True):
+        return types.SimpleNamespace(stride=8, src_index=torch.tensor([0, 1, 1, 1, 1, 1, 1, 1]),
+                                     use_fused=use_fused, remap_recorded=0)
+
+    def test_paths(self):
+        orig = lambda self, w, i: ("orig", w, i)  # noqa: E731
+        remap = ne.make_remap(orig)
+        w, i = torch.rand(8, 8), torch.arange(64).reshape(8, 8)
+        cap = self.um.patch.object(torch.cuda, "is_current_stream_capturing", return_value=True)
+        dev = self.um.patch.object(ne, "_on_device", return_value=True)
+        with self.um.patch.object(torch.cuda, "is_current_stream_capturing", return_value=False), dev:
+            self.assertEqual(remap(self.obj(), w, i)[0], "orig")             # eager: vcap's remap
+        with cap, dev:
+            self.assertEqual(remap(self.obj(use_fused=False), w, i)[0], "orig")  # vcap fused off: vcap's remap
+            ne.STATE["mask_ok"] = None
+            self.assertEqual(remap(self.obj(), w, i)[0], "orig")             # mask self-check not passed
+            ne.STATE["mask_ok"] = True
+            o = self.obj()
+            ow, oi = remap(o, w, i)
+            self.assertEqual(o.remap_recorded, 1)
+            self.assertTrue(torch.equal(oi, i[o.src_index]))                 # the gate sees vcap's tensor
+            self.assertIs(ne.STATE["masked"][0], oi)
+            masked = ne.STATE["masked"][1]
+            self.assertEqual(masked[2:].unique().tolist(), [128])            # rows 2..7 dead (src 1)
+            self.assertTrue(torch.equal(masked[:2], i[:2]))
+        seen = {}
+
+        def route_metadata(flat, wf, start, nl, ne_):
+            seen.update(flat=flat.clone(), args=(start, nl, ne_))
+            return ("s2d", "d2s", "g", None, "off")
+
+        mod = types.SimpleNamespace(route_metadata=route_metadata, ROUTE_MAX_IDS=4096)
+        fn = ne.make_route(mod, lambda self, i, w: "stock")
+        host = types.SimpleNamespace(num_global_experts=128)
+        with self.um.patch.object(torch.cuda, "is_current_stream_capturing", return_value=True):
+            other = oi.clone()
+            ne.STATE["masked"] = (oi, masked)
+            self.assertNotEqual(fn(host, other, ow), ("s2d", "d2s", "g", "off"))  # another tensor: not served
+            ne.STATE["masked"] = (oi, masked)
+            self.assertEqual(fn(host, oi, ow), ("s2d", "d2s", "g", "off"))
+            self.assertEqual(seen["args"], (0, 128, 129))
+            self.assertTrue(torch.equal(seen["flat"], masked.flatten()))
+            self.assertIsNone(ne.STATE["masked"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # launch.sh up|down|status|logs: Inkling-2-Mini on one DGX Spark (GB10), one container.
 #
-#   scripts/launch.sh up                 # default profile: SGLang + DSpark (see README)
+#   scripts/launch.sh up                 # default profile: SGLang + the DFlash2 drafter (see README)
 #   ENGINE=vllm scripts/launch.sh up     # alternative profile: vLLM + DSpark
+#   SPEC=dspark scripts/launch.sh up     # fallback: the model's own DSpark draft (the v2.7.2 profile + the v2.8 exact fixes)
 #   scripts/launch.sh up --some-flag x   # extra engine flags are appended to the command line
 #   scripts/launch.sh status | logs | down
 #
@@ -37,7 +38,7 @@ LOAD_NOMMAP=${LOAD_NOMMAP:-1}                               # read the checkpoin
 OVERLAY=${OVERLAY:-1}
 OVERLAY_DIR=${OVERLAY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/overlay}
 VERIFY_CAP=${VERIFY_CAP:-policy:/opt/inkling-overlay/inkling_vcap/policies/r2-theta004.json,bsmax=16}  # verify-width policy (off = stock)
-DRAFT_BYTES=${DRAFT_BYTES:-gemv,fold8,head8,draftmx8,hotvocab:65536,wide8,w8tile,rnnhoist}  # draft-side byte cuts (empty = stock)
+DRAFT_BYTES=${DRAFT_BYTES:-gemv,fold8,head8,draftmx8,hotvocab:65536,hotbase,wide8,w8tile,rnnhoist}  # draft-side byte cuts (empty = stock)
 HOTVOCAB_FILE=${HOTVOCAB_FILE:-/opt/inkling-overlay/inkling_draftbytes/hotvocab/inkling2-mini-hot-r2.json}  # ranked draft vocabulary
 KERNELS=${KERNELS:-moe_tiles,qkvr_gemv}                     # target-side kernel choices (empty = stock)
 PREFILL=${PREFILL:-qkvr_split,bias_layout,quant_once,partial_bf16}  # exact prefill levers (empty = stock)
@@ -51,9 +52,79 @@ MOE2=${MOE2:-tiles}                                          # GB10 tile tables 
 VCAP_BV=${VCAP_BV:-1}                                       # block verification under the verify cap (exact; INKLING_VERIFY_CAP_BV=mask)
 VCAP_FASTPROBS=${VCAP_FASTPROBS:-1}                         # draft statistics / sampled accept q from one BF16 read (exact)
 VCAP_FUSED=${VCAP_FUSED:-1}                                 # sampled accept straight from the logits, >= 3 requests (exact)
+RSFIX=${RSFIX:-1}                                           # exact residual / bonus token rule in sampled verification (+ SGLang PR #51681 / #51692 fixes)
 NOEXP=${NOEXP:-1}                                           # dead verify rows get no experts under the verify cap (exact for live rows; inactive when the cap or its remap is off)
 KV12=${KV12:-1}                                             # global-layer KV also kept as packed 12-bit pages (exact; side pool)
-CERT_WIDE=${CERT_WIDE:-1}                                   # certified greedy LM head for 17-192-row verify batches (exact)
+CERT_WIDE=${CERT_WIDE:-1}                                   # certified greedy LM head for 17-128-row verify batches (exact; CERT_WIDE_MAX_ROWS)
+CERT_WIDE_MAX_ROWS=${CERT_WIDE_MAX_ROWS:-}                  # largest verify batch (rows) the certified wide head serves (empty = overlay default)
+CERT_WIDE_STATS=${CERT_WIDE_STATS:-0}                       # 1: log wide certified-head outcomes and union sizes per batch size (diagnostic)
+RNNHOIST_MAX_BS=${RNNHOIST_MAX_BS:-32}                      # draft rnnhoist row limit (v2.7.2: 16; 32 changes c17-c32 drafts by FP32 order)
+DFLASH_BYTES_USER=${DFLASH_BYTES+set}                       # SPEC=dflash2 drafter byte cuts: mx8 (MXFP8 layers), hot8 / hot16
+DFLASH_BYTES=${DFLASH_BYTES:-}                               # (hot-vocab candidates); unset = mx8,hot8 with SPEC=dflash2 + OVERLAY=1
+DFLASH_FUSED=${DFLASH_FUSED:-}                               # SPEC=dflash2: sampled accept from the logits with sparse q (inkling_dfaccept); unset = 1 with SPEC=dflash2 + OVERLAY=1
+DFLASH_HOT_N=${DFLASH_HOT_N:-}                               # hot-vocab size for hot8 / hot16 (empty = 65536)
+[[ $ENGINE == vllm && -z ${SPEC:-} ]] && SPEC=dspark   # the vLLM profile keeps the DSpark draft
+SPEC=${SPEC:-dflash2}                  # dflash2 (default: third-party DFlash2 drafter) | dspark (the model's own draft, v2.7.2 profile) | none
+DFLASH_BV=${DFLASH_BV:-1}                                    # SPEC=dflash2 + OVERLAY=1: block verification on sampled steps (exact with RSFIX)
+DFCAP_USER=${DFCAP+set}
+DFCAP=${DFCAP:-}                                             # SPEC=dflash2 verify-width cap; unset = the v2.8 policy with OVERLAY=1, off = full width
+DFLASH2_DIR=${DFLASH2_DIR:-$HOME/models/Inkling-2-Mini-DFlash2}   # scripts/download.sh --dflash2
+DFLASH2_REVISION=4f9088ea66c21f2b99ed657d1941c306b03e84d2           # incoai/Inkling-2-Mini-DFlash2
+DFLASH2_SHA256="14223ae2f3aa1d661da67cf0143ec33070d952a6e28a119e6cec64fcc0bebe50 sglang_inkling_dflash2.py
+d094e435eb939e01fca6297f637c5af35e3da4b552f8e1ab0a181cd278a1cefa config.json
+217980ab00d116693fa5946df7bbfd967caf5fac1f529afd541fbd470ddb54ee model.safetensors"
+# DFLASH_FUSED default (ABBA 2026-11-24, cap off: sampled c24 per-request decode +2.3 %, c8 unproven so batches below
+# 16 requests keep the stock accept (INKLING_DFLASH_FUSED_MIN_BS); calls with a verify-cap cutoff always do)
+[[ -n $DFLASH_FUSED ]] || { [[ $SPEC == dflash2 && $OVERLAY == 1 ]] && DFLASH_FUSED=1 || DFLASH_FUSED=0; }
+[[ $DFLASH_FUSED == 0 || ( $SPEC == dflash2 && $OVERLAY == 1 ) ]] || {
+  echo "DFLASH_FUSED applies to SPEC=dflash2 with OVERLAY=1 only" >&2; exit 2; }
+[[ -z $DFLASH_BYTES || ( $SPEC == dflash2 && $OVERLAY == 1 ) ]] || {
+  echo "DFLASH_BYTES applies to SPEC=dflash2 with OVERLAY=1 only" >&2; exit 2; }
+if [[ $SPEC == dflash2 ]]; then
+  # The DFLASH worker never calls the DSpark draft / verify overlays and the certified heads are armed by the
+  # DSpark verify epilogue: all off. The target-side kernels and RSFIX stay as configured. The draft KV is a
+  # ring over its 2,048-token window; the target's global KV is the packed store (KV12S=1, static pools) or,
+  # with KV12S=0, the stock BF16 pool (the KV12 side pool does not fit next to the draft at this fraction).
+  [[ $ENGINE == sglang ]] || { echo "SPEC=dflash2 needs ENGINE=sglang" >&2; exit 2; }
+  [[ ${KV12S_POOL:-static} == static ]] || { echo "SPEC=dflash2 needs KV12S_POOL=static" >&2; exit 2; }
+  KV12=0
+  VERIFY_CAP=off; DRAFT_BYTES=; VCAP_BV=0; VCAP_FASTPROBS=0; VCAP_FUSED=0; NOEXP=0;
+  # CERT_DFLASH=1: the certified head (<= 16 rows) on DFLASH greedy verify steps (inkling_cert/dflash.py); the wide
+  # head writes no logits on certified steps and stays off
+  # Defaults with the overlay (v2.8 ABBA 2026-11-24: mx8,hot8 speedbench quick +8.4 %, prose c1 +6.5 %;
+  # CERT_DFLASH +2.8 %, check mode 0 mismatches in 34,808 rows): DFLASH_BYTES=mx8,hot8, CERT_DFLASH=1
+  if [[ $OVERLAY == 1 ]]; then
+    [[ -n $DFLASH_BYTES_USER ]] || DFLASH_BYTES=mx8,hot8
+    CERT_HEAD=${CERT_DFLASH:-1}
+  else
+    CERT_HEAD=${CERT_DFLASH:-0}
+  fi
+  # CERT_WIDE_DFLASH=1: also the wide certified head (17..CERT_WIDE_MAX_ROWS rows); its IDs reach the DFLASH accept
+  # as target_predict (inkling_cert/dflash.py). On with the certified head (greedy hashes 30/30, code c8 +3 %,
+  # sampled verify graph unchanged: the unarmed pass replaces the stock softcap at the same bytes).
+  [[ $CERT_HEAD == 1 ]] && CERT_WIDE=${CERT_WIDE_DFLASH:-1} || CERT_WIDE=${CERT_WIDE_DFLASH:-0}
+  [[ $CERT_WIDE == 0 || $CERT_HEAD == 1 ]] || { echo "CERT_WIDE_DFLASH=1 needs CERT_DFLASH=1" >&2; exit 2; }
+  [[ $CERT_HEAD == 0 || $OVERLAY == 1 ]] || { echo "CERT_DFLASH needs OVERLAY=1" >&2; exit 2; }
+  [[ $PICO12 == *drafthead* ]] && { echo "PICO12 drafthead patches the DSpark draft head; drop it with SPEC=dflash2" >&2; exit 2; }
+  [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.85
+  # Full-width DFLASH capture (inkling_vcap/dfsteplog.py): STEPLOG=<label> writes
+  # $CACHE_DIR/steplog/<label>/dflash1-*.npz; measurement only (verification stays full width)
+  if [[ -n ${STEPLOG:-} ]]; then
+    [[ $OVERLAY == 1 ]] || { echo "STEPLOG needs OVERLAY=1 (the capture is an overlay)" >&2; exit 2; }
+    VERIFY_CAP=steplog
+  fi
+  # The verify cap on DFLASH. DFCAP = fixed:K | conf:T | dfpolicy:/opt/inkling-overlay/...json (+ ,bsmax=N);
+  # DFCAP_NOEXP=1: dead rows get no experts (inkling_noexp); DFCAP_BV=1: block verification (sparse-q mask).
+  if [[ -z $DFCAP_USER && $OVERLAY == 1 && -z ${STEPLOG:-} ]]; then
+    DFCAP=dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF1-sm.json,bsmax=8
+  fi
+  [[ $DFCAP == off ]] && DFCAP=
+  if [[ -n ${DFCAP:-} ]]; then
+    [[ $OVERLAY == 1 ]] || { echo "DFCAP needs OVERLAY=1" >&2; exit 2; }
+    [[ -z ${STEPLOG:-} ]] || { echo "DFCAP and STEPLOG are exclusive (the capture is full width)" >&2; exit 2; }
+    VERIFY_CAP=$DFCAP; NOEXP=${DFCAP_NOEXP:-1}; VCAP_BV=${DFCAP_BV:-$DFLASH_BV}
+  fi
+fi
 KV12S_DEFAULT=${KV12S_DEFAULT:-1}                           # packed global KV store default for the SGLang overlay profile
 if [[ -z ${KV12S:-} ]]; then                                # vLLM and OVERLAY=0 never default to KV12S
   if [[ $ENGINE == sglang && $OVERLAY == 1 ]]; then KV12S=$KV12S_DEFAULT; else KV12S=0; fi
@@ -79,7 +150,6 @@ KV12_SLOTS=${KV12_SLOTS:-2048}                              # packed side-pool p
 SCODES=${SCODES:-1}                                          # NVFP4 expert scale codes: 5-bit codes + row base, expanded in the GEMM (exact)
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
 MOE_TILES=${MOE_TILES:-1@2304:swap_ab=1,tile_n=32,tile_k=256;1@1152:swap_ab=1,tile_n=32,tile_k=256;8@2304:swap_ab=1,tile_n=32,tile_k=256;8@1152:swap_ab=1,tile_n=32,tile_k=256;64@2304:swap_ab=0,tile_n=64,tile_k=256;64@1152:swap_ab=1,tile_n=32,tile_k=256}
-SPEC=${SPEC:-dspark}                   # dspark | none
 SGLANG_ARGS=${SGLANG_ARGS:-}
 # vLLM profile
 GPU_UTIL=${GPU_UTIL:-0.80}
@@ -91,6 +161,7 @@ case $cmd in
   down)
     docker stop "$NAME" >/dev/null 2>&1 || true
     docker rm "$NAME" >/dev/null 2>&1 || true
+    for _ in $(seq 60); do docker ps -aq --filter "name=^${NAME}$" | grep -q . || break; sleep 1; done  # wait for --rm removal
     pkill -f "memguard.sh $NAME " 2>/dev/null || true
     echo "stopped $NAME"; exit 0 ;;
   status)
@@ -113,7 +184,13 @@ if [[ $KV12S == 1 ]]; then
     # The packed store replaces the global BF16 pool and the KV12 side copy; with the draft's
     # window lanes priced per window token (static.DRAFT_WINDOW_LANES), 0.89 sizes ~2.19M
     # tokens and keeps the kvstress worst case above the 3.5 GiB guard (prefill graphs kept).
-    [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.89
+    # With SPEC=dflash2 the draft is a fixed 2.16 GB ring: 0.89 sizes ~2.38M tokens (measured: 0.90 gave 2.42M
+    # with the kvstress worst case at 4.6 GiB, guard 3.5); contexts above 256K keep 0.85 (their prefix scratch
+    # is larger) until measured.
+    if [[ $SPEC == dflash2 ]]; then
+      if (( CTX > 262144 )); then [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.85
+      else [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.89; fi
+    else [[ -n $MEM_FRACTION_USER ]] || MEM_FRACTION=0.89; fi
     # ~79K window tokens, as v2.7 and v2.7.1 (48 requests' windows plus an 8K chunk).
     [[ -n $SWA_RATIO_USER ]] || SWA_RATIO=0.037
     kv12s_args=(--max-running-requests 48 --cuda-graph-max-bs-decode=48)
@@ -134,12 +211,25 @@ fi
 if [[ -f $MODEL_DIR/.revision && $(cat "$MODEL_DIR/.revision") != "$MODEL_REVISION" ]]; then
   echo "warning: $MODEL_DIR is revision $(cat "$MODEL_DIR/.revision"), this recipe was measured on $MODEL_REVISION" >&2
 fi
+if [[ $SPEC == dflash2 ]]; then
+  # Every file SGLang reads from the drafter directory is checked on every launch, and nothing else may be there
+  # (stock DFLASH would load an extra mask_embedding.pt into the live target embedding).
+  [[ $(cat "$DFLASH2_DIR/.revision" 2>/dev/null) == "$DFLASH2_REVISION" ]] || {
+    echo "no DFlash2 drafter at revision $DFLASH2_REVISION in $DFLASH2_DIR (scripts/download.sh --dflash2)" >&2; exit 1; }
+  extra=$(cd "$DFLASH2_DIR" && ls -A | grep -vxE 'config\.json|model\.safetensors|sglang_inkling_dflash2\.py|README\.md|\.revision' || true)
+  [[ -z $extra ]] || { echo "unexpected files in $DFLASH2_DIR: $extra" >&2; exit 1; }
+  (cd "$DFLASH2_DIR" && printf '%s\n' "$DFLASH2_SHA256" | sed 's/ /  /' | sha256sum -c --quiet -) || {
+    echo "DFlash2 drafter files in $DFLASH2_DIR do not match the pinned sha256" >&2; exit 1; }
+fi
 if docker ps --format '{{.Names}}' | grep -qx "$NAME"; then
   echo "$NAME is already running (scripts/launch.sh down first)" >&2; exit 1
 fi
 # One model server per Spark: unified memory is shared by the GPU and the OS.
 others=$(docker ps --format '{{.Names}} {{.Image}}' | grep -Ei 'sglang|vllm|tensorrt|llama|ollama' || true)
 [[ -z $others ]] || { echo "another model server is running, stop it first:"$'\n'"$others" >&2; exit 1; }
+avail=$(awk '/MemAvailable/ {print int($2/1048576)}' /proc/meminfo)
+(( avail > ${MIN_AVAIL_GIB%.*} + 8 )) || {
+  echo "MemAvailable is ${avail} GiB: free memory first (another process, the page cache of a download)" >&2; exit 1; }
 docker rm "$NAME" >/dev/null 2>&1 || true
 mkdir -p "$CACHE_DIR"
 
@@ -154,18 +244,44 @@ if [[ $ENGINE == sglang ]]; then
   spec=()
   [[ $SPEC == dspark ]] && spec=(--speculative-algorithm DSPARK --speculative-num-draft-tokens 8)
   [[ $SPEC == dspark && $OVERLAY == 1 && $VCAP_BV == 1 ]] && spec+=(--speculative-use-block-verification)
+  entry=(--entrypoint python3 "$SGLANG_IMAGE")
+  if [[ $SPEC == dflash2 ]]; then
+    spec=(--speculative-algorithm DFLASH --speculative-draft-model-path /draft --speculative-num-draft-tokens 8
+          --speculative-draft-attention-backend fa4)
+    # block verification: the stock flag; under the cap the overlay's sparse-q mask (INKLING_VERIFY_CAP_BV)
+    # (exact only with the RSFIX reject fix: without it block verification stays off)
+    rsfix_reject=0; [[ $OVERLAY == 1 && ( $RSFIX == 1 || $RSFIX == *reject* ) ]] && rsfix_reject=1
+    if [[ -n ${DFCAP:-} ]]; then [[ $VCAP_BV == 1 && $rsfix_reject == 1 ]] && spec+=(--speculative-use-block-verification)
+    else [[ $DFLASH_BV == 1 && $rsfix_reject == 1 ]] && spec+=(--speculative-use-block-verification); fi
+    [[ $rsfix_reject == 1 ]] || VCAP_BV=0
+    # CTX and DFLASH2_DIR are the inputs the memory budget and the sha256 check were made for
+    for a in "$@"; do case $a in --context-length*|--speculative-draft-model-path*)
+      echo "with SPEC=dflash2 set CTX / DFLASH2_DIR instead of $a" >&2; exit 2;; esac; done
+    # The drafter's SGLang compatibility patch rewrites installed sglang files, so it runs inside this container
+    # only (--rm: it never outlives the run), before the server starts; the server log is also kept in CACHE_DIR.
+    # The pinned sha256 is checked again inside the container, on the read-only mount the patch and weights load from.
+    entry=(--rm -e SGLANG_ENABLE_DFLASH_DRAFT_KV_RING=1 -e DFLASH2_SHA256="$DFLASH2_SHA256" -v "$DFLASH2_DIR":/draft:ro
+           --entrypoint bash "$SGLANG_IMAGE"
+           -c 'mkdir -p /root/.cache/dflash2-logs; exec > >(tee -a /root/.cache/dflash2-logs/server-$(date -u +%Y%m%dT%H%M%SZ).log) 2>&1
+               (cd /draft && printf "%s\n" "$DFLASH2_SHA256" | sed "s/ /  /" | sha256sum -c --quiet -) || {
+                 echo "DFlash2 drafter files do not match the pinned sha256" >&2; exit 1; }
+               python3 -I /draft/sglang_inkling_dflash2.py && exec python3 "$@"' dflash2)
+  fi
   ov=()
   if [[ $OVERLAY == 1 ]]; then
     [[ -f $OVERLAY_DIR/sitecustomize.py ]] || { echo "OVERLAY=1 but no overlay at $OVERLAY_DIR" >&2; exit 1; }
     ov=(-v "$OVERLAY_DIR":/opt/inkling-overlay:ro -e PYTHONPATH=/opt/inkling-overlay
         -e INKLING_VERIFY_CAP="$VERIFY_CAP" -e INKLING_VERIFY_CAP_LOG_EVERY="${VERIFY_CAP_LOG_EVERY:-0}"
+        -e INKLING_VERIFY_CAP_STEPLOG="${STEPLOG:+/root/.cache/steplog/$STEPLOG}" -e INKLING_VERIFY_CAP_REMAP="${DFCAP_REMAP:-1}"
         -e INKLING_DRAFT_BYTES="$DRAFT_BYTES" -e INKLING_DRAFT_HOTVOCAB_FILE="$HOTVOCAB_FILE" -e INKLING_KERNELS="$KERNELS" -e INKLING_MOE_TILES="$MOE_TILES"
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
         -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
-        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP"
+        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
-        -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_KV12S="$KV12S" -e INKLING_KV12S_OVERFLOW_HEADS="$KV12S_OVERFLOW_HEADS"
+        -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"
+        -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"
+        -e INKLING_KV12S="$KV12S" -e INKLING_KV12S_OVERFLOW_HEADS="$KV12S_OVERFLOW_HEADS"
         -e INKLING_KV12S_FALLBACK_PAGES="$KV12S_FALLBACK_PAGES" ${kv12s_env[@]+"${kv12s_env[@]}"})
   fi
   run=("${common[@]}" ${ov[@]+"${ov[@]}"}
@@ -176,7 +292,7 @@ if [[ $ENGINE == sglang ]]; then
        -e SGLANG_OPT_DSV41_DSPARK_SKIP_PREFILLED_INPUTS=1
        ${SGLANG_ENV:-}
        ${nommap_env[@]+"${nommap_env[@]}"}
-       --entrypoint python3 "$SGLANG_IMAGE"
+       "${entry[@]}"
        -m sglang.launch_server --model-path /model --served-model-name "$SERVED"
        --tp 1 --ep 1 --attention-backend fa4 --dtype bfloat16 --page-size 128
        ${spec[@]+"${spec[@]}"} ${kv12s_args[@]+"${kv12s_args[@]}"}

@@ -14,7 +14,7 @@ import sys
 import tempfile
 import time
 
-_ROOT = Path(__file__).resolve().parents[1]  # overlay/ in the release, the track root in development
+_ROOT = Path(__file__).resolve().parents[1]  # overlay/ in the release, the package root in a development checkout
 sys.path.insert(0, str(_ROOT if (_ROOT / "inkling_kv12s").is_dir() else _ROOT / "overlay"))
 
 import torch
