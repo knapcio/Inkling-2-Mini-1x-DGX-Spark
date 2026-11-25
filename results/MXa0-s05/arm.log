@@ -1,0 +1,22 @@
+2026-11-25T00:20:46Z MXa0-s05 mode warm
+MXa0-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.83, "geomean_tok_s": 73.33, "aggregate_tok_s": 71.12, "median_ttft_ms": 164.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.12, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.457, "drift_pct_all": -0.457}}
+wrote results/MXa0-s05/warm-sbquick.json (1.4 min)
+2026-11-25T00:22:11Z MXa0-s05 mode sbf
+MXa0-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.88, "geomean_tok_s": 73.13, "aggregate_tok_s": 71.19, "median_ttft_ms": 164.3, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.57, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.297, "drift_pct_all": -0.297}}
+wrote results/MXa0-s05/speedbench.json (4.9 min)
+2026-11-25T00:27:03Z MXa0-s05 mode dtp
+prose      c1  aggregate    65.5 tok/s  per-stream   65.9  ttft 0.188 s  failed 0
+prose      c4  aggregate   137.8 tok/s  per-stream   36.7  ttft 0.337 s  failed 0
+prose      c8  aggregate   199.8 tok/s  per-stream   27.8  ttft 0.403 s  failed 0
+prose      c16 aggregate   293.7 tok/s  per-stream   20.1  ttft 0.487 s  failed 0
+code       c1  aggregate    73.3 tok/s  per-stream   78.7  ttft 0.195 s  failed 0
+code       c4  aggregate   140.4 tok/s  per-stream   38.5  ttft 0.335 s  failed 0
+code       c8  aggregate   208.1 tok/s  per-stream   29.8  ttft 0.359 s  failed 0
+code       c16 aggregate   303.5 tok/s  per-stream   21.2  ttft 0.499 s  failed 0
+wrote results/MXa0-s05/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 65.9 | 137.8 (36.7) | 199.8 (27.8) | 293.7 (20.1) |
+| code | 78.7 | 140.4 (38.5) | 208.1 (29.8) | 303.5 (21.2) |
+2026-11-25T00:29:46Z MXa0-s05 mode think8
+2026-11-25T00:31:35Z MXa0-s05 mode think24

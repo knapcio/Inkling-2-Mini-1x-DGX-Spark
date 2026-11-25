@@ -5,14 +5,14 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-25, v2.8.3):** basic tests on one box; full two-box qualification follows in v2.8.x.
+**Status (2026-11-25, v2.8.4):** basic tests on one box; full two-box qualification follows in v2.8.x.
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.
 `scripts/launch.sh` checks the drafter's sha256 on the host and again inside the container on every start, and the
 drafter's SGLang compatibility patch runs only inside the throwaway (`--rm`) serving container. Twenty-two overlay
-packages (`overlay/`; one prefill package ships opt-in) run on top of it by default: drafter byte cuts (MXFP8 drafter layers, an FP8 64K hot-vocabulary
-plane for the candidate projection), the prefix tail that keeps the drafter's window filled on prefix-cache hits
+packages (`overlay/`; one prefill package ships opt-in) run on top of it by default: drafter byte cuts (MXFP8 drafter layers, since v2.8.4 on FlashInfer's MXFP8 GEMM where
+the shapes allow, and an FP8 64K hot-vocabulary plane for the candidate projection), the prefix tail that keeps the drafter's window filled on prefix-cache hits
 (v2.8.1, see "Prefix tail"), the certified greedy LM head on verify steps, the packed 12-bit global KV store,
 the exact sampled-verification fixes, block verification and a fused accept on sampled steps, a calibrated
 verify-width cap with dead-row expert skip (v2.8.2: priced separately for greedy and sampled requests, with a context
@@ -31,14 +31,13 @@ work, `SPEC=dspark` is the faster choice.
 
 Basic tests on one box; full two-box qualification follows in v2.8.x. The current column is one GB10 Spark on
 2026-11-24 with the release defaults (`SPEC=dflash2`, verify-width cap on, `CTX=262144`); the stock and v2.7.2
-columns are the earlier two-box medians. Cells marked v2.8.3 were measured on the v2.8.3 release defaults; the
-others are the v2.8.2, v2.8.1 or v2.8 runs. v2.8.3 changes concurrent decode (padding rows) and prefill (the
-prologue).
+columns are the earlier two-box medians. Cells marked v2.8.4 were measured on the v2.8.4 release defaults; the
+others are the v2.8.3, v2.8.2, v2.8.1 or v2.8 runs. v2.8.4 changes only the drafter's own GEMMs (draft proposals).
 
-| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.8.3)** |
+| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.8.4)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
-| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **72.90** (v2.8.3; v2.8.2: 72.78-72.82) |
+| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.53** (v2.8.4, box A; v2.8.3 on box B: 72.90) |
 | decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **65.1 / 140.5 / 203.5 / 288.3** |
 | decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **79.0 / 141.6 / 211.3 / 298.2** |
 | thinking c8 / c24, aggregate tok/s (48 x 2,048 tokens, effort high, T=0.8) | - | 235.3 / 438.8 | **277.4 / 515.5** (v2.8) |
@@ -46,7 +45,7 @@ prologue).
 | cold prefill, 8K tokens, tok/s | 3,399 | 5,439 | **5,553** (v2.8.3; v2.8.2: 5,527) |
 | decode at 32K / 128K context, c1, tok/s (512 tokens) | 55.1 / 37.1 | 71.9 / 49.0 (one box) | **66.05 / 50.91** (v2.8.2 policy, box A) |
 | KV pool, global-layer tokens | 843K | 2.13-2.17M | **2,352,000** (v2.8.3, `MEM_FRACTION=0.88`) |
-| MemAvailable after start / worst case (thinking c24 + cold 240K needle) | ~40 GiB / - | 6.4-7.7 / 5.4 GiB | **4.5-5.5 (v2.8.1) / 5.3 GiB** (v2.8.3, lowest of 4 runs) |
+| MemAvailable after start / worst case (thinking c24 + cold 240K needle) | ~40 GiB / - | 6.4-7.7 / 5.4 GiB | **4.5-5.5 (v2.8.1) / 4.8 GiB** (v2.8.4, box A; v2.8.3 on box B: 5.3 GiB) |
 
 Speedbench full (73 prompts x 256 tokens) is the release-to-release comparison; quick (30 prompts x 160 tokens) is a
 different prompt set and length, used here for the cap on / off screens (the stock cell is the stock engine's screen on
@@ -75,7 +74,10 @@ decode tokens). Decode tok/s, geometric mean per category; 0 failed prompts.
 
 | | prose | code | structured | agentic | multilingual | long context | all 73 prompts |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **v2.8.3** (box B, release defaults) | **65.02** | 81.56 | 77.63 | 83.28 | 57.65 | 72.99 | **72.90** |
+| **v2.8.4** (box A, release defaults) | **65.75** | 82.46 | 77.73 | 83.69 | 58.01 | 74.20 | **73.53** |
+| v2.8.4 drafter MXFP8 GEMM on, mean of two runs (box A) | 65.97 | 82.73 | 78.03 | 83.97 | 58.24 | 74.46 | 73.78 |
+| the same, off (v2.8.3 defaults), mean of two runs (box A) | 65.14 | 81.58 | 77.57 | 83.32 | 57.70 | 72.96 | 72.93 |
+| v2.8.3 (box B, release defaults) | 65.02 | 81.56 | 77.63 | 83.28 | 57.65 | 72.99 | 72.90 |
 | v2.8.2 (box B, two runs) | 64.99 / 64.96 | 81.52 / 81.43 | 77.62 / 77.56 | 83.32 / 83.21 | 57.63 / 57.56 | 72.15 / 72.94 | 72.78 / 72.82 |
 | v2.8.2 without the cap (box B) | - | - | - | - | - | 67.31 | 64.06 |
 | v2.8.2 with v2.8.1's cap policy (box B) | - | - | - | - | - | 73.05 | 72.42 |
@@ -85,6 +87,20 @@ decode tokens). Decode tok/s, geometric mean per category; 0 failed prompts.
 | v2.8 (box A) | 64.66 | 79.89 | 77.14 | 73.57 | 57.21 | 63.12 | 69.66 |
 | v2.7.2 (two-box median) | 53.6 | 72.1 | 68.0 | 76.7 | 43.7 | 75.1 | 63.8 |
 | stock engine | 32.6 | 48.0 | 44.3 | 49.3 | 25.3 | 51.0 | 40.6 |
+
+v2.8.4 is the release defaults on box A (`results/REL284-s05/`, one run, 73 prompts, 0 failed): median time to
+first token 164.8 ms, median step 39.27 ms, 2.833 tokens per step. The same-box reference with `mx8w` off is 73.13 /
+72.73 (`results/MXa0-s05/`, `results/MXb0-s05/`); v2.8.3's 72.90 was measured on box B, so the release rows of the two
+versions are not a like-for-like comparison. Per-stream decode in the release run: prose c1 / c4 / c8 / c16 66.7 /
+37.0 / 27.9 / 20.4, code 79.1 / 38.6 / 30.0 / 22.0 tok/s. Greedy outputs are identical to the `mx8w`-off run on 30 / 30
+prompts. The drafter's MXFP8 GEMM (`mx8w`) was
+measured as an ABBA on box A (`results/MXa0-s05/`, `results/MXa1-s05/`, `results/MXb1-s05/`, `results/MXb0-s05/`,
+off / on / on / off): all prompts 73.75 / 73.81 against 73.13 / 72.73 (+1.2 % on the means), median step 39.21 /
+39.22 ms against 39.57 / 39.91 ms; every category gains, long context most (+2.1 %), structured least (+0.6 %).
+Per-stream decode at c1: prose 66.7 / 66.9 against 65.9 / 65.7 (+1.4 %), code 79.4 / 79.5 against 78.7 / 78.8
+(+0.9 %); at c4-c16 mostly up but noisy (from code c8 -1.2 % to prose c4 +3.8 %); thinking per-request median c8
++1.8 %, c24 +2.4 %. It makes the drafter's own GEMMs faster; no acceptance change is claimed. Greedy outputs are identical with
+and without it on 30 / 30 prompts in every arm.
 
 v2.8.3 is the release defaults on box B (`results/REL283-s06/`, one run, 73 prompts, 0 failed): median time to
 first token 163.8 ms, median step 39.71 ms, 2.742 tokens per step. c1 decode is unchanged within the run-to-run
@@ -298,6 +314,10 @@ alongside a cold 240K needle: 5.0 GiB (5.7 / 5.0 / 5.9 / 6.4 GiB; `results/KVS28
 `results/PF282-s06/`, `results/REL282-s06/`; 48 / 48 requests completed, 343.8 / 341.8 tok/s aggregate), guard
 floor 3.5 GiB. At 0.89 (`results/KVS282c-s06/`) the guard stopped the server 25 s into that load at 3.3 GiB.
 
+v2.8.4 (box A, `results/MXkv-s05/`, release defaults with the drafter MXFP8 GEMM): lowest MemAvailable in the
+worst-case load 4.8 GiB (thinking c24 aggregate 345.8 tok/s; the release run `REL284`: 4.9 GiB), guard floor 3.5 GiB; KV pool unchanged (about 2.36M
+tokens on box A; the swizzled scales add 11.2 MB).
+
 v2.8.3 (box B, release defaults, `MEM_FRACTION=0.88`): global-layer KV pool 2,352,000 tokens; lowest MemAvailable in
 the same worst-case load 5.3 GiB (5.6 / 5.5 / 5.4 / 5.3 GiB; `results/KVS283a-s06/`, `results/KVS283b-s06/`,
 `results/PF283-s06/`, `results/REL283-s06/`; 48 / 48 requests completed, 340.1 / 357.4 tok/s aggregate), guard floor
@@ -307,7 +327,7 @@ The pool differs between boots at the same fraction because the memory left afte
 
 ### Quality checks
 
-- Needles with the passphrase at 50 % depth at 128K and 240K tokens: PASS on v2.8, v2.8.1, v2.8.2 and v2.8.3.
+- Needles with the passphrase at 50 % depth at 128K and 240K tokens: PASS on v2.8, v2.8.1, v2.8.2, v2.8.3 and v2.8.4.
 - Prefill levers: exactness gate (FP64 reference, near-tie check of greedy outputs, needles). The default set (sink
   gate and prologue) is bit-identical in serving: greedy outputs identical to the controls on 30 / 30 prompts,
   log-probabilities bit-equal over 4,691 tokens (a control repeat is also 30 / 30 bit-equal). With the opt-in hoist
@@ -377,7 +397,7 @@ quick: 30 prompts x 160 tokens, c1, T=0; decode table; thinking load; at long co
 | lever | switch (default) | effect, alone | output | credit |
 |---|---|---|---|---|
 | DFlash2 drafter: a 5-layer block-diffusion draft that proposes a block of 8 positions in one pass over a 2,048-token sliding window of target features (layer visits 5, 23, 41, 48), keeps 16 candidates per position, and a selector traces one path through them (7 drafts per verify step) | `SPEC=dflash2` (`--speculative-algorithm DFLASH`) | stock against stock DSpark: tokens per step x1.25, prose decode c1 / c4 / c8 / c16 +43 / +46 / +40 / +39 %, code x1.22-1.25, thinking c8 +19 % | draft proposals only; the target verifies every token | **incoai**, [Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2) and its SGLang compatibility patch (Apache-2.0); block-diffusion drafting from the **DFlash** authors ([z-lab/dflash](https://github.com/z-lab/dflash)); SGLang's DFLASH worker |
-| Drafter byte cuts: MXFP8 copies of the drafter's five layers' linears (the W8 kernels of the DSpark draft cuts), and an FP8 row-scaled copy of the target head restricted to the 65,536 most frequent ids for the selector's candidate projection (instead of the full 200,058-row BF16 head) | `DFLASH_BYTES=mx8,hot8`, `DFLASH_HOT_N` (65536) | speedbench quick +8.4 %, prose c1 +6.5 % (ABBA, one box) | draft proposals only (the selector's q is computed from the candidates the path is drawn from) | ours; the hot-vocabulary list is the v2.1 one (idea: FR-Spec, Zhao et al.) |
+| Drafter byte cuts: MXFP8 copies of the drafter's five layers' linears (the W8 kernels of the DSpark draft cuts); since v2.8.4 (`mx8w`) the 20 of 30 linears whose K and N are multiples of 128 run FlashInfer's stock b12x MXFP8 GEMM on the same MXFP8 bytes for 1-256 rows (activations quantised to MXFP8 per call; the 10 576-wide conv projections keep `mx8`); and an FP8 row-scaled copy of the target head restricted to the 65,536 most frequent ids for the selector's candidate projection (instead of the full 200,058-row BF16 head) | `DFLASH_BYTES=mx8,mx8w,hot8`, `DFLASH_HOT_N` (65536) | `mx8,hot8`: speedbench quick +8.4 %, prose c1 +6.5 % (ABBA, one box). `mx8w`: drafter linears 1.73-1.76x over BF16 cuBLAS (microbench), 0.33-0.36 ms faster than `mx8`'s GEMV at 8 / 16 rows; speedbench full +1.2 % (ABBA, box A) | draft proposals only (the selector's q is computed from the candidates the path is drawn from); greedy outputs identical 30 / 30 | ours; the hot-vocabulary list is the v2.1 one (idea: FR-Spec, Zhao et al.); `mx8w` runs **FlashInfer**'s b12x MXFP8 GEMM and quantiser |
 | Certified greedy LM head on DFLASH verify steps of <= 16 rows (c1 / c2): armed per step when the stock accept would take the plain argmax (no grammar, logprobs or logit adjustments) | `CERT_DFLASH=1` | c1 +2.8 % | identical argmax by construction (check mode: 34,808 rows, 0 mismatches) | ours (the v2 certified head, armed from the DFLASH worker) |
 | Certified greedy LM head for 17-192-row DFLASH verify batches: the certified token ids go straight to the DFLASH accept | `CERT_WIDE_DFLASH` (on with `CERT_DFLASH`) | code c8 +3 %, no regression elsewhere | greedy texts identical on 30 / 30 prompts; per-row proof | ours (the v2.7 wide certified head) |
 | Verify-width cap on DFLASH: per request and step, verify only the first L of the 8 rows; L grows left to right while the drafter's calibrated survival (per slot and selector-confidence bin, fitted on full-width DFLASH step logs) pays for the row; cut rows are remapped to the anchor row and get no experts at all. v2.8.2 policy `df-SLDF2x`: greedy and sampled requests are priced separately, with a context bucket; sampled requests verify all rows from 8 requests up, and a single greedy request at 64K tokens of context or more caps less; above 8 requests all rows are verified | `DFCAP` unset = `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8`, `DFCAP_NOEXP=1`, `DFCAP_REMAP=1`; `DFCAP=off` disables it | v2.8 stack, cap on vs off, box A: speedbench quick 62.49 -> 70.61 (+13.0 %); prose c1 / c4 / c8 +17.5 / +14.4 / +6.8 %, code +16.7 / +18.8 / +12.5 %; c16 not capped. `df-SLDF2x` against the v2.8.1 policy (box A, ABBA): speedbench quick 73.17 -> 73.75, decode at 32K 61.27 -> 66.05 (+7.8 %), c4 / c8 and 128K within noise | target distribution unchanged (a stopping rule on draft-side information; GPU Monte Carlo law test, chain and block verification, with wrong values on the cut rows); greedy texts differ only at near-ties (`df-SLDF2x`: 27 / 30 identical) | ours (port of the DSpark verify-width policy) |
@@ -573,7 +593,7 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   -e INKLING_ATTN=prefill_swa,prefill_global -e INKLING_PFUSE=all \
   -e INKLING_PFUSE_HOIST=0 -e INKLING_ATTN_GATE=1 -e INKLING_PROLOGUE=1 -e INKLING_MOE2=tiles -e INKLING_SCODES=1 \
   -e INKLING_VERIFY_CAP_FASTPROBS=0 -e INKLING_VERIFY_CAP_FUSED_ACCEPT=0 -e INKLING_NOEXP=1 -e INKLING_PADX=1 \
-  -e INKLING_DFLASH_BYTES=mx8,hot8 -e INKLING_DFLASH_HOT_N= \
+  -e INKLING_DFLASH_BYTES=mx8,mx8w,hot8 -e INKLING_DFLASH_HOT_N= \
   -e INKLING_DFLASH_PREFIX_TAIL=2048 -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT=4096 \
   -e INKLING_DFLASH_FUSED_ACCEPT=1 -e INKLING_RSFIX=1 \
   -e INKLING_KV12=0 -e INKLING_KV12_MAX_PAGES=2048 \
@@ -649,7 +669,7 @@ Profile and drafter switches:
 | `SPEC` | `dflash2` (`dspark` with `ENGINE=vllm`) | `dflash2`: the DFlash2 drafter; `dspark`: the model's own DSpark draft (v2.7.2 profile); `none`: no speculation |
 | `ENGINE` | `sglang` | `vllm`: the vLLM alternative profile (DSpark, no overlays) |
 | `DFLASH2_DIR` | `~/models/Inkling-2-Mini-DFlash2` | drafter directory; revision and sha256 checked on every start |
-| `DFLASH_BYTES` (`INKLING_DFLASH_BYTES`), `DFLASH_HOT_N` | `mx8,hot8` with the overlays, `65536` | drafter byte cuts: `mx8` MXFP8 drafter linears; `hot8` FP8 hot-vocabulary plane (first `DFLASH_HOT_N` ids of `HOTVOCAB_FILE`) for the selector's candidate projection; `hot16` the same in BF16; empty = stock drafter |
+| `DFLASH_BYTES` (`INKLING_DFLASH_BYTES`), `DFLASH_HOT_N` | `mx8,mx8w,hot8` with the overlays, `65536` | drafter byte cuts: `mx8` MXFP8 drafter linears; `mx8w` (needs `mx8`) FlashInfer's b12x MXFP8 GEMM on the same bytes for the linears whose K and N are multiples of 128, up to `INKLING_DFLASH_MX8W_MAX_M` (256) rows, E8M0 scales swizzled once (+11.2 MB); `hot8` FP8 hot-vocabulary plane (first `DFLASH_HOT_N` ids of `HOTVOCAB_FILE`) for the selector's candidate projection; `hot16` the same in BF16; empty = stock drafter |
 | `CERT_DFLASH` (`INKLING_CERT_HEAD`) | `1` with the overlays | certified greedy LM head on DFLASH verify steps of <= 16 rows; `check` serves the full head and counts mismatches; `0` = off. Needs `PICO12` with `lmhead` |
 | `CERT_WIDE_DFLASH` (`INKLING_CERT_WIDE`) | `1` with `CERT_DFLASH=1` | certified head for 17-192-row DFLASH verify batches; its token ids go straight to the DFLASH accept (needs `CERT_DFLASH=1`) |
 | `DFCAP` (`INKLING_VERIFY_CAP`) | `dfpolicy:/opt/inkling-overlay/inkling_vcap/policies/df-SLDF2x.json,bsmax=8` with the overlays | DFLASH verify-width cap: calibrated survival policy priced separately for greedy and sampled requests, with a context bucket (`theta_x`, `ctx_edges` 16,384 / 65,536); all 8 rows above 8 requests, and for sampled requests from 8 requests up; the v2.8.1 policy is `df-SLDF1-sm.json`; `fixed:K` and `conf:T` exist for measurement; `off` = full width |

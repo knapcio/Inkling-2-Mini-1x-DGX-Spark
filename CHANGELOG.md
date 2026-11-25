@@ -1,5 +1,37 @@
 # Changelog
 
+## v2.8.4 (2026-11-25)
+
+Basic tests on one box; full two-box qualification follows in v2.8.x.
+
+The drafter's MXFP8 linears run FlashInfer's MXFP8 GEMM where the shapes allow. Speedbench full +1.2 % in an ABBA on
+box A; greedy outputs identical. Release run (box A): speedbench full 73.53; the same box with `mx8w`
+off 73.13 / 72.73. Results (box A): `results/MXa0-s05/`,
+`results/MXa1-s05/`, `results/MXb1-s05/`, `results/MXb0-s05/`, `results/MXkv-s05/`, `results/REL284-s05/`.
+
+- `DFLASH_BYTES` default `mx8,hot8` -> `mx8,mx8w,hot8` (`inkling_dfbytes`). With `mx8w`, the 20 of the drafter's 30
+  linears whose K and N are multiples of 128 run FlashInfer's stock b12x MXFP8 GEMM (`mm_mxfp8` with
+  `mxfp8_quantize` for the activations) for 1-256 rows; the other 10 (the 576-wide conv projections) keep `mx8`. It
+  reuses `mx8`'s FP8 bytes, with the E8M0 scales swizzled once (+11.2 MB, no second FP8 copy). Draft proposals only:
+  under the lossless verification greedy output is unchanged (30 / 30 identical in every arm, no near-ties).
+- Microbench (the drafter's 30 layer linears, cold L2, one graph): 1.73-1.76x over BF16 cuBLAS (8 rows 3.33 ->
+  1.90 ms, 192 rows 4.05 -> 2.34 ms), 0.33-0.36 ms faster than `mx8`'s GEMV at 8 / 16 rows.
+- Serving ABBA, box A (off / on / on / off): speedbench full 73.75 / 73.81 on against 73.13 / 72.73 off (+1.2 % on the
+  means); median step 39.21 / 39.22 against 39.57 / 39.91 ms. Categories, on against off: long context 74.46 vs 72.96
+  (+2.1 %), code 82.73 vs 81.58 (+1.4 %), prose 65.97 vs 65.14 (+1.3 %), multilingual 58.24 vs 57.70 (+0.9 %),
+  agentic 83.97 vs 83.32 (+0.8 %), structured 78.03 vs 77.57 (+0.6 %). Per-stream decode at c1: prose 66.7 / 66.9
+  against 65.9 / 65.7 (+1.4 %), code 79.4 / 79.5 against 78.7 / 78.8 (+0.9 %); c4-c16 mostly up but noisy (code c8
+  -1.2 % to prose c4 +3.8 %); thinking per-request median c8 +1.8 %, c24 +2.4 %.
+- Memory (box A, release defaults with `mx8w`): lowest MemAvailable under the worst-case load 4.8 GiB (thinking c24
+  aggregate 345.8 tok/s; guard 3.5 GiB); needles at 128K and 240K PASS; KV pool unchanged (about 2.36M tokens on box
+  A).
+- Release run (box A, `results/REL284-s05/`, one run, 0 failed): speedbench full 73.53; prose 65.75, code 82.46,
+  structured 77.73, agentic 83.69, multilingual 58.01, long context 74.20; median time to first token 164.8 ms,
+  median step 39.27 ms, 2.833 tokens per step. Same-box reference with `mx8w` off: 73.13 / 72.73 (v2.8.3's 72.90 was
+  on box B, not comparable as a gain). Per-stream decode, prose c1 / c4 / c8 / c16 66.7 / 37.0 / 27.9 / 20.4, code
+  79.1 / 38.6 / 30.0 / 22.0. Greedy outputs identical to the `mx8w`-off run on 30 / 30 prompts; lowest MemAvailable
+  4.9 GiB.
+
 ## v2.8.3 (2026-11-25)
 
 Basic tests on one box; full two-box qualification follows in v2.8.x.

@@ -81,7 +81,8 @@
 - **Christopher Owen, spark-ds41f** (Apache-2.0): the packed-BF16 vocabulary projection (b12x patch 0012) whose format
   we ported to Triton in a screen (not adopted, see docs/experiments.md).
 - **FlashInfer** (CUTLASS / CuTe DSL grouped GEMMs, the GEMVs) and **CUTLASS**: the kernels the MoE tile choice
-  and the GPU checks run on.
+  and the GPU checks run on; since v2.8.4 also the b12x MXFP8 GEMM and quantiser (`mm_mxfp8`, `mxfp8_quantize`)
+  that run the drafter's eligible linears (mx8w), used as shipped.
 - **NVIDIA** for the DGX Spark platform.
 - **speedbench** ([knapcio/speedbench](https://github.com/knapcio/speedbench)), our own benchmark, for the headline
   numbers and the long-context table; its frozen prompt set also feeds the decode table.

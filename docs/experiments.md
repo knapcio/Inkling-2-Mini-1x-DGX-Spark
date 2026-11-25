@@ -1342,3 +1342,50 @@ Speedbench full, release defaults (`REL283`, box B, one run, 0 failed): all 72.9
 65.02, code 81.56, structured 77.63, agentic 83.28, multilingual 57.65, long context 72.99; median time to first
 token 163.8 ms, median step 39.71 ms, 2.742 tokens per step. c1 decode is unchanged within the run-to-run spread;
 v2.8.3's gains are at concurrency (padding rows) and in prefill (the prologue).
+
+## v2.8.4: drafter MXFP8 GEMM (`mx8w`)
+
+Basic tests on one box; full two-box qualification follows in v2.8.x. Runs on box A: ABBA `results/MXa0-s05/`
+(off), `results/MXa1-s05/` (on), `results/MXb1-s05/` (on), `results/MXb0-s05/` (off); memory `results/MXkv-s05/`;
+release check `results/REL284-s05/`.
+
+Since v2.8, `mx8` runs the drafter's linears on MXFP8 copies of their BF16 weights through a GEMV (up to 16 rows)
+and a Triton kernel. `mx8w` hands the 20 of the 30 linears whose K and N are multiples of 128 to FlashInfer's stock
+b12x MXFP8 GEMM (`mm_mxfp8`, activations quantised per call by `mxfp8_quantize`) for every row count up to 256, on the
+same FP8 bytes; the E8M0 scales are swizzled once into the layout the GEMM reads (+11.2 MB, no second FP8 copy). The
+10 576-wide conv projections keep `mx8`. It changes draft proposals only; greedy output under the lossless
+verification was identical in every arm (30 / 30, no near-ties).
+
+Microbench, the drafter's 30 layer linears in one graph, cold L2:
+
+| rows | BF16 cuBLAS | `mx8` GEMV | `mx8w` (b12x) |
+|---:|---:|---:|---:|
+| 8 | 3.33 ms | 2.23 ms | 1.90 ms |
+| 32 | 3.42 ms | - | 1.96 ms |
+| 64 | 3.48 ms | - | 2.00 ms |
+| 192 | 4.05 ms | - | 2.34 ms |
+
+1.73-1.76x over BF16; 0.33-0.36 ms faster than the `mx8` GEMV at 8 / 16 rows.
+
+Serving ABBA (box A), speedbench full:
+
+| | prose | code | structured | agentic | multilingual | long context | all 73 | median step |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| on (two runs, mean) | 65.97 | 82.73 | 78.03 | 83.97 | 58.24 | 74.46 | 73.78 (73.75 / 73.81) | 39.21 / 39.22 ms |
+| off (two runs, mean) | 65.14 | 81.58 | 77.57 | 83.32 | 57.70 | 72.96 | 72.93 (73.13 / 72.73) | 39.57 / 39.91 ms |
+| change | +1.3 % | +1.4 % | +0.6 % | +0.8 % | +0.9 % | +2.1 % | +1.2 % | |
+
+Per-stream decode at c1: prose 66.7 / 66.9 against 65.9 / 65.7 (+1.4 %), code 79.4 / 79.5 against 78.7 / 78.8
+(+0.9 %). At c4-c16 mostly up but noisy, from code c8 -1.2 % to prose c4 +3.8 %. Thinking, per-request median: c8
++1.8 %, c24 +2.4 %. No acceptance change is claimed; the gain is in the drafter's GEMM time.
+
+Memory (`MXkv`, box A, `mx8w` on): lowest MemAvailable under the worst-case load 4.8 GiB, thinking c24 aggregate
+345.8 tok/s, needles at 128K and 240K PASS; KV pool unchanged (about 2.36M tokens on box A).
+
+Release check (`REL284`, box A, release defaults, one run, 0 failed): speedbench full 73.53 (prose 65.75, code
+82.46, structured 77.73, agentic 83.69, multilingual 58.01, long context 74.20); median time to first token 164.8 ms,
+median step 39.27 ms, 2.833 tokens per step; same-box reference with `mx8w` off 73.13 / 72.73. v2.8.3's 72.90 was
+measured on box B and is not compared as a gain. Per-stream decode, prose c1 / c4 / c8 / c16 66.7 / 37.0 / 27.9 /
+20.4, code 79.1 / 38.6 / 30.0 / 22.0. Greedy outputs identical to `MXa0` (`mx8w` off) on 30 / 30 prompts; the sink
+gate, the verify cap, padding rows, the prologue and `mx8w` (20 of 30 drafter linears on the MXFP8 GEMM) all
+reported armed at start-up. Lowest MemAvailable 4.9 GiB; the v2.8.4 worst case stays 4.8 GiB (`MXkv`).

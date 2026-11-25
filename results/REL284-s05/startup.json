@@ -1,0 +1,2 @@
+{"label":"REL284-s05","ready_utc":"2026-11-25T01:37:25Z","startup_s":131,"memavail_ready_gib":4.9,"kv":"[2026-11-25 01:37:20 PID132] max_total_num_tokens=2377856, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.44 GB"}
+{"memavail_end_gib":5.2}

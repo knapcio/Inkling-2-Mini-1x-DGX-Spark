@@ -121,6 +121,84 @@ def prepare_layers(model):
     STATE["prepared"] += 1
     shapes = sorted({tuple(m.weight.shape) for _, m in linears})
     _log(f"mx8: {len(linears)} drafter linears {shapes} -> {size / 1e6:.1f} MB MXFP8")
+    if "mx8w" in STATE["opts"]:
+        prepare_mx8w(linears)
+
+
+# ------------------------------------------------------------------ mx8w: stock b12x MXFP8 GEMM on the eligible linears
+_MX8W_CLASSES = {}
+
+
+def b12x_eligible(pack) -> bool:
+    """b12x mm_mxfp8 needs K % 128 == 0 (one BK128 tile) and an MXFP8 pack (E8M0 per 32 inputs, FP8 e4m3)."""
+    from inkling_draftbytes.quant import SCALE_E8M0
+
+    return (pack.scale_kind == SCALE_E8M0 and pack.group == 32 and pack.k % 128 == 0 and pack.n % 128 == 0
+            and pack.q.dtype == torch.float8_e4m3fn and pack.q.is_contiguous())
+
+
+def b12x_linear(x2, q, sf):
+    """[M, K] BF16 -> [M, N] BF16 via flashinfer.mxfp8_quantize + mm_mxfp8(backend="b12x"), default tile plan (no
+    autotuning: a fixed tactic per shape)."""
+    from flashinfer import mm_mxfp8, mxfp8_quantize
+    from flashinfer.autotuner import autotune
+
+    xq, xs = mxfp8_quantize(x2, is_sf_swizzled_layout=True)
+    with autotune(False):
+        return mm_mxfp8(xq, q.t(), xs, sf, out_dtype=torch.bfloat16, backend="b12x")
+
+
+def _mx8w_method_class(cls):
+    sub = _MX8W_CLASSES.get(cls)
+    if sub is None:
+        inner_apply = cls.apply
+
+        def apply(self, layer, x, bias=None):
+            sf = getattr(layer, "_idf_b12x_sf", None)
+            pack = getattr(layer, "_idb_w8", None)
+            # the stock MXFP8 quantizer needs a contiguous, 16-byte aligned [rows, K] input; anything else falls back
+            if (sf is not None and pack is not None and bias is None and x.is_cuda and x.dtype == torch.bfloat16
+                    and x.dim() >= 1 and x.shape[-1] == pack.k and x.is_contiguous() and x.data_ptr() % 16 == 0):
+                rows = x.numel() // x.shape[-1] if x.shape[-1] else 0
+                if 0 < rows <= STATE["mx8w_max_m"]:
+                    STATE["mx8w_calls"] += 1
+                    y = b12x_linear(x.reshape(rows, x.shape[-1]), pack.q, sf)
+                    return y.view(*x.shape[:-1], pack.n)
+            return inner_apply(self, layer, x, bias)
+
+        sub = type(f"Dfbytes{cls.__name__}", (cls,), {"apply": apply})
+        _MX8W_CLASSES[cls] = sub
+    return sub
+
+
+def prepare_mx8w(linears):
+    import copy
+
+    from flashinfer import block_scale_interleave
+
+    n = 0
+    extra = 0
+    for _, module in linears:
+        pack = getattr(module, "_idb_w8", None)
+        if pack is None or not b12x_eligible(pack):
+            continue
+        sf = block_scale_interleave(pack.scale.contiguous())
+        old = getattr(module, "_idf_b12x_sf", None)
+        if old is not None and old.shape == sf.shape and old.dtype == sf.dtype and old.device == sf.device:
+            old.copy_(sf)  # reload: keep the address captured draft graphs read (q is refreshed in place by mx8)
+        else:
+            module._idf_b12x_sf = sf
+        extra += sf.numel()
+        if not type(module.quant_method).__name__.startswith("Dfbytes"):
+            method = copy.copy(module.quant_method)
+            method.__class__ = _mx8w_method_class(type(module.quant_method))
+            module.quant_method = method
+        n += 1
+    if n == 0:
+        raise DfbytesFatal("inkling_dfbytes: mx8w found no b12x-eligible drafter linear")
+    STATE["mx8w_linears"] = n
+    _log(f"mx8w: {n} of {len(linears)} drafter linears on b12x MXFP8 for rows 1..{STATE['mx8w_max_m']} "
+         f"(the rest keep mx8; +{extra / 1e6:.1f} MB swizzled scales)")
 
 
 def patch_dflash(mod):

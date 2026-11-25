@@ -60,7 +60,7 @@ CERT_WIDE_MAX_ROWS=${CERT_WIDE_MAX_ROWS:-}                  # largest verify bat
 CERT_WIDE_STATS=${CERT_WIDE_STATS:-0}                       # 1: log wide certified-head outcomes and union sizes per batch size (diagnostic)
 RNNHOIST_MAX_BS=${RNNHOIST_MAX_BS:-32}                      # draft rnnhoist row limit (v2.7.2: 16; 32 changes c17-c32 drafts by FP32 order)
 DFLASH_BYTES_USER=${DFLASH_BYTES+set}                       # SPEC=dflash2 drafter byte cuts: mx8 (MXFP8 layers), hot8 / hot16
-DFLASH_BYTES=${DFLASH_BYTES:-}                               # (hot-vocab candidates); unset = mx8,hot8 with SPEC=dflash2 + OVERLAY=1
+DFLASH_BYTES=${DFLASH_BYTES:-}                               # (hot-vocab candidates); unset = mx8,mx8w,hot8 with SPEC=dflash2 + OVERLAY=1
 DFLASH_FUSED=${DFLASH_FUSED:-}                               # SPEC=dflash2: sampled accept from the logits with sparse q (inkling_dfaccept); unset = 1 with SPEC=dflash2 + OVERLAY=1
 PADX=${PADX:-1}                                              # CUDA-graph padding rows -> phantom expert (inkling_padx, exact for live rows); 0: off
 DFLASH_HOT_N=${DFLASH_HOT_N:-}                               # hot-vocab size for hot8 / hot16 (empty = 65536)
@@ -96,8 +96,9 @@ if [[ $SPEC == dflash2 ]]; then
   # head writes no logits on certified steps and stays off
   # Defaults with the overlay (v2.8 ABBA 2026-11-24: mx8,hot8 speedbench quick +8.4 %, prose c1 +6.5 %;
   # CERT_DFLASH +2.8 %, check mode 0 mismatches in 34,808 rows): DFLASH_BYTES=mx8,hot8, CERT_DFLASH=1
+  # v2.8.4 adds mx8w (b12x MXFP8 GEMM on the eligible drafter linears, ABBA speedbench full +1.2 %, greedy identical)
   if [[ $OVERLAY == 1 ]]; then
-    [[ -n $DFLASH_BYTES_USER ]] || DFLASH_BYTES=mx8,hot8
+    [[ -n $DFLASH_BYTES_USER ]] || DFLASH_BYTES=mx8,mx8w,hot8
     CERT_HEAD=${CERT_DFLASH:-1}
   else
     CERT_HEAD=${CERT_DFLASH:-0}
