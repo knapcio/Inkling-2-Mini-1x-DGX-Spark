@@ -1,0 +1,8 @@
+2026-11-25T09:00:27Z QE291b-s05 mode warm
+QE291b-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.76, "geomean_tok_s": 73.22, "aggregate_tok_s": 71.14, "median_ttft_ms": 159.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.04, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.624, "drift_pct_all": 0.624}}
+wrote results/QE291b-s05/warm-sbquick.json (1.4 min)
+2026-11-25T09:01:53Z QE291b-s05 mode inkq
+[inkq QE291b-s05] gsm8k: 383/400 in 471 s
+[inkq QE291b-s05] lc: 99/100 in 460 s
+[inkq QE291b-s05] qeval: 64/75 in 108 s
+[inkq QE291b-s05] total 546/575 in 1039.5 s; families {'gsm8k': [383, 400], 'lc': [99, 100], 'qeval': [64, 75]}; min prompt tokens 1569; failed requests 0

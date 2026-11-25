@@ -67,6 +67,7 @@ DFLASH_HOT_N=${DFLASH_HOT_N:-}                               # hot-vocab size fo
 DFLASH_PREFIX_TAIL=${DFLASH_PREFIX_TAIL:-2048}                 # SPEC=dflash2: on a prefix-cache hit, prefill the last N prompt tokens again so the drafter sees them (0 = off)
 DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only for prompts of at most this many tokens (longer prompts keep the cache as before)
 DFLASH_TAIL_SNAPSHOTS=${DFLASH_TAIL_SNAPSHOTS:-8}                # SPEC=dflash2: prompt-end draft windows kept for later prefix hits (40 MiB each, charged to the KV budget; 0 = off)
+PROMPT_TOUCH=${PROMPT_TOUCH:-1}                              # OVERLAY=1: after a request finishes, refresh its prompt-end cache checkpoint so the next turn of a long conversation keeps its prefix hit (cache LRU order only; 0 = off)
 [[ $ENGINE == vllm && -z ${SPEC:-} ]] && SPEC=dspark   # the vLLM profile keeps the DSpark draft
 SPEC=${SPEC:-dflash2}                  # dflash2 (default: third-party DFlash2 drafter) | dspark (the model's own draft, v2.7.2 profile) | none
 DFLASH_BV=${DFLASH_BV:-1}                                    # SPEC=dflash2 + OVERLAY=1: block verification on sampled steps (exact with RSFIX)
@@ -151,6 +152,11 @@ case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prefix tail
   *INKLING_DFLASH_PREFIX_TAIL*|*INKLING_DFLASH_TAIL_SNAPSHOTS*)  # INKLING_DFLASH_PREFIX_TAIL, its _MAX_INPUT, the snapshots
     echo "set DFLASH_PREFIX_TAIL / DFLASH_PREFIX_TAIL_MAX_INPUT / DFLASH_TAIL_SNAPSHOTS instead of passing INKLING_DFLASH_* tail variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
+case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prompt-end refresh is switched by the launcher alone
+  *INKLING_PROMPT_TOUCH*)
+    echo "set PROMPT_TOUCH instead of passing INKLING_PROMPT_TOUCH in SGLANG_ENV" >&2; exit 2 ;;
+esac
+case $PROMPT_TOUCH in 0|1) ;; *) echo "PROMPT_TOUCH must be 0 or 1 (got '$PROMPT_TOUCH')" >&2; exit 2 ;; esac
 [[ $KV12S == 1 ]] && case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in
   *enable-unified-memory*|*cuda-graph-backend-prefill*)
     echo "with KV12S=1, choose the pool with KV12S_POOL instead of passing its engine flags" >&2; exit 2 ;;
@@ -162,7 +168,7 @@ KV12S_FALLBACK_PAGES=${KV12S_FALLBACK_PAGES:-64}            # raw fallback pages
 KV12_SLOTS=${KV12_SLOTS:-2048}                              # packed side-pool pages per global layer (2048 = 6.1 GiB, one 256K request)
 SCODES=${SCODES:-1}                                          # NVFP4 expert scale codes: 5-bit codes + row base, expanded in the GEMM (exact)
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
-PFUSE_HOIST=${PFUSE_HOIST:-0}                               # opt-in prefill loop-bank hoist over pfuse loop_mix (1: FP32-order class, not in the default pending a bracket; exact: bit-identical, slower; 0: off)
+PFUSE_HOIST=${PFUSE_HOIST:-1}                               # prefill loop-bank hoist over pfuse loop_mix (1: changes FP32 summation order, not the math; quality bracketed equal; exact: bit-identical, slower; 0: off)
 ATTN_GATE=${ATTN_GATE:-all}                                 # gate_sink in the prefill attention epilogue, sliding-window and global layers (bit-identical; 1: sliding-window only; 0: off)
 PROLOGUE=${PROLOGUE:-1}                                     # SWA prefill: K conv + L2 clip and V conv + value norm in one kernel each (bit-identical: the CuTe row-sum order; 0: off)
 [[ ",$PFUSE," == *,all,* || ",$PFUSE," == *,loopmix,* ]] || PFUSE_HOIST=0   # the hoist wraps pfuse loopmix
@@ -172,8 +178,9 @@ _onoff() { case $(printf %s "$1" | tr '[:upper:]' '[:lower:]') in ''|0|off|false
 [[ $(_onoff "$PROLOGUE") == 0 ]] && PROLOGUE=0
 PREFILL_LEVERS=0; [[ $PFUSE_HOIST != 0 || $ATTN_GATE != 0 || $PROLOGUE != 0 ]] && PREFILL_LEVERS=1
 [[ $PREFILL_LEVERS == 1 ]] && case " ${SGLANG_ARGS:-} $* " in
-  *--enable-mixed-chunk*)                                     # MIXED batches replay through EXTEND prefill graphs
-    echo "--enable-mixed-chunk needs PFUSE_HOIST=0 ATTN_GATE=0 PROLOGUE=0 (decode rows would get prefill-only math)" >&2; exit 2 ;;
+  *--enable-mixed-chunk*)  # not lossless: the prefill budget shrinks by the running count (chunk boundaries move) and
+                           # running requests drop to plain 1-token decode (no speculation); untested with the levers
+    echo "--enable-mixed-chunk is refused with PFUSE_HOIST / ATTN_GATE / PROLOGUE on: it moves the long prompts' chunk boundaries (not lossless) and turns running requests into plain 1-token decode without speculation; use --prefill-decode-interval for prefill / decode interleaving" >&2; exit 2 ;;
 esac
 MOE_TILES=${MOE_TILES:-1@2304:swap_ab=1,tile_n=32,tile_k=256;1@1152:swap_ab=1,tile_n=32,tile_k=256;8@2304:swap_ab=1,tile_n=32,tile_k=256;8@1152:swap_ab=1,tile_n=32,tile_k=256;64@2304:swap_ab=0,tile_n=64,tile_k=256;64@1152:swap_ab=1,tile_n=32,tile_k=256}
 SGLANG_ARGS=${SGLANG_ARGS:-}
@@ -299,6 +306,7 @@ if [[ $ENGINE == sglang ]]; then
   dftail=; [[ $SPEC == dflash2 && $DFLASH_PREFIX_TAIL != 0 ]] && dftail=$DFLASH_PREFIX_TAIL
   [[ $DFLASH_TAIL_SNAPSHOTS =~ ^[0-9]+$ ]] || { echo "DFLASH_TAIL_SNAPSHOTS must be a whole number (got '$DFLASH_TAIL_SNAPSHOTS')" >&2; exit 2; }
   dfsnap=; [[ $SPEC == dflash2 && $OVERLAY == 1 && $DFLASH_TAIL_SNAPSHOTS != 0 ]] && dfsnap=$DFLASH_TAIL_SNAPSHOTS
+  ptouch=0; [[ $OVERLAY == 1 && $PROMPT_TOUCH == 1 ]] && ptouch=1
   ov=()
   if [[ $OVERLAY == 1 ]]; then
     [[ -f $OVERLAY_DIR/sitecustomize.py ]] || { echo "OVERLAY=1 but no overlay at $OVERLAY_DIR" >&2; exit 1; }
@@ -309,7 +317,7 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
         -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_PFUSE_HOIST="$PFUSE_HOIST" -e INKLING_ATTN_GATE="$ATTN_GATE" -e INKLING_PROLOGUE="$PROLOGUE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
-        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_TAIL_SNAPSHOTS="$dfsnap" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
+        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_TAIL_SNAPSHOTS="$dfsnap" -e INKLING_PROMPT_TOUCH="$ptouch" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
         -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"
         -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"

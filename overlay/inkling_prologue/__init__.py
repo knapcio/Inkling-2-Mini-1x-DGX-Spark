@@ -6,7 +6,8 @@ Patch: Inkling2Attention._prologue. For an EXTEND visit of a sliding-window laye
 short-conv prefill kernel's own threshold), static conv weights with residual, head_dim 128, no k-clip scale and a
 weightless value norm, k_sconv + k_l2_clip and v_sconv + v_norm each run as one kernel (_triton._sconv_post_kernel);
 the conv-cache prepare / update calls and the q / rel clips are the stock code. Everything else runs the stock method.
-Exact up to FP32 summation order of the head reductions (rounding points kept). CUDA-graph safe (no host sync).
+Bit-identical to the stock conv + clip / RMSNorm: the head row sums follow the CuTe kernels' reduction order (_triton
+_row_sumsq, SUM_ORDER; tools/gpu_check_prologue.py requires 0 ulp). CUDA-graph safe (no host sync).
 """
 
 import os

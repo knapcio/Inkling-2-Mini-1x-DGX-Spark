@@ -1,0 +1,2 @@
+{"label":"AGD-s06","ready_utc":"2026-11-25T08:17:56Z","startup_s":131,"memavail_ready_gib":5.5,"kv":"[2026-11-25 08:17:49 PID132] max_total_num_tokens=2347904, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.78 GB"}
+{"memavail_end_gib":5.2}

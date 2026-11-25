@@ -1,0 +1,1 @@
+{"label": "KVS292-s06-kv-c24", "started": "2026-11-25T09:10:31+01:00", "concurrency": 24, "requests": 48, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 267.45, "completion_tokens": 87750, "aggregate_tok_s": 328.1, "per_request_decode_tok_s_median": 16.3, "ttft_median_s": 1.51, "length_finishes": 39}

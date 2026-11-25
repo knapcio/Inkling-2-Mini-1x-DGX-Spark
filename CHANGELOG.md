@@ -1,5 +1,39 @@
 # Changelog
 
+## v2.9.2 (2026-11-25)
+
+v2.9.1 plus the prefill loop-bank hoist and the prompt-end cache touch, both on by default. Quality bracket on one box
+(`inkq`); memory, needles and agent loops on box B.
+
+- `PFUSE_HOIST=1` (`inkling_phoist`, new default): the loop controller's linear source projection is prepared once per
+  loop pass instead of inside every fused visit. It changes the FP32 summation order, not the math (99.96 % of
+  elements bit-equal to the fused path, FP64-reference error within 1.5x), so greedy outputs can move on long
+  prompts like any reduction-order change. Cold prefill against v2.9.1 (box B, mean of 2 runs): 1K 2,857 vs 2,821
+  (+1.3 %), 8K 5,657 vs 5,595 (+1.1 %), 32K 5,325 vs 5,236 (+1.7 %), 128K 3,875 vs 3,824 (+1.4 %).
+- Quality, the gate for summation-order levers ("fine if model quality does not drop"): `inkq` v2, 575 graded items
+  with prompts >= 1.5K tokens, five interleaved runs on one box: v2.9.1 556 / 559 / 555, the hoist 562 / 559. No
+  drop on any family; one hoist run scored above the baseline spread; over the six hoist-baseline pairs 38 items
+  were right only with the hoist and 15 only with the baseline.
+- `PROMPT_TOUCH` (`inkling_ptouch`, new default): after a request finishes, its prompt path is touched with SGLang's
+  `touch_prefix`, so the sliding-window state behind a finished prompt end is no longer the first entry evicted. In
+  long-context agent loops this removes intermittent whole-context cache misses on the next turn (24 x 72K, interval
+  2: stock 3 / 3 runs with 9-10 misses, turn-2 time to first token 163-186 s, wall ~370-380 s; with the touch 2 / 2
+  runs 24 / 24 hits, 3.0 s, ~210 s). Eviction order only: nothing the model computes changes. Combined-tree release
+  check: AG292 24 / 24 hits at the default interval (3.0 s, turn-2 wall 211 s); KVS292c worst MemAvailable 4.8 GiB,
+  48 / 48 at c24, needles 128K / 240K PASS; REL292 speedbench full 73.19 (hoist-only tree 73.44) with greedy outputs
+  identical to the hoist-only tree on 73 / 73 and 30 / 30 warm.
+- README: `--prefill-decode-interval 1` documented as an opt-in for interactive streaming (earlier first tokens,
+  later completion; not for agent loops); draft-tail snapshot slots beyond 8 concurrent conversations.
+- Memory with the hoist: worst MemAvailable 4.0 / 5.7 GiB in two runs (v2.9.1: 4.8), needles at 128K and 240K
+  PASS; `MEM_FRACTION` stays 0.88. Sanity 11 / 11; speedbench full 73.44 (v2.9.1 on the other box 73.19 / 73.24).
+- The `--enable-mixed-chunk` refusal now states the real reasons (it moves chunk boundaries and drops speculation for
+  running requests), and the prologue's docstring says bit-identical.
+- Results: `results/Q292h-s06/`, `results/PF292-s06/`, `results/KVS292-s06/`, `results/KVS292b-s06/`, `results/QE291a-s05/`, `results/QE292h-s05/`,
+  `results/QE291b-s05/`, `results/QA1-s05/`, `results/QA2-s05/`, `results/QA3-s05/`, `results/QL1-s05/`,
+  `results/QL2-s05/`, `results/AG292-s06/`, `results/KVS292c-s06/`, `results/REL292-s06/`; agent-loop A/B:
+  `results/AG64-s06/`, `results/AGD-s06/`, `results/AGD2-s06/`, `results/AGD3-s06/`, `results/AG64b-s05/`,
+  `results/DYI1-s06/`, `results/DYI2-s06/`, `results/STd-s06/`, `results/STd2-s06/`, `results/PTd-s06/`, `results/PTd2-s06/`.
+
 ## v2.9.1 (2026-11-25)
 
 Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes.

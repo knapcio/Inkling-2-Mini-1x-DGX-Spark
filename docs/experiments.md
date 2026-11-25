@@ -1470,3 +1470,64 @@ Memory: release defaults worst MemAvailable 4.8 GiB, needles at 128K and 240K PA
 A/B memory pair (gate on all layers / sliding-window only) gave 5.2 / 5.4 GiB. Its worst-case aggregate (326.7 vs
 348.0 tok/s) reflects a different number of generated tokens at T=0.8 (86,182 vs 91,254), not speed: wall time,
 per-request decode and time to first token were equal or better with the gate on all layers.
+
+## v2.9.2 draft: the prefill loop-bank hoist under a quality gate (2026-11-25)
+
+The hoist (`PFUSE_HOIST=1`, `inkling_phoist`) changes the FP32 summation order of the loop controller's source
+projection, not the math: 99.96 % of elements bit-equal to the fused path, FP64-reference error within 1.5x, startup
+self-test with fallback. In the exactness gate it moved 2 of 30 long prompts without a near-tie; removing the shipped
+fused loop mix (`PFUSE` without `loopmix`, the same class against stock) moved the same 4 long prompts with 1
+non-near-tie, so the hoist is in the class v2.8 already ships. The owner set the gate for such levers to quality.
+
+Eval `inkq` (not shipped in this repo): 575 automatically graded items, every prompt >= 1.5K tokens so the hoist runs (it arms
+from ~600 prefill rows): GSM8K test 0-399 10-shot (final number), 100 synthetic long-context lookups at 4 / 8 / 16 /
+32K tokens (exact code), 75 code / JSON / math / format tasks behind a fixed 1.1K-token preamble (their own checkers). T = 0, effort
+low, one box (box A), arms interleaved.
+
+| run | gsm8k | lc | qeval | total | cut-off answers |
+|---|---:|---:|---:|---:|---:|
+| v1 QE291a (v2.9.1) | 382 | 98 | 64 | 544 | 30 |
+| v1 QE292h (hoist) | 382 | 97 | 63 | 542 | - |
+| v1 QE291b (v2.9.1) | 383 | 99 | 64 | 546 | - |
+| v2 QA1 (v2.9.1) | 390 | 100 | 66 | 556 | 7 |
+| v2 QL1 (hoist) | 392 | 100 | 70 | 562 | 5 |
+| v2 QA2 (v2.9.1) | 389 | 100 | 70 | 559 | 5 |
+| v2 QL2 (hoist) | 391 | 100 | 68 | 559 | 5 |
+| v2 QA3 (v2.9.1) | 387 | 100 | 68 | 555 | 5 |
+
+Rules were registered before each protocol's data. v1 (A / A' / lever): flips 18 / 18 <= 27, McNemar p 0.82 / 0.48,
+families within 2, total 542 outside [543, 547]: FAIL by one item; the hoist's 6 lone misses were all answers cut off
+at the token limit. v2 (three baselines, two lever runs, token budgets raised): baseline flips 11 / 13 / 10, budget
+22.5, total range [554, 560]. QL2 passes everything (flips 7 / 10 / 10, p 0.45 / 1.0 / 0.34). QL1: flips 10 / 9 / 7
+pass, families pass, but total 562 is above the range and McNemar against QA3 is p 0.016 with 7 hoist-only wins and
+0 losses: the two-sided rule fails it on the upside only. Across the six lever-baseline pairs: 38 hoist-only correct,
+15 baseline-only correct. The owner's criterion is one-sided ("fine if model quality does not drop"); the two-sided
+bracket was our own construct and does not block a measured win, so the hoist ships on in v2.9.2.
+
+Serving with the hoist (box B): sanity 11 / 11, needles 128K / 240K PASS, speedbench full 73.44, worst MemAvailable
+4.0 GiB at `MEM_FRACTION` 0.88 (`KVS292-s06`; a repeat `KVS292b-s06` 5.7 GiB with time to first token 1.08 s and
+per-request decode 17.2 tok/s, so the first run's 1.51 s / 16.3 tok/s was run-to-run spread; v2.9.1 4.8 / 5.2).
+Cold prefill against v2.9.1 (`PF292-s06` vs `PF291-s06`, box B, mean of 2 runs): 1K / 8K / 32K / 128K 2,857 / 5,657
+/ 5,325 / 3,875 against 2,821 / 5,595 / 5,236 / 3,824 (+1.3 / +1.1 / +1.7 / +1.4 %).
+
+## v2.9.2: prompt-end cache touch for agent loops (2026-11-25)
+
+AG64 (24 agents x ~72K-token distinct contexts, two turns) showed intermittent whole-context prefix-cache misses on
+turn 2: the sliding-window state behind a finished request's prompt end got its LRU recency at prefill time, and the
+final insert refreshes only the window behind the output end, so after the request finished its prompt-end window was
+the oldest evictable one. Under window-pool pressure the earliest conversations lost it first, their next turn fell
+back to the root and re-prefilled ~72K tokens, and each re-prefill evicted the next-oldest prompt end. Observed in the
+cache dumps of stock misses: the prompt-end node had lost its sliding window and with it the saved state (11 of 12
+dumped misses); in the remaining one part of the window was gone.
+`inkling_ptouch` (`PROMPT_TOUCH`, on) touches the prompt path with the cache's own `touch_prefix` right after the
+final insert (no allocation, no lock, no state slot): eviction order only.
+
+| arms (24 x 72K, `--prefill-decode-interval 2`) | turn-2 cache misses | turn-2 TTFT | turn-2 wall |
+|---|---|---|---|
+| stock, 3 runs | 3 / 3 runs with 9-10 agents missing | 163-186 s | ~370-380 s |
+| prompt-end touch, 2 runs | 0 / 2 (24 / 24 hits) | 3.0 s | ~210 s |
+
+Default-interval runs showed the same intermittent misses (5 of 24 agents in AG64 and AGD; none in AGD2, AGD3, AG64b).
+Combined-tree release check: AG292 (default interval) 24 / 24 hits, time to first token 3.0 s, turn-2 wall 211 s;
+KVS292c worst MemAvailable 4.8 GiB, 48 / 48 at c24, needles 128K / 240K PASS; REL292 speedbench full 73.19
+(hoist-only Q292h 73.44), greedy outputs identical to Q292h on 73 / 73 speedbench and 30 / 30 warm prompts.

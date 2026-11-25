@@ -1,0 +1,8 @@
+2026-11-25T10:29:14Z QA2-s05 mode warm
+QA2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.8, "geomean_tok_s": 73.28, "aggregate_tok_s": 71.17, "median_ttft_ms": 160.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.01, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.0, "drift_pct_all": 0.0}}
+wrote results/QA2-s05/warm-sbquick.json (1.4 min)
+2026-11-25T10:30:39Z QA2-s05 mode inkq2
+[inkq QA2-s05] gsm8k: 389/400 in 491 s
+[inkq QA2-s05] lc: 100/100 in 458 s
+[inkq QA2-s05] qeval: 70/75 in 125 s
+[inkq QA2-s05] total 559/575 in 1073.4 s; families {'gsm8k': [389, 400], 'lc': [100, 100], 'qeval': [70, 75]}; min prompt tokens 1569; failed requests 0

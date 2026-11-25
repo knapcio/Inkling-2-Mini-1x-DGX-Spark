@@ -81,6 +81,9 @@ try:
     if _on("INKLING_DFLASH_PREFIX_TAIL") or _on("INKLING_DFLASH_TAIL_SNAPSHOTS"):  # DFLASH draft ring on prefix hits: (A) re-prefill the last N input tokens, (B) restore a prompt-end draft window snapshot
         import inkling_dftail
         inkling_dftail.install()
+    if _on("INKLING_PROMPT_TOUCH"):  # cache LRU order only: refresh a finished request's prompt-end checkpoint
+        import inkling_ptouch
+        inkling_ptouch.install()
     if _on("INKLING_RSFIX"):  # exact residual / bonus lane rule (+ SGLang PR #51681 / #51692 fixes)
         import inkling_rsfix
         inkling_rsfix.install()

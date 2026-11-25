@@ -1,0 +1,2 @@
+{"label":"KVS292b-s06","ready_utc":"2026-11-25T11:47:58Z","startup_s":132,"memavail_ready_gib":6.1,"kv":"[2026-11-25 11:47:52 PID132] max_total_num_tokens=2317184, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.27 GB"}
+{"memavail_end_gib":5.8}

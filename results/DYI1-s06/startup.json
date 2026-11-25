@@ -1,0 +1,2 @@
+{"label":"DYI1-s06","ready_utc":"2026-11-25T08:39:38Z","startup_s":126,"memavail_ready_gib":5.1,"kv":"[2026-11-25 08:39:33 PID132] max_total_num_tokens=2362240, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.44 GB"}
+{"memavail_end_gib":4.8}

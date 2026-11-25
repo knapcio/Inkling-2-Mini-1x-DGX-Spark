@@ -1,0 +1,9 @@
+2026-11-25T12:17:31Z KVS292c-s06 mode warm
+KVS292c-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.95, "geomean_tok_s": 74.01, "aggregate_tok_s": 71.94, "median_ttft_ms": 161.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.0, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.016, "drift_pct_all": -0.016}}
+wrote results/KVS292c-s06/warm-sbquick.json (1.4 min)
+2026-11-25T12:18:55Z KVS292c-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 108.0, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T12:23:21Z KVS292c-s06 mode nd128
+needle 128K                  PASS  {"prompt_tokens": 128023, "seconds": 33.9, "expected": "JUNIPER-COBALT-2002", "answer": "JUNIPER-COBALT-2002"}
+1 / 1 passed
