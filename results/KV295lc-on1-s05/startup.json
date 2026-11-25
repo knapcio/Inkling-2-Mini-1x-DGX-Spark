@@ -1,0 +1,2 @@
+{"label":"KV295lc-on1-s05","ready_utc":"2026-11-25T23:34:46Z","startup_s":131,"memavail_ready_gib":5.1,"kv":"[2026-11-25 23:34:44 PID133] max_total_num_tokens=2350720, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.23 GB"}
+{"memavail_end_gib":5.2}

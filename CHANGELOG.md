@@ -36,6 +36,9 @@ v2.9.4 plus a cheaper settle of the packed global KV store after each DFlash2 ve
   greedy texts with several requests in flight. With several requests in flight the greedy texts differ between runs of
   the same setting too (for example prose at c16, box B, off vs off), so this alone does not show a store difference;
   the shared arms, which run the per-visit kernels, lost nothing in the decode table.
+  Greedy dumps at 4 and 8 requests in flight (box A, `results/KV295lc-*-s05/`) differ between any two arms about as
+  much as between two off arms or two rounds of one arm, so they show no store difference either; `1` stays opt-in for
+  the decode-table loss.
 - Memory, box A (warm, kvstress, 128K needle; booted with `1`, which allocates the same as `shared` plus a 768-byte
   table): lowest MemAvailable 4.9 GiB (v2.9.3 on the same box and recipe: 4.6 GiB); kvstress 48 of 48 thinking
   requests at 24 in flight together with the cold 240K needle, 337.3 tok/s aggregate (v2.9.3: 325.8); 240K and 128K

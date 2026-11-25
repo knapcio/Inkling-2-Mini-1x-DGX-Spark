@@ -1,0 +1,9 @@
+2026-11-25T23:52:57Z KV295lc-on2-s05 mode warm
+KV295lc-on2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.36, "geomean_tok_s": 74.88, "aggregate_tok_s": 72.81, "median_ttft_ms": 160.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.61, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.412, "drift_pct_all": -0.412}}
+wrote results/KV295lc-on2-s05/warm-sbquick.json (1.4 min)
+2026-11-25T23:54:19Z KV295lc-on2-s05 mode lcdc4
+round 0: 30 prompts at concurrency 4
+round 1: 30 prompts at concurrency 4
+2026-11-25T23:55:38Z KV295lc-on2-s05 mode lcdc8
+round 0: 30 prompts at concurrency 8
+round 1: 30 prompts at concurrency 8

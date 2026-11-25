@@ -1740,6 +1740,16 @@ texts with several requests in flight also differ between runs of one setting (b
 request 3 tokens early, the other did not), so this does not by itself show a store difference; the GPU check found
 none. The shared arms run the per-visit kernels and lost nothing; `shared` is the default and `1` stays opt-in.
 
+Greedy dumps with several requests in flight (box A, `tools/lc_dump_conc.py`: the 30 speedbench quick prompts, 160
+tokens, top-2 logprobs, two rounds each, at 4 and at 8 in flight; arms `1`, `0`, `0`, `1`, `results/KV295lc-*-s05/`)
+do not separate `1` from `0`, because no setting reproduces its own greedy texts there. At 4 in flight, 9-12 of 60
+requests were identical between any two arms (off against off: 10), and within one arm only 4-5 of 30 were identical
+between its two rounds; at 8 in flight, 2-7 of 60 between arms (off against off: 3) and 1-2 of 30 within an arm. The
+texts part at a median of about 50 tokens in, at tokens whose top two candidates were close (median gap 0.18 nat at 4
+in flight, 0.15 at 8; about 92 % under 0.5 nat): with several requests in flight the greedy text depends on how the
+requests share each step. The dumps show no difference beyond the off arms' own, and the GPU check found none in the
+store; `1` stays opt-in because of the decode-table loss, not because of a difference found.
+
 Memory (box A, `KV295mem`, booted with `1`; `shared` allocates the same less a 768-byte table): thinking c24
 (48 x 2,048 tokens) together with a cold 240K-token needle, worst MemAvailable 4.9 GiB (v2.9.3, same box and recipe:
 4.6 GiB), 48 / 48 completed, 337.3 tok/s aggregate; needles 128K and 240K pass.
