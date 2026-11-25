@@ -67,7 +67,7 @@
   "notes": "r2 full V24F-s06",
   "tool_version": "0.3.0",
   "client": {
-   "host": "spark-06",
+   "host": "box-b",
    "python": "3.12.3",
    "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
   }
@@ -1720,7 +1720,7 @@
   "metrics_families": []
  },
  "client": {
-  "host": "spark-06",
+  "host": "box-b",
   "python": "3.12.3",
   "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
  },

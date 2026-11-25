@@ -1531,3 +1531,96 @@ Default-interval runs showed the same intermittent misses (5 of 24 agents in AG6
 Combined-tree release check: AG292 (default interval) 24 / 24 hits, time to first token 3.0 s, turn-2 wall 211 s;
 KVS292c worst MemAvailable 4.8 GiB, 48 / 48 at c24, needles 128K / 240K PASS; REL292 speedbench full 73.19
 (hoist-only Q292h 73.44), greedy outputs identical to Q292h on 73 / 73 speedbench and 30 / 30 warm prompts.
+
+## v2.9.3: prompt copy for long prompts (2026-11-25)
+
+The DFlash2 drafter drafts from a 2,048-token window, so on long documents it cannot see a passage the answer is
+quoting. `inkling_pcopy` looks up the most recent earlier occurrence of the last 12 committed tokens in the request's
+own context; at a match of 16 tokens or more the tokens that followed it replace the drafter's proposals for the rest
+of the block (draft proposals only). Offline, on step logs replayed against the token history with the exact
+alignment, the rule raised tokens per step by about 12 % on requests of 16K tokens or more; the gain came from a
+minority of requests (one 32K request alone +78 %), and requests under 16K gained nothing.
+
+Kernels: the first version ran its work as separate small launches and added 0.3 ms per single-request decode step,
+so it was rebuilt as one fused launch and then, for long contexts, as two (a scan split over 2,048-token chunks with
+an atomic maximum, then the per-row copy). GPU checks: bit-identical to the reference step on 160 random steps,
+directed rows (coverage gaps, clipped writes, ids past the vocabulary, sampled copies in and off the candidate set),
+competing hits across chunk boundaries and a fault between the two launches; sampled-law Monte Carlo tests pass,
+including a wrong-q control that the test detects. GPU time of a no-hit step, single request: 12.3 us at 128K
+context (the first fused version 307 us), 10-14 us at 4-32K; host enqueue about 34 us.
+
+Two ABBA runs on box A (`warm`, speedbench full, `lc32`, agent mode 160 / 512, thinking c8), off = `DFLASH_PCOPY=0`.
+ABBA 1 ran the separate-launch version, ABBA 2 the fused one; neither had the 8K gate. `lc32` decode is the sum of
+decoded tokens over the sum of decode seconds of the six requests per size (3 repeats, cold and cached, 512 tokens);
+the step is the median of the per-request `step_ms` over the 73 measured speedbench full requests (the 4 sentinel
+requests excluded), and speedbench full is the run summary's geometric mean of per-request decode tok/s.
+
+| arm | lc32 32K tok/s (tok/step) | lc32 128K tok/s (tok/step) | step ms | speedbench full tok/s (summary geomean) | agent 160 / 512 decode tok/s | thinking c8 tok/s |
+|---|---:|---:|---:|---:|---:|---:|
+| ABBA 1 off (PCa1) | 65.5 (3.10) | 55.8 (3.40) | 39.61 | 72.82 | 74.7 / 77.1 | 270.9 |
+| ABBA 1 on (PCb1r) | 74.5 (3.56) | 58.6 (3.68) | 39.81 | 72.40 | 73.7 / 76.1 | 255.0 |
+| ABBA 1 on (PCb2) | 66.0 (3.08) | 56.1 (3.47) | 39.83 | 72.56 | 74.0 / 76.8 | 274.5 |
+| ABBA 1 off (PCa2) | 64.0 (2.99) | 57.7 (3.52) | 39.35 | 73.56 | 75.4 / 75.3 | 262.8 |
+| ABBA 2 off (PCrA1) | 60.5 (2.76) | 50.7 (3.08) | 39.46 | 73.42 | 77.8 / 80.0 | 275.8 |
+| ABBA 2 on (PCrB1) | 67.5 (3.10) | 50.3 (3.04) | 39.22 | 73.63 | 77.3 / 79.2 | 276.9 |
+| ABBA 2 on (PCrB2) | 73.8 (3.45) | 55.9 (3.45) | 39.63 | 72.96 | 78.0 / 81.4 | 280.4 |
+| ABBA 2 off (PCrA2) | 66.6 (3.08) | 51.4 (3.10) | 39.52 | 73.38 | 77.2 / 81.1 | 275.5 |
+
+Mean of the four runs per arm: 32K 64.2 -> 70.5 tok/s (+9.8 %; 2.98 -> 3.30 tokens per step), 128K 53.9 -> 55.2
+(+2.4 %; 3.27 -> 3.41). Within each ABBA every run with the copy was faster at 32K than every run without it. The
+step: ABBA 1 +0.34 ms (the separate-launch version, rejected), ABBA 2 -0.06 ms. Greedy speedbench full outputs were
+identical in all four arms of ABBA 2. Copies were forced on about 2.2-2.5 % of decode steps (422 / 487 forced rows in
+19,456 steps), almost all in `lc32`.
+
+Speedbench full tokens per step (deterministic across repeats) showed one cost: 13 of 73 requests changed by a
+verify step or so, and one long context prompt of 2.7K tokens needed 67 steps instead of 61 (long context category
+-0.8 % tokens per step). Every speedbench prompt is shorter than 5K tokens and the offline gain sat at 16K and above,
+so v2.9.3 runs the copy only for prompts of at least 8,192 tokens (`DFLASH_PCOPY_MIN_CTX`); below that the step
+returns before any launch and speedbench runs exactly as without the copy.
+
+### Release checks (this tree, 8K gate, both boxes)
+
+An ABBA on each box: box A in the order on, off, off, on; box B off, on, on, off. Same measures as above.
+
+| arm | lc32 32K tok/s, cold / cached | lc32 128K tok/s, cold / cached | step ms (median per-request `step_ms`, 73 measured requests) | speedbench full tok/s (summary geomean) | thinking c8 tok/s |
+|---|---:|---:|---:|---:|---:|
+| box A, off (A1, A2) | 62.1 / 63.5 | 60.6 / 49.9 | 39.42, 39.26 | 73.21, 73.52 | 279.2, 284.3 |
+| box A, on (B1, B2) | 67.8 / 70.5 | 65.5 / 48.2 | 39.53, 39.49 | 73.15, 72.99 | 281.0, 268.5 |
+| box B, off (A1, A2) | 64.3 / 62.5 | 56.8 / 48.2 | 39.45, 39.62 | 73.01, 72.82 | 282.0, 268.6 |
+| box B, on (B1, B2) | 74.7 / 69.9 | 54.4 / 54.8 | 39.47, 39.47 | 73.09, 73.06 | 272.9, 279.1 |
+
+(`lc32` cells: the pair of runs pooled, cold and cached separately.) At 32K: box A +10.1 % (62.8 -> 69.1 tok/s,
+tokens per step +12.8 %), box B +14.0 % (63.4 -> 72.2, +18.0 %). At 128K: box A +1.5 %, box B +4.6 %. The 128K cells
+hold 3 requests each and are noisy: box A's cached cell fell 3.4 % and box B's cold cell 4.2 %, while the other cell
+on each box rose (box A cold +8.2 %, box B cached +13.5 %).
+
+The gate: in all four arms on both boxes every one of the 73 speedbench full requests took the same number of verify
+steps as the first off arm, and greedy outputs were identical on 73 / 73 speedbench and 30 / 30 warm prompts. With the
+gate, speedbench never reaches the copy; its speed differences are run-to-run timing.
+
+Agent mode (speedbench agent histories are 5-16K tokens, so the 8K gate admits part of them). Pooled over the turns of
+8K-16K tokens (sum of tokens over sum of verify steps; 36 turns at 160 tokens, 18 at 512):
+
+| | box A off | box A on | box B off | box B on |
+|---|---|---|---|---|
+| 160-token turns, tokens per step | 4.03, 3.93, 3.72, 3.61 | 3.90, 3.89 | 3.96, 3.80 | 3.81, 3.92 |
+| 512-token turns, tokens per step | 3.94, 3.95, 3.95, 4.10 | 4.12, 4.15 | 3.77, 3.75 | 3.82, 3.69 |
+| 160-token turns, end-to-end s (normalized to the first off arm's tokens) | 215.8, 215.5, 217.2, 218.2 | 217.5, 217.0 | 214.6, 216.1 | 218.5, 216.9 |
+| 512-token turns, end-to-end s | 181.9, 186.3, 185.4, 183.4 | 188.3, 185.3 | 188.5, 189.7 | 188.7, 187.4 |
+
+(Box A's off column includes the two off arms of the gate screen below.) Tokens per step with the copy stays inside the
+off arms' range; end-to-end is +0.3 / +1.4 % on box A and +1.1 / -0.6 % on box B, against off-arm spreads of 1.2 % and
+2.4 % on box A. The gate stays at 8,192 tokens.
+
+Memory (box B, `KVS293`): thinking c24 (48 x 2,048 tokens) together with a cold 240K-token needle, worst MemAvailable
+4.9 GiB, 48 / 48 completed, needles 128K and 240K PASS. Agent loops (24 x ~72K-token contexts, two turns): box A 24 / 24
+turn-2 prefix-cache hits, time to first token 3.0 s, turn-2 wall 217.2 s (`AG293-s05`); box B 24 / 24, 2.9 s, 214.5 s,
+worst MemAvailable 5.2 GiB (`AG293-s06`).
+
+Gate screen (box A, report only): the same tree with `DFLASH_PCOPY_MIN_CTX=16384` (C1, C2) against off (A3, A4),
+each warm, `lc32` and agent mode. `lc32` at 32K: off 64.1 / 65.1 tok/s (2.98 / 3.05 tokens per step), 16K gate 71.3 /
+71.0 (3.43 / 3.35), +10.2 %; at 128K off 53.1 / 51.5, 16K gate 55.4 / 49.5 (flat within the cell noise). No agent
+turn reaches 16K tokens (the longest is 15,873), so under the 16K gate the agent-mode arms run exactly the off path;
+their end-to-end times (raw sums of time to first token and decode) still spread from 215.2 to 223.2 s at 160-token
+turns and from 185.6 to 195.0 s at 512-token turns, about 4 % between arms of identical behaviour. That is the noise
+floor of agent-mode end-to-end against which the 8K gate's +0.3 to +1.4 % was read; the gate stays at 8,192 tokens.

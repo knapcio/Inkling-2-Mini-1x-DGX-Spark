@@ -1,0 +1,2 @@
+{"label":"PCb1r-s05","ready_utc":"2026-11-25T05:10:14Z","startup_s":132,"memavail_ready_gib":6.1,"kv":"[2026-11-25 05:10:08 PID135] max_total_num_tokens=2340096, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.35 GB"}
+{"memavail_end_gib":5.9}

@@ -1,0 +1,17 @@
+2026-11-25T16:41:53Z V293C2-s05 mode warm
+V293C2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.67, "geomean_tok_s": 73.77, "aggregate_tok_s": 71.69, "median_ttft_ms": 160.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.05, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.272, "drift_pct_all": -0.272}}
+wrote results/V293C2-s05/warm-sbquick.json (1.4 min)
+2026-11-25T16:43:19Z V293C2-s05 mode lc32
+V293C2-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32700    6.062      5394.3      0.249        None      71.0 [58.6, 85.9]        49.33     3.448
+128K     130841   33.972     3851.4      0.454        None      49.0 [44.3, 54.1]        62.404    2.946
+wrote results/V293C2-s05/longctx-lc32.json (5.0 min)
+2026-11-25T16:48:18Z V293C2-s05 mode sba
+V293C2-s05: {"failed": 0, "valid_decode": 94, "ALL": {"n": 94, "median_tok_s": 73.95, "geomean_tok_s": 75.91, "aggregate_tok_s": 74.4, "median_ttft_ms": 248.5, "truncated_frac": 0.681, "reasoning_token_frac": 0.541, "reasoning_char_frac": 0.741, "median_step_ms": 43.55, "median_tokens_per_step": 3.169, "steps_source": "response", "median_accept_rate": 0.3171, "median_draft_per_step": 7.0}}
+V293C2-s05: agent: cold TTFT 1040.4 ms, cached-turn TTFT 241.3 ms, cache hit vs ideal 0.9914, e2e 2.309 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/V293C2-s05/sbagent.json (3.8 min)
+2026-11-25T16:52:04Z V293C2-s05 mode sba512
+V293C2-s05-512: {"failed": 0, "valid_decode": 47, "ALL": {"n": 47, "median_tok_s": 74.8, "geomean_tok_s": 78.36, "aggregate_tok_s": 77.62, "median_ttft_ms": 250.6, "truncated_frac": 0.234, "reasoning_token_frac": 0.471, "reasoning_char_frac": 0.75, "median_step_ms": 44.18, "median_tokens_per_step": 3.319, "steps_source": "response", "median_accept_rate": 0.3333, "median_draft_per_step": 7.0}}
+V293C2-s05-512: agent: cold TTFT 1034.8 ms, cached-turn TTFT 242.2 ms, cache hit vs ideal 0.9914, e2e 3.614 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/V293C2-s05/sbagent512.json (3.4 min)

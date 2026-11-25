@@ -1,5 +1,45 @@
 # Changelog
 
+## v2.9.3 (2026-11-25)
+
+v2.9.2 plus the prompt copy for long prompts, on by default with `SPEC=dflash2`. v2.9.2 passed a two-box qualification
+(Q292R and Q292S on both boxes); the prompt copy was release-checked on both boxes.
+
+- `DFLASH_PCOPY=12` (`inkling_pcopy`, new default): each decode step, the most recent earlier occurrence of the last
+  12 committed tokens in the request's own context is looked up; at a match of 16 tokens or more, the tokens that
+  followed it replace the drafter's proposals for the rest of the draft block. Draft proposals only: the target
+  verifies every token; sampled requests give each copied slot a point mass (exact acceptance law, GPU Monte Carlo
+  test), and the verify-width cap keeps the copied rows live. Two fused kernels per step (a scan split over
+  2,048-token chunks with an atomic maximum, then the per-row copy), bit-identical to the reference step on random and
+  directed cases; no-hit cost 12 us GPU per step at 128K context.
+- `DFLASH_PCOPY_MIN_CTX=8192`: the copy runs only for prompts of at least 8,192 tokens. Without it one speedbench long
+  context prompt (2.7K tokens) needed 67 verify steps instead of 61; every speedbench prompt is under 5K tokens, so
+  speedbench now runs exactly as without the copy.
+- Box A, two ABBA runs, speedbench `longctx`: decode at 32K 64.2 -> 70.5 tok/s (+9.8 %, tokens per step 2.98 ->
+  3.30), at 128K 53.9 -> 55.2 (+2.4 %); within each ABBA every run with the copy was faster at 32K. Speedbench full,
+  agent mode and thinking c8 flat; single-request decode step 39.49 ms off vs 39.43 ms on (median per-request `step_ms` of the 73
+  measured requests, second ABBA); greedy speedbench outputs identical in all four arms. Copies were forced on about 2 % of speedbench
+  decode steps.
+- Release checks on this tree with the 8K gate, an ABBA on each box (copy off / on: speedbench full, `longctx`, agent
+  mode, thinking c8). `longctx` decode at 32K: box A 62.8 -> 69.1 tok/s (+10.1 %; cold +9.2 %, cached +11.0 %), box B
+  63.4 -> 72.2 (+14.0 %; cold +16.2 %, cached +11.9 %); at 128K +1.5 % / +4.6 % (cells of 3 requests, noisy: box A
+  cached -3.4 %, box B cold -4.2 %). The gate check: speedbench full step counts identical to the off arm on 73 / 73
+  requests in every arm on both boxes, greedy outputs identical on 73 / 73 speedbench and 30 / 30 warm prompts.
+  Single-request step (median per-request `step_ms`, 73 measured requests): box A 39.34 ms off vs 39.51 on, box B 39.54 vs 39.47; speedbench
+  full and thinking c8 within the off arms' spread. Agent mode: on the 8-16K-token turns the gate admits, tokens per
+  step with the copy stayed inside the off arms' range on both boxes; end-to-end +0.3 / +1.4 % (box A, 160 / 512-token
+  turns) and +1.1 / -0.6 % (box B), against an off-arm spread of up to 2.4 %. Memory (box B, thinking c24 + cold 240K
+  needle): worst MemAvailable 4.9 GiB, 48 / 48 at c24, needles 128K / 240K PASS. Agent loops (24 x 72K, two turns):
+  box A and box B 24 / 24 turn-2 hits (time to first token 3.0 / 2.9 s).
+- Results: `results/PCa1-s05/`, `results/PCa2-s05/`, `results/PCb1r-s05/`, `results/PCb2-s05/` (first ABBA),
+  `results/PCrA1-s05/`, `results/PCrA2-s05/`, `results/PCrB1-s05/`, `results/PCrB2-s05/` (second ABBA); release
+  checks: `results/V293A1-s05/`, `results/V293A2-s05/`, `results/V293B1-s05/`, `results/V293B2-s05/`,
+  `results/V293A1-s06/`, `results/V293A2-s06/`, `results/V293B1-s06/`, `results/V293B2-s06/`, `results/KVS293-s06/`,
+  `results/AG293-s05/`, `results/AG293-s06/`; gate screen: `results/V293C1-s05/`, `results/V293C2-s05/`,
+  `results/V293A3-s05/`, `results/V293A4-s05/`; v2.9.2 qualification: `results/Q292R-s05/`, `results/Q292R-s06/`,
+  `results/Q292S-s05/`, `results/Q292S-s06/`; prompt-end touch repeats and window-pool contrasts (default interval):
+  `results/PT1-s06/`, `results/PT2-s06/`, `results/SWA1-s06/`, `results/SWA5-s06/`.
+
 ## v2.9.2 (2026-11-25)
 
 v2.9.1 plus the prefill loop-bank hoist and the prompt-end cache touch, both on by default. Quality bracket on one box

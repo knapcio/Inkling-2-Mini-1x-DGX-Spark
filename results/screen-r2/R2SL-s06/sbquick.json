@@ -64,7 +64,7 @@
   "notes": "r2 R2SL-s06",
   "tool_version": "0.3.0",
   "client": {
-   "host": "spark-06",
+   "host": "box-b",
    "python": "3.12.3",
    "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
   }
@@ -1729,7 +1729,7 @@
   ]
  },
  "client": {
-  "host": "spark-06",
+  "host": "box-b",
   "python": "3.12.3",
   "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
  },

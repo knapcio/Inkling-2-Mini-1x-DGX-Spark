@@ -1,0 +1,1 @@
+{"label": "V293B1-s05-c8", "started": "2026-11-25T15:22:12+01:00", "concurrency": 8, "requests": 16, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 112.48, "completion_tokens": 31604, "aggregate_tok_s": 281.0, "per_request_decode_tok_s_median": 38.1, "ttft_median_s": 0.54, "length_finishes": 14}

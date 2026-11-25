@@ -1,0 +1,21 @@
+2026-11-25T04:11:24Z PCa1-s05 mode warm
+PCa1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.2, "geomean_tok_s": 72.87, "aggregate_tok_s": 70.75, "median_ttft_ms": 163.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.96, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2437, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.515, "drift_pct_all": -0.515}}
+wrote results/PCa1-s05/warm-sbquick.json (1.4 min)
+2026-11-25T04:12:49Z PCa1-s05 mode sbf
+PCa1-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.19, "geomean_tok_s": 72.82, "aggregate_tok_s": 70.94, "median_ttft_ms": 165.4, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.61, "median_tokens_per_step": 2.833, "steps_source": "response", "median_accept_rate": 0.2635, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.125, "drift_pct_all": 0.125}}
+wrote results/PCa1-s05/speedbench.json (4.9 min)
+2026-11-25T04:17:43Z PCa1-s05 mode lc32
+PCa1-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32693    6.21       5264.6      0.249        None      65.2 [55.6, 76.5]        48.783    3.126
+128K     130843   34.552     3786.8      0.443        None      55.3 [49.6, 61.7]        62.094    3.419
+wrote results/PCa1-s05/longctx-lc32.json (5.0 min)
+2026-11-25T04:22:41Z PCa1-s05 mode sba
+PCa1-s05: {"failed": 0, "valid_decode": 94, "ALL": {"n": 94, "median_tok_s": 71.13, "geomean_tok_s": 73.33, "aggregate_tok_s": 71.45, "median_ttft_ms": 246.7, "truncated_frac": 0.681, "reasoning_token_frac": 0.532, "reasoning_char_frac": 0.73, "median_step_ms": 42.79, "median_tokens_per_step": 2.944, "steps_source": "response", "median_accept_rate": 0.2857, "median_draft_per_step": 7.0}}
+PCa1-s05: agent: cold TTFT 1060.2 ms, cached-turn TTFT 237.8 ms, cache hit vs ideal 0.9914, e2e 2.355 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/PCa1-s05/sbagent.json (3.9 min)
+2026-11-25T04:26:35Z PCa1-s05 mode sba512
+PCa1-s05-512: {"failed": 0, "valid_decode": 47, "ALL": {"n": 47, "median_tok_s": 74.3, "geomean_tok_s": 77.23, "aggregate_tok_s": 75.37, "median_ttft_ms": 243.4, "truncated_frac": 0.255, "reasoning_token_frac": 0.457, "reasoning_char_frac": 0.747, "median_step_ms": 43.35, "median_tokens_per_step": 3.233, "steps_source": "response", "median_accept_rate": 0.3214, "median_draft_per_step": 7.0}}
+PCa1-s05-512: agent: cold TTFT 1062.4 ms, cached-turn TTFT 232.7 ms, cache hit vs ideal 0.9914, e2e 3.49 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/PCa1-s05/sbagent512.json (3.5 min)
+2026-11-25T04:30:02Z PCa1-s05 mode think8

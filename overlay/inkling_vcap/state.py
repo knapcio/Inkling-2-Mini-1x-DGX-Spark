@@ -99,6 +99,7 @@ class VcapState:
         self.algorithm = ""
         self.df = None
         self.df_planned = None     # dfcap.Cutoff of the current DFLASH step (exactness guard in _accept_block)
+        self.df_min_live = None    # [bs] int64 live-row minimum for this step (inkling_pcopy: forced copy drafts + 1)
         self.df_policy = None      # dfcap.DfPolicyDevice (dfpolicy: mode)
         self.src_identity = True   # src_index currently the identity (dfcap.plan)
         # INKLING_VERIFY_CAP_STEPLOG: the full-width capture (dfsteplog.DfStepLog).

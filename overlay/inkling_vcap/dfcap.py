@@ -204,6 +204,11 @@ def plan(state, *, bs: int, mode: str, arg, sampled: Optional[torch.Tensor] = No
                            arg.pol.band_index(bs), arg, context=context)
     else:
         raise ValueError(mode)
+    min_live = getattr(state, "df_min_live", None)
+    if min_live is not None:
+        # inkling_pcopy: a row with k forced copy drafts keeps k + 1 live rows (then clamped like every row; a configured
+        # maximum below k + 1 cuts the run like any stopping rule: the copies past it are simply not verified)
+        lens = torch.maximum(lens, min_live[:bs].to(lens.dtype))
     state.live_lens[:bs].copy_(lens.clamp_(max(1, lo), hi if hi > 0 else stride))
     state.live_lens[bs:].zero_()  # graph-padding requests: dead, remapped to row 0, capped to 0
     logic.build_src_index(state.live_lens, state.layout, out=state.src_index)

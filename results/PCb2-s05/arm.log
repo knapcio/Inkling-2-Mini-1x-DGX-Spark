@@ -1,0 +1,21 @@
+2026-11-25T04:47:20Z PCb2-s05 mode warm
+PCb2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.71, "geomean_tok_s": 72.11, "aggregate_tok_s": 70.0, "median_ttft_ms": 164.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.22, "median_tokens_per_step": 2.651, "steps_source": "response", "median_accept_rate": 0.2405, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.43, "drift_pct_all": -0.43}}
+wrote results/PCb2-s05/warm-sbquick.json (1.4 min)
+2026-11-25T04:48:46Z PCb2-s05 mode sbf
+PCb2-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.83, "geomean_tok_s": 72.56, "aggregate_tok_s": 70.65, "median_ttft_ms": 164.1, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.83, "median_tokens_per_step": 2.833, "steps_source": "response", "median_accept_rate": 0.2635, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.003, "drift_pct_all": 0.003}}
+wrote results/PCb2-s05/speedbench.json (4.9 min)
+2026-11-25T04:53:40Z PCb2-s05 mode lc32
+PCb2-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32693    6.212      5262.9      0.244        None      66.1 [53.8, 81.3]        47.187    3.001
+128K     130843   34.581     3783.7      0.447        None      56.4 [44.8, 71.0]        61.787    3.52
+wrote results/PCb2-s05/longctx-lc32.json (5.0 min)
+2026-11-25T04:58:38Z PCb2-s05 mode sba
+PCb2-s05: {"failed": 0, "valid_decode": 94, "ALL": {"n": 94, "median_tok_s": 70.31, "geomean_tok_s": 72.26, "aggregate_tok_s": 70.63, "median_ttft_ms": 248.9, "truncated_frac": 0.681, "reasoning_token_frac": 0.565, "reasoning_char_frac": 0.761, "median_step_ms": 43.0, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2898, "median_draft_per_step": 7.0}}
+PCb2-s05: agent: cold TTFT 1058.4 ms, cached-turn TTFT 239.9 ms, cache hit vs ideal 0.9914, e2e 2.437 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/PCb2-s05/sbagent.json (3.9 min)
+2026-11-25T05:02:34Z PCb2-s05 mode sba512
+PCb2-s05-512: {"failed": 0, "valid_decode": 47, "ALL": {"n": 47, "median_tok_s": 71.35, "geomean_tok_s": 76.26, "aggregate_tok_s": 75.08, "median_ttft_ms": 250.3, "truncated_frac": 0.255, "reasoning_token_frac": 0.435, "reasoning_char_frac": 0.704, "median_step_ms": 44.25, "median_tokens_per_step": 3.1, "steps_source": "response", "median_accept_rate": 0.302, "median_draft_per_step": 7.0}}
+PCb2-s05-512: agent: cold TTFT 1059.3 ms, cached-turn TTFT 240.9 ms, cache hit vs ideal 0.9909, e2e 3.541 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/PCb2-s05/sbagent512.json (3.5 min)
+2026-11-25T05:06:06Z PCb2-s05 mode think8

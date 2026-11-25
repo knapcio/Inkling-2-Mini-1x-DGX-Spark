@@ -78,6 +78,9 @@ try:
     if _on("INKLING_DFLASH_FUSED_ACCEPT"):  # DFLASH sampled accept from the logits with sparse q (same law)
         import inkling_dfaccept
         inkling_dfaccept.install()
+    if _on("INKLING_DFLASH_PCOPY"):  # DFLASH: prompt-copy forced drafts (draft proposals only; after the verify cap)
+        import inkling_pcopy
+        inkling_pcopy.install()
     if _on("INKLING_DFLASH_PREFIX_TAIL") or _on("INKLING_DFLASH_TAIL_SNAPSHOTS"):  # DFLASH draft ring on prefix hits: (A) re-prefill the last N input tokens, (B) restore a prompt-end draft window snapshot
         import inkling_dftail
         inkling_dftail.install()

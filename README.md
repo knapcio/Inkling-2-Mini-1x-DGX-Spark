@@ -5,12 +5,12 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-25, v2.9.2):** basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes.
+**Status (2026-11-25, v2.9.3):** v2.9.2 (the base of v2.9.3) passed a two-box qualification: Q292R and Q292S on both boxes; v2.9.3's prompt copy was release-checked on both boxes.
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.
 `scripts/launch.sh` checks the drafter's sha256 on the host and again inside the container on every start, and the
-drafter's SGLang compatibility patch runs only inside the throwaway (`--rm`) serving container. Twenty-three overlay
+drafter's SGLang compatibility patch runs only inside the throwaway (`--rm`) serving container. Twenty-four overlay
 packages (`overlay/`) run on top of it by default: drafter byte cuts (MXFP8 drafter layers, since v2.8.4 on FlashInfer's MXFP8 GEMM where
 the shapes allow, and an FP8 64K hot-vocabulary plane for the candidate projection), the prefix tail and draft-tail snapshots that keep the drafter's window
 filled on prefix-cache hits (v2.8.1 / v2.9, see "Prefix tail" and "Draft-tail snapshots"), the certified greedy LM head on verify steps, the packed 12-bit global KV store,
@@ -19,7 +19,8 @@ verify-width cap with dead-row expert skip (v2.8.2: priced separately for greedy
 bucket), no expert work for the padding rows of CUDA-graph batches (v2.8.3, see "Padding rows"), two bit-identical
 prefill kernels, the sink gate (sliding-window layers since v2.8.2, global layers since v2.9.1) and the sliding-window
 prologue (v2.8.3) and the loop-bank hoist (v2.9.2), see "Prefill levers"; the prompt-end cache touch for agent loops
-(v2.9.2, see "Prefix cache in agent loops"), and the target-side kernel, prefill and
+(v2.9.2, see "Prefix cache in agent loops"), the prompt copy for long prompts (v2.9.3, see "Prompt copy for long
+documents"), and the target-side kernel, prefill and
 memory levers of v2.7.2. The
 target distribution is unchanged; the hoist changes only the floating-point summation order of one projection (quality
 checked with a five-run bracket, no drop). `SPEC=dspark` runs the model's own DSpark draft instead (the v2.7.2 profile, see
@@ -29,26 +30,29 @@ Long context: at 32K context the DFlash2 profile decodes about 8-17 % slower tha
 (v2.8.2's verify-cap policy 66.1, v2.8.1 64.3, v2.8 60-63, v2.7.2 72 tok/s; different runs and boxes). Its acceptance
 falls with context (3.10-3.17 vs 3.36 tokens per step at 32K), because the drafter sees only a 2,048-token window. At
 128K both decode at about 50 tok/s. For mostly long-context single-user
-work, `SPEC=dspark` is the faster choice.
+work, `SPEC=dspark` is the faster choice. Since v2.9.3 the prompt copy narrows the gap where the answer quotes the
+document: on speedbench `longctx` decode at 32K rises 10-14 % and at 128K 1.5-4.6 % (two boxes) (see "Prompt copy for long
+documents").
 
-Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes. The current column is one GB10 Spark on
+V2.9.2 (the base of v2.9.3) passed a two-box qualification: Q292R and Q292S on both boxes; v2.9.3's prompt copy was release-checked on both boxes. The current column is one GB10 Spark on
 2026-11-24 with the release defaults (`SPEC=dflash2`, verify-width cap on, `CTX=262144`); the stock and v2.7.2
-columns are the earlier two-box medians. Cells marked v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
-(box B); the others are the v2.8.x or v2.8 runs. v2.9 added draft-tail snapshots for agent loops; v2.9.1 runs the sink
+columns are the earlier two-box medians. Cells marked v2.9.3, v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
+(box B unless stated); the others are the v2.8.x or v2.8 runs. v2.9 added draft-tail snapshots for agent loops; v2.9.1 runs the sink
 gate on the global layers too (prefill); v2.9.2 adds the loop-bank hoist (prefill) and the prompt-end cache touch
-(agent-loop prefix hits). Single-request decode is unchanged.
+(agent-loop prefix hits); v2.9.3 adds the prompt copy for prompts of 8K tokens or more (long-context decode).
+Single-request decode on short prompts is unchanged.
 
-| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.2)** |
+| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.3)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
-| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.19** (v2.9.2, box B; v2.9.1 on the same box 73.12: unchanged within run spread) |
+| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.08** (v2.9.3, box B, mean of 2 runs; v2.9.2 73.19: unchanged, the prompt copy never fires on these prompts) |
 | agent loops (speedbench agent mode, 5-16K-token histories), end-to-end time against prefix tail and snapshots off, 160- / 512-token turns | - | - | **-4.4 % / -4.9 %** (v2.9 screen; decode 73.9 -> 78.3 tok/s) |
 | decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **65.1 / 140.5 / 203.5 / 288.3** |
 | decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **79.0 / 141.6 / 211.3 / 298.2** |
 | thinking c8 / c24, aggregate tok/s (48 x 2,048 tokens, effort high, T=0.8) | - | 235.3 / 438.8 | **277.4 / 515.5** (v2.8) |
 | thinking c9 / c15, aggregate tok/s | - | - | **282.2 / 392.5** (v2.8.3; padx off 269.3 / 373.9) |
 | cold prefill, 8K tokens, tok/s | 3,399 | 5,439 | **5,657** (v2.9.2; v2.9.1: 5,595) |
-| decode at 32K / 128K context, c1, tok/s (512 tokens) | 55.1 / 37.1 | 71.9 / 49.0 (one box) | **66.05 / 50.91** (v2.8.2 policy, box A) |
+| decode at 32K / 128K context, c1, tok/s (512 tokens) | 55.1 / 37.1 | 71.9 / 49.0 (one box) | **69.1-72.2 / 54.5-55.5** (v2.9.3 with the prompt copy, boxes A / B, 2 runs each; copy off: 62.8-63.4 / 52.1-54.7) |
 | KV pool, global-layer tokens | 843K | 2.13-2.17M | **2,371,200** (v2.9, box B, `MEM_FRACTION=0.88`) |
 | MemAvailable after start / worst case (thinking c24 + cold 240K needle) | ~40 GiB / - | 6.4-7.7 / 5.4 GiB | **4.5-5.5 (v2.8.1) / 4.8 GiB** (v2.9.2, box B; v2.9.1: 4.8 GiB) |
 
@@ -105,7 +109,11 @@ release defaults on box B (`results/V29R-s06/`): all 73 prompts 73.34 against v2
 box (`results/Q284R-s06/`), flat; greedy outputs identical to v2.8.4 on 30 / 30 prompts. In speedbench agent mode the
 release run scored 76.33 (160-token turns) and 78.86 (512-token turns), geometric mean tok/s. The v2.8.4 qualification
 runs on both boxes passed (`results/Q284R-s06/`, `results/Q284R-s05/`, `results/Q284S-s06/`,
-`results/Q284S-s05/`). v2.8.4 is the release defaults on box A
+`results/Q284S-s05/`). The v2.9.2 qualification passed on both boxes (`results/Q292R-s05/`, `results/Q292R-s06/`,
+`results/Q292S-s05/`, `results/Q292S-s06/`): speedbench full 72.95 / 73.12 on box A / B (v2.8.4: 72.95 / 73.43), quality
+guard 30 / 30 and sanity on both, cold prefill +1.6 to +6.4 % against v2.8.4 at 1K-128K, thinking c1 / c8 / c24 / c48
+per-request decode within run spread, worst MemAvailable 4.2 / 5.6 GiB over three thinking-c24 rounds with a cold
+240K needle after each (3 / 3 PASS per box), 200K and 250K contexts 2 / 2 each. v2.8.4 is the release defaults on box A
 (`results/REL284-s05/`, one run, 73 prompts, 0 failed): median time to
 first token 164.8 ms, median step 39.27 ms, 2.833 tokens per step. The same-box reference with `mx8w` off is 73.13 /
 72.73 (`results/MXa0-s05/`, `results/MXb0-s05/`); v2.8.3's 72.90 was measured on box B, so the release rows of the two
@@ -215,6 +223,48 @@ Interactive streaming with many concurrent long prompts: `SGLANG_ARGS="--prefill
 tokens earlier (time to first token p50 373 -> 213 s on 24 x 72K) but finishes every response later (completion
 +2-3 %, p90 time to first token +3 %, tail +15 %). It is off by default and does not help agent loops, which wait for
 the whole response.
+
+### Prompt copy for long documents
+
+`DFLASH_PCOPY=12` (`overlay/inkling_pcopy`, default on since v2.9.3, `SPEC=dflash2` only). The drafter sees a
+2,048-token window, so when an answer quotes a long document it cannot see the passage it is quoting. Each decode
+step, the prompt copy looks for the most recent earlier occurrence of the last 12 committed tokens in the request's
+own context (prompt and output so far); when that match extends to at least 16 tokens, the tokens that followed it
+replace the drafter's proposals for the rest of the draft block. These are draft proposals only: the target verifies
+every token as before. Sampled requests give each copied slot a point mass, which the exact acceptance rule needs, and
+the verify-width cap keeps the copied rows live. The step is two small kernels (a scan of the context split over
+2,048-token chunks, then the copy) with no host synchronisation.
+
+The copy is armed only for requests whose prompt has at least `DFLASH_PCOPY_MIN_CTX` tokens (8,192). On short
+prompts true copies are rare and a forced copy that is wrong costs acceptance: without the gate one speedbench long
+context prompt of 2.7K tokens needed 67 verify steps instead of 61 for the same output. Every speedbench prompt is
+shorter than 5K tokens, so with the gate speedbench runs exactly as without the copy; the gain sits at 16K tokens of
+context and above.
+
+Measured on box A, two ABBA runs (off, on, on, off), speedbench `longctx` (`lc32`: 32K and 128K documents, 3 repeats
+cold and cached, 512 decoded tokens): decode in tok/s is the sum of decoded tokens over the sum of decode seconds of
+the six requests per size; tokens per step likewise. The first ABBA ran an earlier version of the copy (one kernel
+launch per piece of work), the second the shipped kernels; neither had the 8K gate, which only affects prompts
+shorter than 8K.
+
+| | off | on |
+|---|---:|---:|
+| decode at 32K, tok/s, ABBA 1 / ABBA 2 | 65.5, 64.0 / 60.5, 66.6 | 74.5, 66.0 / 67.5, 73.8 |
+| mean of the four runs, 32K: decode tok/s / tokens per step | 64.2 / 2.98 | **70.5 / 3.30** (+9.8 % / +10.5 %) |
+| decode at 128K, tok/s, ABBA 1 / ABBA 2 | 55.8, 57.7 / 50.7, 51.4 | 58.6, 56.1 / 50.3, 55.9 |
+| mean of the four runs, 128K: decode tok/s / tokens per step | 53.9 / 3.27 | **55.2 / 3.41** (+2.4 % / +4.2 %) |
+| single-request decode step, ms (median of the per-request `step_ms` over the 73 measured speedbench full requests), ABBA 2 | 39.46, 39.52 | 39.22, 39.63 |
+
+Within each ABBA every run with the copy decoded faster at 32K than every run without it. Speedbench full, agent
+mode and thinking c8 were flat (docs/experiments.md has every arm); greedy outputs of speedbench full were identical
+in all four arms of the second ABBA. Across speedbench, copies were forced on about 2 % of decode steps, almost all
+in the long documents. With the earlier one-launch-per-piece version the decode step was 0.3 ms longer, which is why
+the shipped version runs two fused kernels (the extra host launch, about 10 us, is hidden behind the GPU: -0.06 ms
+in ABBA 2). `DFLASH_PCOPY=0` turns it off.
+
+Release check on this tree, with the gate, one ABBA per box: `longctx` decode at 32K +10.1 % (box A) and +14.0 %
+(box B); speedbench full took the same verify steps and gave identical greedy outputs on 73 / 73 prompts in every arm;
+agent mode and thinking c8 within the off arms' spread (docs/experiments.md, "Release checks").
 
 ### Decode by prompt type and concurrency
 
@@ -507,6 +557,7 @@ quick: 30 prompts x 160 tokens, c1, T=0; decode table; thinking load; at long co
 | Fused sampled accept for the DFlash2 selector draft: the accept computed from the logits with a sparse draft q (no dense [requests, 7, vocabulary] q or [requests, 8, vocabulary] p), at 16 or more requests without a verify-cap cutoff | `DFLASH_FUSED=1` (`INKLING_DFLASH_FUSED_MIN_BS=16`) | thinking c24 per-request decode +2.3 % (ABBA, cap off); below 16 requests the stock accept | same law as the stock accept | ours |
 | Prefix tail: on a prefix-cache hit of a prompt of at most 4,096 tokens, the last 2,048 prompt tokens are prefilled again (SGLang's own prefix bound, as for logprob requests), so the drafter's 2,048-token window is filled instead of drafting from the uncached suffix only | `DFLASH_PREFIX_TAIL=2048`, `DFLASH_PREFIX_TAIL_MAX_INPUT=4096`; `0` = off | speedbench full 69.59 -> 72.86 (long context 63.09 -> 73.53, agentic 73.44 -> 82.74), same box (v2.8.1 at `MEM_FRACTION=0.89`, v2.8 at 0.85); +0.1-0.5 s time to first token on bounded hits | prefill-only: the same positions a cold prefill computes (floating-point order of the prefill chunking only); draft-side benefit | ours |
 | Draft-tail snapshots: the drafter's 2,048-position window at the end of each prompt is kept in one of 8 slots, keyed by content and cache salt, and copied back into the drafter ring on a later prefix-cache hit instead of a ring rebuilt from the uncached suffix | `DFLASH_TAIL_SNAPSHOTS=8`; `0` = off | with the prefix tail, against both off: agent loops -4.4 / -4.9 % end-to-end time at 160- / 512-token turns (decode 73.9 -> 78.3 tok/s); speedbench full long context +6.7 %, agentic +1.3 %, code +1.7 %; time to first token unchanged | draft-only state; greedy differences in the verify-schedule class (no token outside the reference's top-k); 320 MiB charged to the KV budget | ours |
+| Prompt copy: for prompts of 8K tokens or more, when the last 12 committed tokens recur earlier in the request's context with a match of at least 16 tokens, the tokens that followed replace the drafter's proposals for the rest of the block (two fused kernels per decode step, no host sync) | `DFLASH_PCOPY=12`, `DFLASH_PCOPY_MIN_CTX=8192`; `DFLASH_PCOPY=0` = off | speedbench `longctx` decode at 32K +9.8 %, 128K +2.4 % (mean of four runs per arm in two ABBAs, box A); speedbench full, agent mode and thinking c8 flat; single-request step within 0.1 ms | draft proposals only; sampled copies carry a point mass in the draft q (exact acceptance law, GPU Monte Carlo test); greedy outputs identical on speedbench full | ours; the copy rule is n-gram prompt lookup (idea: prompt lookup decoding, **Apoorv Saxena**, 2023) |
 | Exact sampled verification: the residual / bonus CDF pass of SGLang's reject sampler takes the first lane above the coin that is inside the vocabulary and has positive mass (stock could emit a zero-mass padded row or an out-of-range lane under FP32 rounding); the DFLASH selector walk no longer clamps a no-match to a zero-probability last candidate; the DSpark Markov sampler's Philox fold (SGLang PR #51681) and the blockwise-rejection fixes (SGLang PR #51692, a path the recipe does not use) | `RSFIX=1` | correctness fix, both profiles | law unchanged in exact arithmetic; only rounding events that emitted a zero-probability token change | ours (`reject`, `selector`); **SGLang PR #51681 and PR #51692** |
 
 The drafter, byte-cut and certified-head effects are development screens on one box (each on against the same build
@@ -698,6 +749,7 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   -e INKLING_VERIFY_CAP_FASTPROBS=0 -e INKLING_VERIFY_CAP_FUSED_ACCEPT=0 -e INKLING_NOEXP=1 -e INKLING_PADX=1 \
   -e INKLING_DFLASH_BYTES=mx8,mx8w,hot8 -e INKLING_DFLASH_HOT_N= \
   -e INKLING_DFLASH_PREFIX_TAIL=2048 -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT=4096 -e INKLING_DFLASH_TAIL_SNAPSHOTS=8 \
+  -e INKLING_DFLASH_PCOPY=12 -e INKLING_DFLASH_PCOPY_MIN_CTX=8192 -e INKLING_PROMPT_TOUCH=1 \
   -e INKLING_DFLASH_FUSED_ACCEPT=1 -e INKLING_RSFIX=1 \
   -e INKLING_KV12=0 -e INKLING_KV12_MAX_PAGES=2048 \
   -e INKLING_CERT_WIDE=1 -e INKLING_CERT_WIDE_MAX_ROWS= -e INKLING_CERT_WIDE_STATS=0 \
@@ -815,6 +867,8 @@ Overlay switches (`OVERLAY=0` turns all of them off; each is described in `overl
 | `MOE2` (`INKLING_MOE2`) | `tiles` | tile tables for the routed-expert GEMMs at verify batch sizes (over `moe_tiles`); `INKLING_MOE2_NVFP4` / `INKLING_MOE2_MXFP8` override the tables |
 | `PFUSE` (`INKLING_PFUSE`) | `all` | prefill glue fusion (`loopmix,resnorm,sconvres`), extend batches of >= 512 rows only |
 | `PFUSE_HOIST` (`INKLING_PFUSE_HOIST`) | `1` | loop controller's source projection prepared once per loop pass (`inkling_phoist`; changes the FP32 summation order, not the math; quality bracketed equal; start-up self-test with fallback); `0` = off (v2.9.1 behaviour); `exact` = the bit-identical, slower variant; needs `PFUSE` with `loopmix` |
+| `DFLASH_PCOPY` (`INKLING_DFLASH_PCOPY`) | `12` | `SPEC=dflash2`: prompt copy, the key length of the match (12 is the only supported value); `0` = off (v2.9.2 behaviour). Set by the launcher only |
+| `DFLASH_PCOPY_MIN_CTX` (`INKLING_DFLASH_PCOPY_MIN_CTX`) | `8192` | the prompt copy runs only for requests whose prompt has at least this many tokens |
 | `PROMPT_TOUCH` (`INKLING_PROMPT_TOUCH`) | `1` | after a request finishes, re-touch its prompt path in the prefix cache (`inkling_ptouch`; eviction order only, nothing computed changes); `0` = off (v2.9.1 behaviour) |
 | `ATTN_GATE` (`INKLING_ATTN_GATE`) | `all` | sink gate in the prefill attention epilogue on the sliding-window and global layers (`inkling_attn`; bit-identical to `gate_sink`); `1` = sliding-window layers only; off by itself while `SGLANG_KERNEL_API_LOGLEVEL` is non-zero (that logging reads the output buffer the gate leaves unwritten); `0` = off |
 | `PROLOGUE` (`INKLING_PROLOGUE`) | `1` | sliding-window prefill K conv + L2 clip and V conv + value norm, one kernel each (`inkling_prologue`; bit-identical, stock row-sum order); `0` = off |

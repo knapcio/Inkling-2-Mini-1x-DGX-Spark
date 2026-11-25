@@ -1,0 +1,2 @@
+{"label":"V293A2-s06","ready_utc":"2026-11-25T16:04:02Z","startup_s":132,"memavail_ready_gib":4.7,"kv":"[2026-11-25 16:03:58 PID131] max_total_num_tokens=2349440, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.03 GB"}
+{"memavail_end_gib":4.7}
