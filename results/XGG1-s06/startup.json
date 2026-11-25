@@ -1,0 +1,2 @@
+{"label":"XGG1-s06","ready_utc":"2026-11-24T23:31:13Z","startup_s":171,"memavail_ready_gib":6.0,"kv":"[2026-11-24 23:31:09 PID134] max_total_num_tokens=2343040, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.60 GB"}
+{"memavail_end_gib":6.3}

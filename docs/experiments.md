@@ -1438,3 +1438,35 @@ Release defaults (`V29S`): KV pool 2,371,200 tokens, worst 4.6 GiB, needles at 1
 
 Release run (`V29R`, box B): speedbench full 73.34 against v2.8.4's 73.43 on the same box (`Q284R`), flat; speedbench
 agent mode 76.33 (160-token turns) and 78.86 (512-token turns), geometric mean tok/s.
+
+## v2.9.1: sink gate on the global layers
+
+Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes. Runs
+on box B: release `results/PF291-s06/` (prefill, speedbench full), `results/KVS291-s06/` (worst case, needles);
+exactness `results/XG291r-s06/` (gate on the sliding-window layers), `results/XG291g-s06/` (gate on all layers),
+`results/XGGa-s06/`, `results/XGG1-s06/`; A/B `results/PFGa-s06/`, `results/PFG1-s06/` (prefill),
+`results/KVSGa-s06/`, `results/KVSG1-s06/` (memory).
+
+v2.8.2 moved the sink gate (`gate_sink`) into the epilogue of the sliding-window prefill attention kernel. v2.9.1 does
+the same on the global layers, on both the BF16 and the packed 12-bit KV paths (`ATTN_GATE=all`; `1` keeps the
+sliding-window-only gate). Kernel: -840 us per 8K global-layer visit, -6.7 ms per 8K chunk.
+
+Exactness: the GPU check finds y and LSE bit-identical to stock `gate_sink` on every path, including captured pairs
+and replays. In serving, the log-probability dump with the gate on all layers matches the sliding-window-only gate on
+30 / 30 records, and greedy outputs equal v2.9's release run on 30 / 30 prompts.
+
+Prefill, cold, tok/s (box B, mean of 2 runs):
+
+| context | v2.9.1 release defaults | v2.8.3 release defaults | change | A/B, all layers against sliding-window only |
+|---|---:|---:|---:|---:|
+| 1K | 2,821 | 2,864 | ~flat | - |
+| 8K | 5,595 | 5,553 | +0.8 % | +0.4 % |
+| 32K | 5,236 | 5,217 | +0.4 % | +0.4 % |
+| 128K | 3,824 | 3,788 | +1.0 % | +0.5 % |
+
+Speedbench full: 73.12 against v2.9's 73.34 on the same box, decode unchanged within the run-to-run spread.
+
+Memory: release defaults worst MemAvailable 4.8 GiB, needles at 128K and 240K PASS; `MEM_FRACTION` stays 0.88. The
+A/B memory pair (gate on all layers / sliding-window only) gave 5.2 / 5.4 GiB. Its worst-case aggregate (326.7 vs
+348.0 tok/s) reflects a different number of generated tokens at T=0.8 (86,182 vs 91,254), not speed: wall time,
+per-request decode and time to first token were equal or better with the gate on all layers.

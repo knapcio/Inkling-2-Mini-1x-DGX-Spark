@@ -1,0 +1,2 @@
+{"label":"XG291r-s06","ready_utc":"2026-11-25T06:23:16Z","startup_s":192,"memavail_ready_gib":7.6,"kv":"[2026-11-25 06:23:14 PID135] max_total_num_tokens=2273408, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=7.99 GB"}
+{"memavail_end_gib":7.8}

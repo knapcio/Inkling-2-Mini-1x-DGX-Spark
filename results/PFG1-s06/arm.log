@@ -1,0 +1,19 @@
+2026-11-24T23:51:35Z PFG1-s06 mode warm
+PFG1-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.66, "geomean_tok_s": 73.08, "aggregate_tok_s": 70.89, "median_ttft_ms": 164.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.29, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.131, "drift_pct_all": -0.131}}
+wrote results/PFG1-s06/warm-sbquick.json (1.4 min)
+2026-11-24T23:53:00Z PFG1-s06 mode pf
+PFG1-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1K       1000.0   0.354      2824.9      0.383        None      -                        -         -
+8K       8160.0   1.486      5491.3      0.253        None      -                        -         -
+32K      32703.0  6.309      5183.5      0.268        None      63.5 [55.0, 73.4]        -         -
+128K     130922.0 34.658     3777.5      17.326       None      45.2 [33.2, 61.4]        -         -
+wrote results/PFG1-s06/longctx.json (3.3 min)
+2026-11-24T23:56:19Z PFG1-s06 mode pf
+PFG1-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1K       1014.0   0.348      2913.8      0.385        None      -                        -         -
+8K       8159.0   1.478      5520.3      0.251        None      -                        -         -
+32K      32702.0  6.312      5180.9      0.245        None      59.8 [51.2, 69.8]        -         -
+128K     130920.0 34.547     3789.6      17.347       None      49.5 [39.7, 61.7]        -         -
+wrote results/PFG1-s06/longctx.json (3.3 min)

@@ -1,5 +1,29 @@
 # Changelog
 
+## v2.9.1 (2026-11-25)
+
+Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes.
+
+The sink gate now also runs on the global layers in prefill; decode is unchanged. Box B, release defaults: cold
+prefill 8K / 32K / 128K +0.8 / +0.4 / +1.0 % against v2.8.3; speedbench full 73.12 (v2.9 on the same box 73.34);
+worst case 4.8 GiB. Results (box B): `results/PF291-s06/`, `results/KVS291-s06/`, `results/XG291r-s06/`,
+`results/XG291g-s06/`, `results/KVSGa-s06/`, `results/KVSG1-s06/`, `results/PFGa-s06/`, `results/PFG1-s06/`,
+`results/XGGa-s06/`, `results/XGG1-s06/`.
+
+- `ATTN_GATE=all` (`inkling_attn`, the new default): the sink gate (`gate_sink`), which v2.8.2 computes in the
+  epilogue of the sliding-window prefill attention kernel, now also runs on the global layers, on both the BF16 and the
+  packed 12-bit KV paths. Bit-identical: in the GPU check, y and LSE equal stock `gate_sink` on every path, including
+  captured pairs and replays; in serving, the log-probability dump with the gate on all layers matches the
+  sliding-window-only gate on 30 / 30 records, and greedy outputs equal v2.9's on 30 / 30 prompts. `ATTN_GATE=1`
+  keeps the v2.9 behaviour (sliding-window only), `0` turns it off.
+- Kernel: -840 us per 8K global-layer visit, -6.7 ms per 8K chunk. Same-tree A/B, all layers against
+  sliding-window only: +0.4 / +0.4 / +0.5 % at 8K / 32K / 128K.
+- Cold prefill, release defaults (box B, mean of 2 runs) against v2.8.3: 1K 2,821 vs 2,864 (about flat), 8K 5,595
+  vs 5,553 (+0.8 %), 32K 5,236 vs 5,217 (+0.4 %), 128K 3,824 vs 3,788 (+1.0 %).
+- Speedbench full 73.12 against v2.9's 73.34 on the same box: decode unchanged within the run-to-run spread.
+- Memory: worst MemAvailable 4.8 GiB, needles at 128K and 240K PASS; gate on all layers against sliding-window only
+  5.2 / 5.4 GiB; `MEM_FRACTION` stays 0.88.
+
 ## v2.9 (2026-11-25)
 
 Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes.

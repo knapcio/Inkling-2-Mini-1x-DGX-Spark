@@ -1,0 +1,2 @@
+{"label":"KVSG1-s06","ready_utc":"2026-11-25T04:20:34Z","startup_s":126,"memavail_ready_gib":5.7,"kv":"[2026-11-25 04:20:32 PID134] max_total_num_tokens=2355840, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.05 GB"}
+{"memavail_end_gib":5.4}

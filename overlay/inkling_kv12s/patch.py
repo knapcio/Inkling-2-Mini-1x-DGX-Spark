@@ -783,7 +783,7 @@ class Forward:
 
 
 def _packed_prefill_in_capture(q, layer, page_table, cu_seqlens_q, seqused_k, softmax_scale, *, r, proj, out,
-                               warps=None):
+                               warps=None, gate=None, sinks=None, y=None, zero_tail=True):
     """inkling_attn.ops.packed_prefill_attention without its host-side length check
     (which reads seqused_k): geometry is validated on shapes only, so the call can be
     captured; the kernel bounds every page and length on the device."""
@@ -804,7 +804,7 @@ def _packed_prefill_in_capture(q, layer, page_table, cu_seqlens_q, seqused_k, so
     planes = [*layer.planes, layer.stage, layer.overflow]
     build.load().fwd(q, layer.raw, layer.raw, page_table, cu_seqlens_q, seqused_k, r, proj, out, lse,
                      float(softmax_scale), -1, projp, ops.WARPS if warps is None else int(warps), planes,
-                     ops.W8_FROM)
+                     ops.W8_FROM, gate=gate, sinks=sinks, y=y, zero_tail=bool(zero_tail))
     return out, lse
 
 
@@ -813,7 +813,7 @@ def dispatch_packed_fa4(stock, layer, kwargs, *, warps=None):
     import torch
 
     from inkling_attn.ops import packed_prefill_attention
-    from inkling_attn.patch import STATS, packed_rel_projection
+    from inkling_attn.patch import STATS, gate_begin, gate_commit, packed_rel_projection
 
     from .storage import PAGE
 
@@ -838,6 +838,12 @@ def dispatch_packed_fa4(stock, layer, kwargs, *, warps=None):
             and all(kwargs.get(name) is None for name in unsupported)):
         from .static import CAPTURING
 
+        # INKLING_ATTN_GATE=all: the gated epilogue (y = gate_sink(out, lse) in-kernel; out stays unwritten). With
+        # two launches into one output, the first zeroes y's tail (or all of y when it is the inactive one), the
+        # second must not.
+        g = gate_begin(q, kwargs["out"]) if kwargs.get("return_softmax_lse") else None  # gate_sink needs the LSE
+        gk = {k_: v_ for k_, v_ in g.items() if k_ != "_visit"} if g else {}
+
         if CAPTURING or (torch.cuda.is_available() and torch.cuda.is_current_stream_capturing()):
             # Prefill graph warmup and capture (static pools): the eager scratch gather reads the
             # page table on the host. A captured prefill gathers the prefix into the bounded BF16
@@ -850,7 +856,7 @@ def dispatch_packed_fa4(stock, layer, kwargs, *, warps=None):
                 # Small buckets: the eager rule (per-visit decode of the prefix outweighs).
                 result = _packed_prefill_in_capture(
                     q, layer, table, cu_q, seq_k, kwargs["softmax_scale"], r=bias, proj=proj,
-                    out=kwargs["out"], warps=warps,
+                    out=kwargs["out"], warps=warps, **gk,
                 )
             else:
                 # The prefix in the BF16 scratch when it fits (device decision), else the
@@ -862,13 +868,15 @@ def dispatch_packed_fa4(stock, layer, kwargs, *, warps=None):
                 none = torch.zeros_like(cu_q)
                 _, lse_bf16 = prefill_attention(
                     q, k, v, local, torch.where(fits, cu_q, none), seq_k, bias, proj, kwargs["softmax_scale"],
-                    None, out=kwargs["out"], warps=warps,
+                    None, out=kwargs["out"], warps=warps, **gk,
                 )
                 _, lse_packed = _packed_prefill_in_capture(
                     q, layer, table, torch.where(fits, none, cu_q), seq_k, kwargs["softmax_scale"], r=bias,
-                    proj=proj, out=kwargs["out"], warps=warps,
+                    proj=proj, out=kwargs["out"], warps=warps, **gk, **({"zero_tail": False} if gk else {}),
                 )
                 result = (kwargs["out"], torch.where(fits, lse_bf16, lse_packed))
+            if g:
+                gate_commit(g, kwargs["out"])
             STATS["kernel"] += 1
             return result if kwargs.get("return_softmax_lse") else result[0]
         scratch = _PREFIX_SCRATCH[0] if _PREFIX_SCRATCH else None
@@ -880,13 +888,19 @@ def dispatch_packed_fa4(stock, layer, kwargs, *, warps=None):
             k, v, local = copy
             result = prefill_attention(
                 q, k, v, local, cu_q, seq_k, bias, proj, kwargs["softmax_scale"], None,
-                out=kwargs["out"], warps=warps,
+                out=kwargs["out"], warps=warps, **gk,
             )
+            if g:
+                result = (kwargs["out"], result[1])  # FA4's (out, lse); gate_sink takes y from the visit
         else:
             result = packed_prefill_attention(
                 q, layer, table, cu_q, seq_k, kwargs["softmax_scale"], r=bias, proj=proj,
-                out=kwargs["out"], warps=warps,
+                out=kwargs["out"], warps=warps, **gk,
             )
+            if g:
+                result = (kwargs["out"], result[1])
+        if g:
+            gate_commit(g, kwargs["out"])
         STATS["kernel"] += 1
         return result if kwargs.get("return_softmax_lse") else result[0]
 

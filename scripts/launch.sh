@@ -163,7 +163,7 @@ KV12_SLOTS=${KV12_SLOTS:-2048}                              # packed side-pool p
 SCODES=${SCODES:-1}                                          # NVFP4 expert scale codes: 5-bit codes + row base, expanded in the GEMM (exact)
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
 PFUSE_HOIST=${PFUSE_HOIST:-0}                               # opt-in prefill loop-bank hoist over pfuse loop_mix (1: FP32-order class, not in the default pending a bracket; exact: bit-identical, slower; 0: off)
-ATTN_GATE=${ATTN_GATE:-1}                                   # gate_sink in the sliding-window prefill attention epilogue (bit-identical; 0: off)
+ATTN_GATE=${ATTN_GATE:-all}                                 # gate_sink in the prefill attention epilogue, sliding-window and global layers (bit-identical; 1: sliding-window only; 0: off)
 PROLOGUE=${PROLOGUE:-1}                                     # SWA prefill: K conv + L2 clip and V conv + value norm in one kernel each (bit-identical: the CuTe row-sum order; 0: off)
 [[ ",$PFUSE," == *,all,* || ",$PFUSE," == *,loopmix,* ]] || PFUSE_HOIST=0   # the hoist wraps pfuse loopmix
 _onoff() { case $(printf %s "$1" | tr '[:upper:]' '[:lower:]') in ''|0|off|false|no|none) echo 0 ;; *) echo 1 ;; esac; }

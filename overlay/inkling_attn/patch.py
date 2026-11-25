@@ -52,7 +52,10 @@ STATS = {"kernel": 0, "fallback": 0, "shadowed": 0, "gated": 0, "gate_fallback":
 # bit-identical to SGLang's gate_sink on the FP32 out + LSE). The visit records the gate / sinks its
 # _project_sources returns (an instance-level hook for the duration of the visit); the FA4 call then launches the
 # gated kernel (BF16 y + LSE; the FP32 out stays unwritten) and the visit's gate_sink call returns y.
-GATE = os.environ.get("INKLING_ATTN_GATE", "").strip().lower() in ("1", "on", "true", "yes")
+# INKLING_ATTN_GATE=all (or 2): global prefill visits too (BF16 and KV12S packed readers, via gate_begin / gate_commit).
+_GATE_ENV = os.environ.get("INKLING_ATTN_GATE", "").strip().lower()
+GATE_ALL = _GATE_ENV in ("all", "2")
+GATE = GATE_ALL or _GATE_ENV in ("1", "on", "true", "yes", "swa")
 
 
 def _kernel_api_logging():
@@ -68,6 +71,7 @@ def _kernel_api_logging():
 GATE_OFF_FOR_LOGGING = GATE and _kernel_api_logging()
 if GATE_OFF_FOR_LOGGING:
     GATE = False
+    GATE_ALL = False
 _LOGGED = set()
 
 
@@ -207,7 +211,7 @@ def make_forward(prev, get_attn_backend, get_model, in_breakable, kinds, cp_acti
             return prev(self, hidden_states, positions, forward_batch, attn=attn, attn_padded=attn_padded)
         token = _CTX.set(visit)
         hooked = False
-        if GATE and visit.local and "_project_sources" not in self.__dict__:
+        if GATE and (visit.local or GATE_ALL) and "_project_sources" not in self.__dict__:
             project = self._project_sources  # the full (class-level, wrapped) chain
 
             def _project_sources(sources):
@@ -399,13 +403,14 @@ def make_varlen(stock):
                     from . import ops
 
                     STATS["kernel"] += 1
-                    if GATE and visit.local and visit.gated is None and _gate_ok(visit, call):
+                    if GATE and (visit.local or GATE_ALL) and visit.gated is None and _gate_ok(visit, call):
                         gate, sinks = visit.gate, visit.sinks
                         y = torch.empty(tuple(gate.shape), dtype=torch.bfloat16, device=gate.device)
                         _, lse = ops.prefill_attention(**call, gate=gate, sinks=sinks, y=y)
                         visit.gated = (call["out"], y)
                         STATS["gated"] += 1
-                        _log_once("gated_first", f"first gated SWA prefill launch ({call['q'].shape[0]} rows)")
+                        kind = "SWA" if visit.local else "global"
+                        _log_once(f"gated_first_{kind}", f"first gated {kind} prefill launch ({call['q'].shape[0]} rows)")
                         return call["out"], lse  # out stays unwritten: only gate_sink consumes it, and returns y
                     return ops.prefill_attention(**call)
                 STATS["fallback"] += 1
@@ -445,6 +450,31 @@ def _gate_ok(visit, call):
         STATS["gate_fallback"] += 1
         _log_once("gate_fallback", "gated epilogue: unexpected gate / sinks layout; stock gate_sink used")
     return ok
+
+
+def gate_begin(q, out):
+    """For a packed (KV12S) global prefill reader: the gate / sinks / y kwargs of a gated launch when this visit's
+    gate_sink can take the kernel's y (INKLING_ATTN_GATE=all, whole-visit rows, kernel layouts), else None. The
+    caller launches with them and then calls gate_commit(g, out)."""
+    import torch
+
+    if not GATE_ALL:
+        return None
+    visit = _CTX.get()
+    if visit is None or visit.local or visit.gated is not None or out is None:
+        return None
+    if not _gate_ok(visit, {"q": q, "out": out}):
+        return None
+    y = torch.empty(tuple(visit.gate.shape), dtype=torch.bfloat16, device=visit.gate.device)
+    return {"gate": visit.gate, "sinks": visit.sinks, "y": y, "_visit": visit}
+
+
+def gate_commit(g, out):
+    """After the gated launch(es) of gate_begin's kwargs: the visit's gate_sink returns y (out stays unwritten)."""
+    visit = g["_visit"]
+    visit.gated = (out, g["y"])
+    STATS["gated"] += 1
+    _log_once("gated_first_global", f"first gated global prefill launch ({visit.tokens} rows, packed reader)")
 
 
 def make_gate_sink(stock):
@@ -527,5 +557,6 @@ def patch_attn(module, kinds):
             raise RuntimeError(f"inkling_attn: {ATTN_MODULE}.gate_sink is missing (INKLING_ATTN_GATE)")
         if not getattr(gs, MARK, False):
             module.gate_sink = make_gate_sink(gs)
-        _log_once("gate", "gated epilogue on: sliding-window prefill visits run gate_sink inside the attention kernel")
+        _log_once("gate", "gated epilogue on: " + ("sliding-window and global" if GATE_ALL else "sliding-window")
+                  + " prefill visits run gate_sink inside the attention kernel")
     return True

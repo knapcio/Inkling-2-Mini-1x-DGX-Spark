@@ -1,0 +1,19 @@
+2026-11-24T23:41:15Z PFGa-s06 mode warm
+PFGa-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.66, "geomean_tok_s": 73.15, "aggregate_tok_s": 70.96, "median_ttft_ms": 162.3, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.23, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.157, "drift_pct_all": -0.157}}
+wrote results/PFGa-s06/warm-sbquick.json (1.4 min)
+2026-11-24T23:42:41Z PFGa-s06 mode pf
+PFGa-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1K       1013.0   0.347      2919.3      0.378        None      -                        -         -
+8K       8158.0   1.478      5519.6      0.244        None      -                        -         -
+32K      32701.0  6.293      5196.4      0.238        None      60.8 [47.4, 78.0]        -         -
+128K     130925.0 34.468     3798.5      17.312       None      50.1 [42.9, 58.5]        -         -
+wrote results/PFGa-s06/longctx.json (3.3 min)
+2026-11-24T23:45:57Z PFGa-s06 mode pf
+PFGa-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+1K       1000.0   0.358      2793.3      0.379        None      -                        -         -
+8K       8160.0   1.474      5536.0      0.252        None      -                        -         -
+32K      32703.0  6.274      5212.5      0.229        None      62.2 [53.1, 73.0]        -         -
+128K     130922.0 34.391     3806.9      17.331       None      52.7 [37.1, 74.8]        -         -
+wrote results/PFGa-s06/longctx.json (3.2 min)

@@ -60,22 +60,22 @@ void launch(const Params& p, dim3 blocks, int64_t warps, cudaStream_t stream) {
 }
 
 // global layers: one launch, or the 8-warp (long prefixes) + 4-warp (the rest) pair
-template <bool kPacked, bool kPackedKV>
+template <bool kPacked, bool kPackedKV, bool kGate = false>
 void launch_global(const Params& p, dim3 blocks, int64_t warps, int64_t w8_from_keys, int64_t grid8,
                    cudaStream_t stream) {
   if (warps != 4 || w8_from_keys <= 0) {
-    launch<false, kPacked, kPackedKV>(p, blocks, warps, stream);
+    launch<false, kPacked, kPackedKV, kGate>(p, blocks, warps, stream);
     return;
   }
   Params p8 = p;  // long-prefix requests first on 8 warps (half the K/V traffic per FLOP)
   p8.sel_mode = 2;
   p8.sel_keys = static_cast<int>(w8_from_keys);
-  launch<false, kPacked, kPackedKV>(p8, dim3(static_cast<unsigned>(grid8)), 8, stream);
+  launch<false, kPacked, kPackedKV, kGate>(p8, dim3(static_cast<unsigned>(grid8)), 8, stream);
   C10_CUDA_KERNEL_LAUNCH_CHECK();
   Params p4 = p;
   p4.sel_mode = 1;
   p4.sel_keys = static_cast<int>(w8_from_keys);
-  launch<false, kPacked, kPackedKV>(p4, blocks, 4, stream);
+  launch<false, kPacked, kPackedKV, kGate>(p4, blocks, 4, stream);
 }
 
 void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v, const torch::Tensor& page_table,
@@ -84,7 +84,7 @@ void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v,
          const c10::optional<torch::Tensor>& projp_buf, int64_t warps,
          const c10::optional<std::vector<torch::Tensor>>& packed_kv, int64_t w8_from_keys,
          const c10::optional<torch::Tensor>& gate, const c10::optional<torch::Tensor>& sinks,
-         const c10::optional<torch::Tensor>& y) {
+         const c10::optional<torch::Tensor>& y, bool zero_tail) {
   TORCH_CHECK(warps == 4 || warps == 8, "inkling_attn: warps must be 4 or 8");
   TORCH_CHECK(w8_from_keys >= 0 && w8_from_keys < (int64_t(1) << 31), "inkling_attn: w8_from_keys out of range");
   TORCH_CHECK(q.is_cuda() && q.scalar_type() == at::kBFloat16 && q.dim() == 3 && q.size(2) == inkling_attn::kD &&
@@ -149,7 +149,7 @@ void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v,
   for (const auto* t : {&k, &v, &page_table, &cu_q, &seq_k, &r, &proj, &out, &lse})
     TORCH_CHECK(t->device() == q.device(), "inkling_attn: all tensors must be on q's device");
   TORCH_CHECK(T < (int64_t(1) << 30) && n_req < (int64_t(1) << 20), "inkling_attn: too many rows");
-  if (T == 0 || n_req == 0) return;
+  if (T == 0 || (n_req == 0 && !y.has_value())) return;  // gated with no requests: y is cleared after validation
 
   Params p{};
   p.q = reinterpret_cast<const __nv_bfloat16*>(q.data_ptr());
@@ -226,7 +226,6 @@ void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v,
   const bool gated = gate.has_value();
   TORCH_CHECK(gated == sinks.has_value() && gated == y.has_value(), "inkling_attn: gate, sinks and y go together");
   if (gated) {
-    TORCH_CHECK(window_left >= 0 && !packed_kv, "inkling_attn: the gated epilogue serves sliding-window BF16 calls only");
     const auto& g = *gate;
     const auto& sk = *sinks;
     const auto& yy = *y;
@@ -248,6 +247,10 @@ void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v,
         const auto t1 = t0 + (t->numel() ? (t->storage().nbytes() - t->storage_offset() * t->element_size()) : 0);
         TORCH_CHECK(y1 <= t0 || t1 <= y0, "inkling_attn: y overlaps an input or output buffer");
       }
+    }
+    if (n_req == 0) {  // no request rows: all of y is tail
+      if (zero_tail) yy.zero_();
+      return;
     }
     p.gate = reinterpret_cast<const __nv_bfloat16*>(g.data_ptr());
     p.g_st = g.stride(0);
@@ -282,21 +285,29 @@ void fwd(const torch::Tensor& q, const torch::Tensor& k, const torch::Tensor& v,
     C10_CUDA_KERNEL_LAUNCH_CHECK();
   }
   const dim3 blocks(static_cast<unsigned>(grid));
+  if (gated && zero_tail) {  // zero_tail=false: a second launch into the same y (it must not clear the first's rows)
+    const int zb = static_cast<int>(std::min<int64_t>(T, 1024));
+    zero_tail_rows<<<zb, 128, 0, stream>>>(p.y, p.y_st, static_cast<int>(H * inkling_attn::kD), p.cu_q,
+                                            static_cast<int>(n_req), static_cast<int>(T));
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  }
   if (packed_kv) {
-    if (packed) launch_global<true, true>(p, blocks, warps, w8_from_keys, grid8, stream);
+    if (gated) {
+      if (packed) launch_global<true, true, true>(p, blocks, warps, w8_from_keys, grid8, stream);
+      else launch_global<false, true, true>(p, blocks, warps, w8_from_keys, grid8, stream);
+    } else if (packed) launch_global<true, true>(p, blocks, warps, w8_from_keys, grid8, stream);
     else launch_global<false, true>(p, blocks, warps, w8_from_keys, grid8, stream);
   } else if (window_left >= 0) {
     if (gated) {
-      const int zb = static_cast<int>(std::min<int64_t>(T, 1024));
-      zero_tail_rows<<<zb, 128, 0, stream>>>(p.y, p.y_st, static_cast<int>(H * inkling_attn::kD), p.cu_q,
-                                              static_cast<int>(n_req), static_cast<int>(T));
-      C10_CUDA_KERNEL_LAUNCH_CHECK();
       if (packed) launch<true, true, false, true>(p, blocks, warps, stream);
       else launch<true, false, false, true>(p, blocks, warps, stream);
     } else if (packed) launch<true, true>(p, blocks, warps, stream);
     else launch<true, false>(p, blocks, warps, stream);
   } else {
-    if (packed) launch_global<true, false>(p, blocks, warps, w8_from_keys, grid8, stream);
+    if (gated) {
+      if (packed) launch_global<true, false, true>(p, blocks, warps, w8_from_keys, grid8, stream);
+      else launch_global<false, false, true>(p, blocks, warps, w8_from_keys, grid8, stream);
+    } else if (packed) launch_global<true, false>(p, blocks, warps, w8_from_keys, grid8, stream);
     else launch_global<false, false>(p, blocks, warps, w8_from_keys, grid8, stream);
   }
   C10_CUDA_KERNEL_LAUNCH_CHECK();
@@ -310,5 +321,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
         py::arg("r"), py::arg("proj"), py::arg("out"), py::arg("lse"), py::arg("scale"), py::arg("window_left"),
         py::arg("projp_buf") = py::none(), py::arg("warps") = 4,
         py::arg("packed_kv") = py::none(), py::arg("w8_from_keys") = 0,
-        py::arg("gate") = py::none(), py::arg("sinks") = py::none(), py::arg("y") = py::none());
+        py::arg("gate") = py::none(), py::arg("sinks") = py::none(), py::arg("y") = py::none(),
+        py::arg("zero_tail") = true);
 }
