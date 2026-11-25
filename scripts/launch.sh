@@ -149,7 +149,7 @@ case " ${SGLANG_ENV:-} " in                                   # the prefill leve
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the store is chosen here, so engine flags and overlay agree
   *INKLING_KV12*)                                            # any INKLING_KV12* name, with or without a value
-    echo "set KV12S / KV12S_POOL / KV12 / KV12_SLOTS instead of passing the KV store's variables in SGLANG_ENV" >&2; exit 2 ;;
+    echo "set KV12S / KV12S_POOL / KV12S_SETTLE / KV12 / KV12_SLOTS instead of passing the KV store's variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prefix tail is DFlash2-only: passed by the launcher alone
   *INKLING_DFLASH_PREFIX_TAIL*|*INKLING_DFLASH_TAIL_SNAPSHOTS*|*INKLING_DFLASH_TAIL_DEFER*|*INKLING_DFLASH_PCOPY*)  # the tail, its _MAX_INPUT, the snapshots, the deferral, the prompt copy and its _MIN_CTX
@@ -168,6 +168,8 @@ KV12S_POOL=${KV12S_POOL:-static}                           # static: stock (non-
 case $KV12S_POOL in static|unified) ;; *) echo "KV12S_POOL must be static or unified (got '$KV12S_POOL')" >&2; exit 2 ;; esac
 KV12S_OVERFLOW_HEADS=${KV12S_OVERFLOW_HEADS:-2048}          # exact page-head overflow slots per target visit (32 KiB each)
 KV12S_FALLBACK_PAGES=${KV12S_FALLBACK_PAGES:-64}            # raw fallback pages per visit if that arena is exhausted (512 KiB each)
+KV12S_SETTLE=${KV12S_SETTLE:-shared}                        # SPEC=dflash2: the 8 packed visits' verify settle builds its page candidates once (shared, exact; 1 = also one launch per settle kernel for all visits, opt-in: slower at c4/c8 in the v2.9.5 ABBA; 0 = v2.9.4: per visit)
+case $KV12S_SETTLE in 0|1|shared) ;; *) echo "KV12S_SETTLE must be 1, shared or 0 (got '$KV12S_SETTLE')" >&2; exit 2 ;; esac
 KV12_SLOTS=${KV12_SLOTS:-2048}                              # packed side-pool pages per global layer (2048 = 6.1 GiB, one 256K request)
 SCODES=${SCODES:-1}                                          # NVFP4 expert scale codes: 5-bit codes + row base, expanded in the GEMM (exact)
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
@@ -242,7 +244,8 @@ if [[ $KV12S == 1 ]]; then
     kv12s_args=(--enable-unified-memory --cuda-graph-backend-prefill=disabled --max-running-requests 48
                 --cuda-graph-max-bs-decode=48)
   fi
-  kv12s_env=(-e SGLANG_RAGGED_VERIFY_MODE=static -e INKLING_KV12S_POOL="$KV12S_POOL")
+  kv12s_env=(-e SGLANG_RAGGED_VERIFY_MODE=static -e INKLING_KV12S_POOL="$KV12S_POOL"
+             -e INKLING_KV12S_DFLASH_SETTLE="$KV12S_SETTLE")
 fi
 
 [[ -f $MODEL_DIR/config.json && -f $MODEL_DIR/mtp.safetensors ]] || {

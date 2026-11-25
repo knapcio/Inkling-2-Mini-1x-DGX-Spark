@@ -1687,3 +1687,60 @@ happens once, when the first long prompts prefill (the deferral does not act on 
 Known limitation: a waiting request that holds a snapshot reservation but is not admitted in that scheduling round
 keeps the slot pinned for one forward, so one capture into that slot can be skipped. It costs at most one missed
 snapshot and never restores a wrong window.
+
+## v2.9.5: one set of page candidates for the packed store's verify settle (2026-11-26)
+
+After each DFlash2 verify step the 8 packed global visits settle the step's tentative writes: trim the rejected rows,
+then commit the pages the accepted rows completed. In v2.9.4 each visit first rebuilt the same page candidates from
+the verify locations (11 small ATen launches, including a device assert), then ran its own trim and commit kernels:
+112 launches per step, about 0.48 ms of the post-verify eager region at c1 in the v2.9.3 profile. The DSpark path has
+shared the candidates since v2.7.3; the DFlash2 hook did not.
+
+Two variants, both exact:
+- `shared` (the default): the candidates are built once and handed to every visit, 35 launches per step.
+- `1` (opt-in): also the trim and commit kernels run once over all visits (`device.LaneGroup`: each visit's buffers
+  are addressed from the first visit's by a fixed offset table, built when the pool is created), 14 launches.
+
+GPU check (`tools/gpu_check_settle_lanes.py`, box B, no server): copies of the static pool's packed store get the same
+verify steps from CUDA graphs (tentative writes of all 8 visits with different values per visit, packed attention of
+all 8), then the eager settle with random accepted lengths, every third step ragged. Arms: v2.9.4's own kv12s code
+(loaded from the previous release), per visit, shared and batched.
+
+| case | requests | store bytes | attention | accepted rows |
+|---|---|---|---|---|
+| plain values | 1, 4, 8, 24, 48 | identical in all four arms | identical, and equal to the stock BF16 kernel | equal to the written K/V |
+| page-heads spilling, side arenas exhausted | 1 | identical | identical | equal |
+| page-heads spilling, side arenas exhausted | 4 | differ in slot ids (claim order, also between per-visit runs) | identical | equal, no row lost |
+
+Eager settle of 8 visits, every request sealing a page (us per step):
+
+| requests | per visit | shared | batched |
+|---|---:|---:|---:|
+| 1 | 645 | 322 | 115 |
+| 8 | 839 | 541 | 450 |
+| 24 | 1,532 | 1,222 | 1,172 |
+| 48 | 2,557 | 2,247 | 2,230 |
+
+Serving, ABBA per box (greedy warm = speedbench quick, 30 prompts; `dtp` = decode table, prose and code, c1-c16;
+speedbench full = 73 prompts, c1). Single-request step = median per-request `step_ms`, the two arms on each side
+averaged per prompt; every pair had identical greedy outputs and verify-step counts.
+
+| | box | single-request step, ms | decode table vs off |
+|---|---|---|---|
+| batched (`1`), on / off / off / on, speedbench full | B | 38.80 -> 38.43 (-0.31; 65 of 73 faster) | code c4 -5.1 % (off spread 1.8 %), other cells within |
+| batched (`1`), on / off / off / on, warm | B | 37.83 -> 37.45 (-0.36; 30 of 30) | |
+| batched (`1`), on / off / off / on, warm + `dtp` | A | 37.69 -> 37.38 (-0.27; 30 of 30) | c4 code -4.1 %, prose -3.0 %; c8 prose -1.4 %, code -0.9 % (off spreads 0.1-0.5 %); geomean -1.0 % |
+| shared, shared / off / off / shared, warm + `dtp` | A | 37.62 -> 37.37 (-0.25; 29 of 30) | every cell at or above the off range; geomean +1.3 % |
+
+The batched loss at 4 and 8 requests is not a slower step. From the engine's decode log (one line per 40 steps, about
+360 steps at 4 requests per arm), box A at 4 requests: step about 73 ms on vs 78 ms off, accepted tokens per step
+2.78 vs 3.07, mean verify width 4.5 vs 4.7. The verify-width cap reads only draft confidence, so the batched arms
+decoded different greedy texts with several requests in flight, and fewer of their draft tokens were accepted. Greedy
+texts with several requests in flight also differ between runs of one setting (box B prose c16: one off arm stopped a
+request 3 tokens early, the other did not), so this does not by itself show a store difference; the GPU check found
+none. The shared arms run the per-visit kernels and lost nothing; `shared` is the default and `1` stays opt-in.
+
+Memory (box A, `KV295mem`, booted with `1`; `shared` allocates the same less a 768-byte table): thinking c24
+(48 x 2,048 tokens) together with a cold 240K-token needle, worst MemAvailable 4.9 GiB (v2.9.3, same box and recipe:
+4.6 GiB), 48 / 48 completed, 337.3 tok/s aggregate; needles 128K and 240K pass.
+

@@ -1,0 +1,2 @@
+{"label":"KV295dt-off3-s05","ready_utc":"2026-11-25T23:15:31Z","startup_s":132,"memavail_ready_gib":5.3,"kv":"[2026-11-25 23:15:29 PID134] max_total_num_tokens=2339072, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.42 GB"}
+{"memavail_end_gib":5.4}

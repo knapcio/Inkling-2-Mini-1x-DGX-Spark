@@ -5,7 +5,7 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-25, v2.9.4):** v2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes.
+**Status (2026-11-26, v2.9.5):** v2.9.3 passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes; v2.9.5's shared verify settle is bit-exact in the GPU check and was measured on box A.
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.
@@ -34,16 +34,17 @@ work, `SPEC=dspark` is the faster choice. Since v2.9.3 the prompt copy narrows t
 document: on speedbench `longctx` decode at 32K rises 10-14 % and at 128K 1.5-4.6 % (two boxes) (see "Prompt copy for long
 documents").
 
-V2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes. The current column is one GB10 Spark on
+V2.9.3 passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes; v2.9.5's shared verify settle is bit-exact in the GPU check and was measured on box A. The current column is one GB10 Spark on
 2026-11-24 with the release defaults (`SPEC=dflash2`, verify-width cap on, `CTX=262144`); the stock and v2.7.2
-columns are the earlier two-box medians. Cells marked v2.9.4, v2.9.3, v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
+columns are the earlier two-box medians. Cells marked v2.9.5, v2.9.4, v2.9.3, v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
 (box B unless stated); the others are the v2.8.x or v2.8 runs. v2.9 added draft-tail snapshots for agent loops; v2.9.1 runs the sink
 gate on the global layers too (prefill); v2.9.2 adds the loop-bank hoist (prefill) and the prompt-end cache touch
 (agent-loop prefix hits); v2.9.3 adds the prompt copy for prompts of 8K tokens or more (long-context decode); v2.9.4 lets the prefix tail defer to
-a draft-tail snapshot on repeated cached prompts of up to 4K tokens (speedbench long context +2.1 %).
+a draft-tail snapshot on repeated cached prompts of up to 4K tokens (speedbench long context +2.1 %); v2.9.5 builds the
+packed store's verify-settle page candidates once for all 8 global visits (exact; single-request step -0.25 ms).
 Single-request decode on short prompts is unchanged.
 
-| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.4)** |
+| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.5)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
 | speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.21** (v2.9.4, box B, mean of 2 runs; the same tree with the deferral off 72.93, v2.9.3 73.08) |
@@ -787,7 +788,7 @@ docker run -d --name inkling-2-mini --gpus all --ipc=host --network host --shm-s
   -e INKLING_CERT_WIDE=1 -e INKLING_CERT_WIDE_MAX_ROWS= -e INKLING_CERT_WIDE_STATS=0 \
   -e INKLING_DRAFT_RNNHOIST_MAX_BS=32 \
   -e INKLING_KV12S=1 -e INKLING_KV12S_OVERFLOW_HEADS=2048 -e INKLING_KV12S_FALLBACK_PAGES=64 \
-  -e SGLANG_RAGGED_VERIFY_MODE=static -e INKLING_KV12S_POOL=static \
+  -e SGLANG_RAGGED_VERIFY_MODE=static -e INKLING_KV12S_POOL=static -e INKLING_KV12S_DFLASH_SETTLE=shared \
   -e MAX_JOBS=4 \
   -e SGLANG_OPT_INKLING2_VERIFY_REL_BIAS_KERNEL=1 -e SGLANG_OPT_DSV41_DSPARK_MID_FOLD=1 \
   -e SGLANG_OPT_DSV41_DSPARK_PREPARE_INPUTS_ONCE=1 -e SGLANG_OPT_DSV41_DSPARK_SKIP_PREFILLED_INPUTS=1 \
@@ -908,6 +909,7 @@ Overlay switches (`OVERLAY=0` turns all of them off; each is described in `overl
 | `CERT_WIDE` (`INKLING_CERT_WIDE`), `CERT_WIDE_MAX_ROWS` | `SPEC=dspark`: `1`, overlay default | certified greedy head for 17-192-row verify batches (needs `CERT_HEAD`, `PICO12` and `WIDE` with `lmhead`) |
 | `INKLING_ATTN_W8_FROM` | `131072` | prefix length (keys) from which global-layer prefill uses the 8-warp fused kernel; `0` = one 4-warp launch |
 | `KV12S` (`INKLING_KV12S`), `KV12S_POOL` (`INKLING_KV12S_POOL`) | `1`, `static` | packed global KV store (see "Packed global KV store"); turns `KV12` off. `static` runs on SGLang's stock pools with prefill CUDA graphs, `MEM_FRACTION=0.89` and `SWA_RATIO=0.037` unless set; `unified` (`SPEC=dspark` only) is the v2.7.1 binding (`--enable-unified-memory --cuda-graph-backend-prefill=disabled`, 0.91 / 0.035). `0` = the BF16 store (`MEM_FRACTION` 0.85 with DFlash2, 0.93 with DSpark); vLLM and `OVERLAY=0` always use `0`. Set the store with these variables, not through `SGLANG_ENV` / `SGLANG_ARGS` (the launcher refuses the store's variables there, and with `KV12S=1` also the pool's engine flags, so the engine flags and the overlay always agree). `KV12S_OVERFLOW_HEADS` (2,048) and `KV12S_FALLBACK_PAGES` (64) size the exact overflow arena and fallback pool per layer visit |
+| `KV12S_SETTLE` (`INKLING_KV12S_DFLASH_SETTLE`) | `shared` | `SPEC=dflash2` with `KV12S=1`: after each verify step the 8 packed global visits settle the step's tentative writes. `shared` builds the page candidates once for all visits (as the DSpark path does since v2.7.3) instead of once per visit: 77 fewer launches per step, single-request decode step -0.25 ms (v2.9.5). Exact: the same K/V bits and attention outputs. `1` also runs the trim and commit kernels once over all visits (14 launches per step instead of 112); it is exact as well, but in the v2.9.5 measurements it was slower at 4 and 8 requests in flight, so it is opt-in. `0` = each visit on its own (v2.9.4). The store's bytes are identical in every mode except where one visit's side-slot claims race near arena exhaustion, which the per-visit path resolves in scheduling order as well |
 | `NOEXP` (`INKLING_NOEXP`) | `SPEC=dspark`: `1` | dead verify rows get no experts (inactive when `VERIFY_CAP=off` or its remap is off); `0` = off |
 | `PADX` (`INKLING_PADX`) | `1` | padding rows of decode / verify CUDA-graph batches route to the phantom expert, so the expert GEMMs skip them (`inkling_padx`; per graph at capture: graphs of 10 requests and up; live rows bit-identical; composes with the dead-verify-row skip); `0` = off |
 

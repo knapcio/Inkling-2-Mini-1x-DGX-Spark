@@ -1,5 +1,50 @@
 # Changelog
 
+## v2.9.5 (2026-11-26)
+
+v2.9.4 plus a cheaper settle of the packed global KV store after each DFlash2 verify step. Exact.
+
+- `KV12S_SETTLE=shared` (`INKLING_KV12S_DFLASH_SETTLE`, new default): the DFlash2 hook settled each of the 8 packed
+  global visits on its own and rebuilt the same page candidates for every visit (11 small launches each). They are now
+  built once for all visits, as the DSpark path does since v2.7.3: 77 fewer launches per step. The trim and commit
+  kernels still run per visit, unchanged. `0` is the v2.9.4 settle.
+- `KV12S_SETTLE=1` (opt-in): also runs the trim and commit kernels once over all visits (`device.LaneGroup`; 14
+  launches per step instead of 112). Exact as well, but slower at 4 and 8 requests in flight in the measurements below,
+  so it is not the default.
+- Exactness, every mode: the same K/V bits and attention outputs. The store's bytes are identical as well, except where
+  one visit's side-slot claims race near overflow-arena exhaustion, which the per-visit path also resolves in
+  scheduling order (every outcome exact). GPU check (`tools/gpu_check_settle_lanes.py`, box B): v2.9.4's own kv12s
+  code against per-visit, shared and batched, 1 / 4 / 8 / 24 / 48 requests, verify writes and attention replayed from
+  CUDA graphs, every third step ragged; every byte of the store and every attention output identical, attention equal
+  to the stock BF16 kernel, every accepted row equal to the written K/V. With page-heads spilling and both side arenas
+  exhausted (4 requests): attention and accepted rows identical, no row lost.
+- Eager settle of 8 visits with every request sealing a page (the check's microbenchmark), per visit / shared /
+  batched: 645 / 322 / 115 us at 1 request, 839 / 541 / 450 us at 8, 1,532 / 1,222 / 1,172 us at 24, 2,557 / 2,247 /
+  2,230 us at 48.
+- Shared, box A, ABBA (shared, off, off, shared; warm and the decode table): greedy outputs and verify-step counts
+  identical on 30 / 30 speedbench quick prompts. Single-request decode step 37.62 -> 37.37 ms (median per-request
+  `step_ms` over the 30 prompts, mean of the two arms each side; -0.25 ms, -0.7 %; 29 of 30 prompts faster). Decode
+  table: every cell at or above the off arms' range; c1 +0.5 % prose, +0.6 % code; geometric mean of the eight cells
+  +1.3 % (off-vs-off spread up to 2.9 % per cell).
+- Batched (`1`), box B, ABBA (on, off, off, on; speedbench full and the decode table): greedy outputs and verify-step
+  counts identical on 73 / 73 speedbench full and 30 / 30 quick prompts; single-request decode step 38.80 -> 38.43 ms
+  (-0.31 ms, -0.8 %; 65 of 73 faster); speedbench full 72.96 / 73.25 off, 73.89 / 73.26 on. But the decode table fell
+  at 4 requests in flight, code -5.1 % (off spread 1.8 %). A repeat on box A (on, off, off, on) confirmed it: code c4
+  -4.1 %, prose c4 -3.0 %, prose c8 -1.4 %, code c8 -0.9 %, against off spreads of 0.1-0.5 %; geometric mean -1.0 %.
+  The engine log shows the steps themselves were not slower (box A, 4 requests: about 73 ms on vs 78 ms off). Fewer
+  tokens were accepted per step (2.78 vs 3.07) under narrower verify widths, so the batched arms decoded different
+  greedy texts with several requests in flight. With several requests in flight the greedy texts differ between runs of
+  the same setting too (for example prose at c16, box B, off vs off), so this alone does not show a store difference;
+  the shared arms, which run the per-visit kernels, lost nothing in the decode table.
+- Memory, box A (warm, kvstress, 128K needle; booted with `1`, which allocates the same as `shared` plus a 768-byte
+  table): lowest MemAvailable 4.9 GiB (v2.9.3 on the same box and recipe: 4.6 GiB); kvstress 48 of 48 thinking
+  requests at 24 in flight together with the cold 240K needle, 337.3 tok/s aggregate (v2.9.3: 325.8); 240K and 128K
+  needles pass.
+- Results: `results/KV295sh1-s05/`, `results/KV295sh2-s05/`, `results/KV295dt-off3-s05/`, `results/KV295dt-off4-s05/`
+  (shared); `results/KV295on1-s06/`, `results/KV295off1-s06/`, `results/KV295off2-s06/`, `results/KV295on2-s06/`,
+  `results/KV295dt-on1-s05/`, `results/KV295dt-off1-s05/`, `results/KV295dt-off2-s05/`, `results/KV295dt-on2-s05/`
+  (batched); `results/KV295mem-s05/`.
+
 ## v2.9.4 (2026-11-25)
 
 v2.9.3 plus the prefix tail deferring to draft-tail snapshots, on by default with `SPEC=dflash2`. v2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes.

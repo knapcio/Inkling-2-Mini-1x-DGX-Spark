@@ -1,0 +1,17 @@
+2026-11-25T23:21:57Z KV295dt-off4-s05 mode warm
+KV295dt-off4-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.22, "geomean_tok_s": 74.64, "aggregate_tok_s": 72.57, "median_ttft_ms": 160.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.77, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.255, "drift_pct_all": -0.255}}
+wrote results/KV295dt-off4-s05/warm-sbquick.json (1.4 min)
+2026-11-25T23:23:21Z KV295dt-off4-s05 mode dtp
+prose      c1  aggregate    66.2 tok/s  per-stream   66.7  ttft 0.185 s  failed 0
+prose      c4  aggregate   142.7 tok/s  per-stream   38.5  ttft 0.334 s  failed 0
+prose      c8  aggregate   208.7 tok/s  per-stream   28.6  ttft 0.322 s  failed 0
+prose      c16 aggregate   294.0 tok/s  per-stream   20.3  ttft 0.546 s  failed 0
+code       c1  aggregate    74.4 tok/s  per-stream   79.2  ttft 0.187 s  failed 0
+code       c4  aggregate   140.0 tok/s  per-stream   39.6  ttft 0.391 s  failed 0
+code       c8  aggregate   211.0 tok/s  per-stream   31.3  ttft 0.35 s  failed 0
+code       c16 aggregate   308.3 tok/s  per-stream   21.8  ttft 0.528 s  failed 0
+wrote results/KV295dt-off4-s05/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 66.7 | 142.7 (38.5) | 208.7 (28.6) | 294.0 (20.3) |
+| code | 79.2 | 140.0 (39.6) | 211.0 (31.3) | 308.3 (21.8) |

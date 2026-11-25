@@ -1,0 +1,9 @@
+2026-11-25T22:25:22Z KV295mem-s05 mode warm
+KV295mem-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.34, "geomean_tok_s": 74.82, "aggregate_tok_s": 72.73, "median_ttft_ms": 161.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.72, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.05, "drift_pct_all": 0.05}}
+wrote results/KV295mem-s05/warm-sbquick.json (1.4 min)
+2026-11-25T22:26:44Z KV295mem-s05 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 107.8, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T22:31:15Z KV295mem-s05 mode nd128
+needle 128K                  PASS  {"prompt_tokens": 128023, "seconds": 34.0, "expected": "JUNIPER-COBALT-2002", "answer": "JUNIPER-COBALT-2002"}
+1 / 1 passed

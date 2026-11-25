@@ -1,0 +1,20 @@
+2026-11-25T21:57:51Z KV295off2-s06 mode warm
+KV295off2-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.78, "geomean_tok_s": 74.17, "aggregate_tok_s": 72.12, "median_ttft_ms": 161.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.03, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.925, "drift_pct_all": 0.925}}
+wrote results/KV295off2-s06/warm-sbquick.json (1.4 min)
+2026-11-25T21:59:14Z KV295off2-s06 mode sbf
+KV295off2-s06: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.78, "geomean_tok_s": 73.25, "aggregate_tok_s": 71.25, "median_ttft_ms": 162.7, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 39.07, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.438, "drift_pct_all": -0.438}}
+wrote results/KV295off2-s06/speedbench.json (4.8 min)
+2026-11-25T22:04:04Z KV295off2-s06 mode dtp
+prose      c1  aggregate    65.6 tok/s  per-stream   66.1  ttft 0.187 s  failed 0
+prose      c4  aggregate   138.7 tok/s  per-stream   36.5  ttft 0.316 s  failed 0
+prose      c8  aggregate   208.1 tok/s  per-stream   27.7  ttft 0.451 s  failed 0
+prose      c16 aggregate   298.6 tok/s  per-stream   20.2  ttft 0.563 s  failed 0
+code       c1  aggregate    74.0 tok/s  per-stream   79.0  ttft 0.189 s  failed 0
+code       c4  aggregate   141.5 tok/s  per-stream   39.5  ttft 0.323 s  failed 0
+code       c8  aggregate   204.1 tok/s  per-stream   28.6  ttft 0.345 s  failed 0
+code       c16 aggregate   304.2 tok/s  per-stream   21.4  ttft 0.56 s  failed 0
+wrote results/KV295off2-s06/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 66.1 | 138.7 (36.5) | 208.1 (27.7) | 298.6 (20.2) |
+| code | 79.0 | 141.5 (39.5) | 204.1 (28.6) | 304.2 (21.4) |
