@@ -1,0 +1,9 @@
+2026-11-25T02:28:56Z K81b8-s06 mode warm
+K81b8-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.94, "geomean_tok_s": 73.61, "aggregate_tok_s": 71.4, "median_ttft_ms": 165.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 40.3, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2537, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.193, "drift_pct_all": -0.193}}
+wrote results/K81b8-s06/warm-sbquick.json (1.4 min)
+2026-11-25T02:30:21Z K81b8-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 92.3, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T02:34:45Z K81b8-s06 mode nd128
+needle 128K                  PASS  {"prompt_tokens": 128023, "seconds": 35.0, "expected": "JUNIPER-COBALT-2002", "answer": "JUNIPER-COBALT-2002"}
+1 / 1 passed

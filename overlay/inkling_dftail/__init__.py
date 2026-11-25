@@ -30,6 +30,11 @@ to a dLLM request, and never to a streaming-session continuation (its committed 
 bound and its lookup are pinned by source hash (_sources.py): a different image refuses at start-up (exit 78; set
 DFLASH_PREFIX_TAIL=0 to run without the tail).
 
+(B) INKLING_DFLASH_TAIL_SNAPSHOTS=8 (snapshot.py, bpatch.py): instead of recomputing, the draft window of a prompt's
+end is copied out of the ring when its prefill completes and copied back into the ring of a later request that hits
+the same prefix (draft-only state; the target path is untouched). Independent of (A); with both, (A) still bounds
+prompts of at most MAX_INPUT tokens and (B) fills the ring below the bound.
+
 Exactness: the recomputed positions produce the same KV / states as a cold prefill of those positions (FP order of
 the prefill chunking only, the prefill allowance); the drafter is draft-only. Cost: TTFT on the bounded hits (above).
 """
@@ -42,7 +47,7 @@ from . import _hook, _sources
 ENV = "INKLING_DFLASH_PREFIX_TAIL"
 MODULE = "sglang.srt.managers.schedule_batch"
 MARK = "_inkling_dftail"
-OFF_HINT = " (set DFLASH_PREFIX_TAIL=0 to run without the DFlash2 prefix tail)"
+OFF_HINT = " (set DFLASH_PREFIX_TAIL=0 DFLASH_TAIL_SNAPSHOTS=0 to run without the DFlash2 prefix tail and snapshots)"
 STATE = {"installed": False, "tail": 0, "max_input": 4096, "bounded": 0}
 # None: not resolved yet; True / False: the server's speculative algorithm is / is not DFLASH
 SCOPE = {"dflash": None, "why": "", "logged": False}
@@ -141,17 +146,31 @@ def patch(mod):
 
 
 def install(env=None, root=None):
+    """(A) INKLING_DFLASH_PREFIX_TAIL and (B) INKLING_DFLASH_TAIL_SNAPSHOTS are independent; either arms the overlay."""
     if STATE["installed"]:
         return STATE["tail"]
+    from . import bpatch, snapshot
+
     tail = tail_from_env(env)
     max_input = max_input_from_env(env)
-    if tail:
-        _sources.check(root, OFF_HINT)
-        if MODULE in sys.modules:
-            raise RuntimeError(f"inkling_dftail: install before {MODULE} is imported" + OFF_HINT)
+    slots = snapshot.slots_from_env(env)
+    files = (_sources.PART_A if tail else ()) + (_sources.PART_B if slots else ())
+    if files:
+        _sources.check(root, OFF_HINT, files)
+        targets = ([MODULE] if tail else []) + (list(bpatch.MODULES) if slots else [])
+        loaded = [m for m in targets if m in sys.modules]
+        if loaded:
+            raise RuntimeError(f"inkling_dftail: install before {loaded} are imported" + OFF_HINT)
     STATE.update(installed=True, tail=tail, max_input=max_input)
+    snapshot.STATE["slots"] = slots
     if tail:
         _hook.when_imported(MODULE, patch)
         _log(f"armed: a prefix-cache match leaves the last {tail} input tokens to be prefilled again "
              f"(inputs of at most {max_input} tokens; DFLASH only, not streaming sessions)")
+    if slots:
+        _hook.when_imported(bpatch.CONFIG_MODULE, lambda mod: bpatch.patch_config(mod, slots, OFF_HINT))
+        _hook.when_imported(bpatch.RING_MODULE, lambda mod: bpatch.patch_ring(mod, OFF_HINT))
+        _hook.when_imported(bpatch.WORKER_MODULE, lambda mod: bpatch.patch_worker(mod, slots, OFF_HINT))
+        _hook.when_imported(bpatch.UPDATER_MODULE, lambda mod: bpatch.patch_updater(mod, OFF_HINT))
+        _log(f"armed: draft-tail snapshots, {slots} slots (prompt-end draft windows restored on prefix-cache hits)")
     return tail

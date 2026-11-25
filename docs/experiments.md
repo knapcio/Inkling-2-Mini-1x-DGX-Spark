@@ -1389,3 +1389,52 @@ measured on box B and is not compared as a gain. Per-stream decode, prose c1 / c
 20.4, code 79.1 / 38.6 / 30.0 / 22.0. Greedy outputs identical to `MXa0` (`mx8w` off) on 30 / 30 prompts; the sink
 gate, the verify cap, padding rows, the prologue and `mx8w` (20 of 30 drafter linears on the MXFP8 GEMM) all
 reported armed at start-up. Lowest MemAvailable 4.9 GiB; the v2.8.4 worst case stays 4.8 GiB (`MXkv`).
+
+## v2.9: draft-tail snapshots
+
+Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes. Runs on box B: release `results/V29R-s06/`
+(speedbench full and agent mode), `results/V29S-s06/` (worst case, needles); screen `results/S81off-s06/`,
+`results/S81a-s06/`, `results/S81b-s06/`, `results/S81ab-s06/`; slots `results/K81b8-s06/`, `results/K81b16-s06/`;
+exactness `results/BEXoffref-s06/`, `results/BEXoffb-s06/`, `results/BEXonref-s06/`, `results/BEXonb-s06/`,
+`results/BEXschref4-s06/`. v2.8.4 qualification: `results/Q284R-s06/`, `results/Q284R-s05/`,
+`results/Q284S-s06/`, `results/Q284S-s05/`.
+
+Mechanism. The v2.8.1 prefix tail re-prefills the last 2,048 prompt tokens on a prefix-cache hit of a prompt of at most
+4,096 tokens, so the drafter's ring holds them; longer histories (agent loops) keep the cache and draft from the
+uncached suffix only. Snapshots keep the drafter's 2,048-position window at the end of each completed prompt in one of
+8 slots, keyed by the prompt's content and cache salt, and copy it back into the ring when a later request hits the
+same prefix, with no re-prefill. Draft-only state: the target model's computation is untouched. 8 slots x 2,048
+positions x 5 draft layers = 320 MiB, charged to the KV budget (0.312 GiB). Restored only on matching content and salt;
+weight updates and `flush_cache` clear the slots. The LRU is shared across tenants, so `DFLASH_TAIL_SNAPSHOTS=0` is the
+setting where tenants must not observe each other's cache use.
+
+Screen (box B, v2.8.1 base), change against both off (A = prefix tail, B = snapshots):
+
+| | speedbench full, long context | agentic | code | agent loops, 160-token turns | 512-token turns |
+|---|---:|---:|---:|---:|---:|
+| A | +6.6 % | +1.1 % | +1.7 % | -0.7 % | +0.3 % |
+| B | +14.4 % | +0.2 % | +0.1 % | -4.0 % | -5.4 % |
+| A + B | +6.7 % | +1.3 % | +1.7 % | -4.4 % | -4.9 % |
+
+Agent loops: speedbench agent mode, 8 conversations of 4-8 turns on 5-16K-token histories, end-to-end time at equal
+output length (negative is faster). With A + B decode goes from 73.9 to 78.3 tok/s; median time to first token stays
+at 0.242-0.247 s. B alone wins most on cached long prompts (no re-prefill) but misses A's gain on short agentic and code
+prompts below its 1,024-token capture minimum, so the release ships A + B.
+
+Exactness (greedy, top-k dumps of 30 quick prompts, 13 long prompts and 48 agent turns):
+
+| comparison | result |
+|---|---|
+| verify cap off, reference vs snapshots | no token outside the reference's top-k; 27 / 30 quick prompts identical; long prompts and agent turns near-ties only |
+| verify cap on, reference vs snapshots | the same picture |
+| control: reference vs itself with only the verify width fixed at 4 (same drafts, no snapshots) | diverges on the same three prompts; largest shift 1.65 nat (longctx-02), larger than any snapshot difference |
+
+So the snapshots' differences are in the verify-schedule class. The release run's greedy outputs equal v2.8.4's on
+30 / 30 prompts.
+
+Slots and memory: 8 slots, worst MemAvailable 4.6 GiB; 16 slots, 4.0 GiB with no speed gain, so the default is 8.
+Release defaults (`V29S`): KV pool 2,371,200 tokens, worst 4.6 GiB, needles at 128K and 240K PASS, the worst-case load
+(thinking c24 alongside a cold 240K needle) completed 48 / 48 requests.
+
+Release run (`V29R`, box B): speedbench full 73.34 against v2.8.4's 73.43 on the same box (`Q284R`), flat; speedbench
+agent mode 76.33 (160-token turns) and 78.86 (512-token turns), geometric mean tok/s.

@@ -1,5 +1,44 @@
 # Changelog
 
+## v2.9 (2026-11-25)
+
+Basic tests on one box; v2.8.4 (the base of v2.9) passed a two-box qualification: Q284R and Q284S on both boxes.
+
+Draft-tail snapshots for agent loops; single-request decode is unchanged. Box B, release defaults: speedbench full
+73.34 against v2.8.4's 73.43 on the same box (flat); agent loops -4.4 / -4.9 % end-to-end time at 160- / 512-token
+turns (screen); KV pool 2,371,200 tokens; worst case 4.6 GiB. Results (box B): `results/V29R-s06/`,
+`results/V29S-s06/`, `results/S81off-s06/`, `results/S81a-s06/`, `results/S81b-s06/`, `results/S81ab-s06/`,
+`results/K81b8-s06/`, `results/K81b16-s06/`, `results/BEXoffref-s06/`, `results/BEXoffb-s06/`,
+`results/BEXonref-s06/`, `results/BEXonb-s06/`, `results/BEXschref4-s06/`; v2.8.4 qualification:
+`results/Q284R-s06/`, `results/Q284R-s05/`, `results/Q284S-s06/`, `results/Q284S-s05/`.
+
+- Draft-tail snapshots (`inkling_dftail`, `DFLASH_TAIL_SNAPSHOTS=8`, on by default with `SPEC=dflash2`): when a
+  prefill completes its prompt, the drafter's 2,048-position window at the prompt end is kept in one of 8 slots, keyed
+  by content and cache salt. A later request that hits the same prefix in the cache gets it copied back into its draft
+  ring instead of a ring rebuilt from only the uncached suffix. Restored only when content and salt match. Draft-only
+  state; the target path is untouched. 8 slots of 2,048 positions x 5 draft layers take 320 MiB, charged to the KV
+  budget (0.312 GiB). Any weight update or `flush_cache` clears them. The slots are one shared LRU, so in a multi-tenant
+  server one tenant's requests can evict another's snapshots (visible only as draft acceptance and latency, like the
+  radix cache's own eviction); use `DFLASH_TAIL_SNAPSHOTS=0` where tenants must not observe each other's cache use.
+- Screen on box B (v2.8.1 base), against both levers off (A = the prefix tail shipped since v2.8.1, B = snapshots):
+  speedbench full long context / agentic / code: A +6.6 / +1.1 / +1.7 %, B +14.4 / +0.2 / +0.1 %, A + B +6.7 / +1.3 /
+  +1.7 %. Agent loops (speedbench agent mode, 5-16K-token histories, end-to-end time at equal output length) at 160- /
+  512-token turns: A -0.7 / +0.3 %, B -4.0 / -5.4 %, A + B -4.4 / -4.9 %; decode 73.9 -> 78.3 tok/s with A + B; median
+  time to first token unchanged at 0.242-0.247 s. The release ships A + B.
+- Release run (`V29R`, box B): speedbench full 73.34 (v2.8.4 on the same box 73.43, flat); speedbench agent mode 76.33
+  at 160-token turns and 78.86 at 512-token turns (geometric mean tok/s); greedy outputs equal v2.8.4's on 30 / 30
+  prompts.
+- Exactness: with the verify cap off, the snapshots put no token outside the reference's top-k (27 / 30 quick prompts
+  identical; the long prompts and 48 agent turns show near-ties only); with the cap on, the same. A control without
+  snapshots that only fixes the verify width at 4 (same drafts) diverges on the same three prompts, with a larger shift
+  (1.65 nat on longctx-02) than any the snapshots produced: the snapshots' differences are in the verify-schedule
+  class.
+- Memory: 8 slots, worst MemAvailable 4.6 GiB; 16 slots 4.0 GiB with no speed gain, so 8 is the default. Release
+  defaults (`V29S`): worst 4.6 GiB, needles at 128K and 240K PASS, the worst-case load completed 48 / 48 requests.
+- Inert (logged once, never failing a request) on PD disaggregation, DCP > 1, a quantized or non-NHD draft pool, an
+  uncharged pool, or any hook exception. Pinned to the image's source (exit 78 on drift; `DFLASH_PREFIX_TAIL=0
+  DFLASH_TAIL_SNAPSHOTS=0` runs without the tail and snapshots).
+
 ## v2.8.4 (2026-11-25)
 
 Basic tests on one box; full two-box qualification follows in v2.8.x.

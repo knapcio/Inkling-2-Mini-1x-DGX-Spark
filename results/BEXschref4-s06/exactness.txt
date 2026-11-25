@@ -1,0 +1,15 @@
+## REF (cap off) vs REF4 (fixed:4), 30 quick
+longctx-02: first divergence at token 145: ref '13' vs arm '12', ref top-2 [('13', -0.176), ('12', -1.826), ('49', -10.13), ('14', -11.057), ('18', -11.45)], arm top-2 [('12', -0.252), ('13', -1.502), ('49', -11.07), ('11', -12.1), ('14', -13.345)], ref gap 1.650 -> NOT A NEAR-TIE
+longctx-04: first divergence at token 74: ref 'Actually' vs arm 'Let', ref top-2 [('Actually', -0.799), ('Let', -1.01), ('I', -1.743), ('Rather', -5.366), ('First', -6.286)], arm top-2 [('Let', -0.942), ('Actually', -0.956), ('I', -1.513), ('Rather', -6.519), ('Row', -7.098)], ref gap 0.211 -> near-tie
+longctx-09: first divergence at token 66: ref ' cap' vs arm ' ', ref top-2 [(' cap', -0.629), (' ', -0.77), (' budget', -6.221), (' limits', -7.081), (' counts', -8.359)], arm top-2 [(' ', -0.661), (' cap', -0.735), (' budget', -6.387), (' limits', -6.595), (' counts', -7.537)], ref gap 0.141 -> near-tie
+VERDICT FAIL: 27/30 identical, 2 near-ties (top-2 swap), 0 near-ties (top-k), 1 failures
+## B (cap off) vs REF4 (fixed:4), 30 quick
+longctx-02: first divergence at token 70: ref ' on' vs arm ',', ref top-2 [(' on', -1.57), (',', -1.684), (' to', -2.018), (' through', -2.28), (' there', -2.401)], arm top-2 [(',', -1.476), (' to', -1.87), (' on', -1.934), (' through', -2.022), (' there', -2.101)], ref gap 0.114 -> near-tie (top-k)
+longctx-04: first divergence at token 56: ref '120' vs arm '150', ref top-2 [('120', -1.194), ('130', -1.599), ('150', -1.921), ('100', -2.136), ('110', -2.495)], arm top-2 [('150', -1.346), ('120', -1.441), ('130', -1.645), ('140', -2.386), ('100', -2.676)], ref gap 0.405 -> NOT A NEAR-TIE
+longctx-09: first divergence at token 61: ref ' max' vs arm ' intent', ref top-2 [(' max', -1.097), (' intent', -1.23), (' bugs', -2.013), (' context', -2.334), (' fiction', -3.077)], arm top-2 [(' intent', -1.183), (' max', -1.399), (' bugs', -1.497), (' context', -2.443), (' fiction', -3.17)], ref gap 0.134 -> near-tie
+VERDICT FAIL: 27/30 identical, 1 near-ties (top-2 swap), 1 near-ties (top-k), 1 failures
+## REF vs B (cap off), 30 quick (BEX-off, for reference)
+longctx-02: first divergence at token 70: ref ',' vs arm ' on', ref top-2 [(',', -1.476), (' to', -1.87), (' on', -1.934), (' through', -2.022), (' there', -2.101)], arm top-2 [(' on', -1.57), (',', -1.684), (' to', -2.018), (' through', -2.28), (' there', -2.401)], ref gap 0.393 -> near-tie (top-k)
+longctx-04: first divergence at token 56: ref '150' vs arm '120', ref top-2 [('150', -1.346), ('120', -1.441), ('130', -1.645), ('140', -2.386), ('100', -2.676)], arm top-2 [('120', -1.194), ('130', -1.599), ('150', -1.921), ('100', -2.136), ('110', -2.495)], ref gap 0.096 -> NOT A NEAR-TIE
+longctx-09: first divergence at token 61: ref ' intent' vs arm ' max', ref top-2 [(' intent', -1.159), (' max', -1.23), (' bugs', -1.757), (' context', -2.478), (' fiction', -3.065)], arm top-2 [(' max', -1.097), (' intent', -1.23), (' bugs', -2.013), (' context', -2.334), (' fiction', -3.077)], ref gap 0.072 -> near-tie
+VERDICT FAIL: 27/30 identical, 1 near-ties (top-2 swap), 1 near-ties (top-k), 1 failures

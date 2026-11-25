@@ -234,14 +234,15 @@ class Scope(unittest.TestCase):
 
 class Sources(unittest.TestCase):
     def setUp(self):
-        self.saved = dict(_sources.EXPECTED)
-        _sources.EXPECTED.clear()
+        self.pins = _sources.EXPECTED[_sources.SCHEDULE_BATCH]
+        self.saved = dict(self.pins)
+        self.pins.clear()
         for name in self.saved:
-            _sources.EXPECTED[name] = _sources.digest(PINNED_TEXT, name)
+            self.pins[name] = _sources.digest(PINNED_TEXT, name)
 
     def tearDown(self):
-        _sources.EXPECTED.clear()
-        _sources.EXPECTED.update(self.saved)
+        self.pins.clear()
+        self.pins.update(self.saved)
 
     def root_with(self, text):
         d = tempfile.mkdtemp()
@@ -293,7 +294,7 @@ class Install(unittest.TestCase):
     def setUp(self):
         reset()
         self.saved_check = _sources.check
-        _sources.check = lambda root=None, off_hint="": None  # the pin itself is tested in Sources
+        _sources.check = lambda *a, **k: None  # the pin itself is tested in Sources
         self.saved_mod = sys.modules.pop(dt.MODULE, None)
 
     def tearDown(self):
@@ -317,7 +318,7 @@ class Install(unittest.TestCase):
         self.assertNotIn(dt.MODULE, _hook.pending())
 
     def test_off_skips_the_pin(self):
-        def refuse(root=None, off_hint=""):
+        def refuse(*a, **k):
             raise RuntimeError("pin checked")
 
         _sources.check = refuse
@@ -348,7 +349,7 @@ class Install(unittest.TestCase):
             self.assertFalse(dt.STATE["installed"])
 
     def test_pin_mismatch_refuses(self):
-        def refuse(root=None, off_hint=""):
+        def refuse(root=None, off_hint="", files=()):
             raise RuntimeError("inkling_dftail: differs from the pinned image" + off_hint)
 
         _sources.check = refuse

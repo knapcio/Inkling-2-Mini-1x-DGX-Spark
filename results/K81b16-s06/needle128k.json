@@ -1,0 +1,13 @@
+{
+ "url": "http://127.0.0.1:8000",
+ "results": [
+  {
+   "check": "needle 128K",
+   "pass": true,
+   "prompt_tokens": 128023,
+   "seconds": 34.9,
+   "expected": "JUNIPER-COBALT-2002",
+   "answer": "JUNIPER-COBALT-2002"
+  }
+ ]
+}

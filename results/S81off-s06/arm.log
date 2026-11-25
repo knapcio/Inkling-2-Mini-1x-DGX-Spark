@@ -1,0 +1,14 @@
+2026-11-25T01:24:55Z S81off-s06 mode warm
+S81off-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 67.31, "geomean_tok_s": 70.05, "aggregate_tok_s": 68.93, "median_ttft_ms": 162.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 40.65, "median_tokens_per_step": 2.718, "steps_source": "response", "median_accept_rate": 0.2503, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.398, "drift_pct_all": -0.398}}
+wrote results/S81off-s06/warm-sbquick.json (1.5 min)
+2026-11-25T01:26:23Z S81off-s06 mode sbf
+S81off-s06: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 67.6, "geomean_tok_s": 69.63, "aggregate_tok_s": 68.64, "median_ttft_ms": 161.6, "truncated_frac": 0.904, "reasoning_token_frac": 0.654, "reasoning_char_frac": 0.722, "median_step_ms": 40.71, "median_tokens_per_step": 2.772, "steps_source": "response", "median_accept_rate": 0.2531, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.044, "drift_pct_all": -0.044}}
+wrote results/S81off-s06/speedbench.json (4.9 min)
+2026-11-25T01:31:19Z S81off-s06 mode sba
+S81off-s06: {"failed": 0, "valid_decode": 94, "ALL": {"n": 94, "median_tok_s": 68.38, "geomean_tok_s": 72.53, "aggregate_tok_s": 70.53, "median_ttft_ms": 251.3, "truncated_frac": 0.681, "reasoning_token_frac": 0.536, "reasoning_char_frac": 0.743, "median_step_ms": 44.41, "median_tokens_per_step": 3.097, "steps_source": "response", "median_accept_rate": 0.3024, "median_draft_per_step": 7.0}}
+S81off-s06: agent: cold TTFT 1093.3 ms, cached-turn TTFT 241.9 ms, cache hit vs ideal 0.9913, e2e 2.322 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/S81off-s06/sbagent.json (3.9 min)
+2026-11-25T01:35:15Z S81off-s06 mode sba512
+S81off-s06-512: {"failed": 0, "valid_decode": 47, "ALL": {"n": 47, "median_tok_s": 72.32, "geomean_tok_s": 74.32, "aggregate_tok_s": 73.67, "median_ttft_ms": 248.7, "truncated_frac": 0.234, "reasoning_token_frac": 0.465, "reasoning_char_frac": 0.746, "median_step_ms": 45.22, "median_tokens_per_step": 3.224, "steps_source": "response", "median_accept_rate": 0.321, "median_draft_per_step": 7.0}}
+S81off-s06-512: agent: cold TTFT 1100.2 ms, cached-turn TTFT 239.7 ms, cache hit vs ideal 0.9913, e2e 3.217 s; cache isolation FAILED in 5 of 8 conversations: conv-01, conv-02, conv-03, conv-04, conv-05
+wrote results/S81off-s06/sbagent512.json (3.4 min)

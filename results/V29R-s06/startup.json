@@ -1,0 +1,2 @@
+{"label":"V29R-s06","ready_utc":"2026-11-25T03:26:54Z","startup_s":127,"memavail_ready_gib":4.9,"kv":"[2026-11-25 03:26:50 PID134] max_total_num_tokens=2361088, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.19 GB"}
+{"memavail_end_gib":5.0}

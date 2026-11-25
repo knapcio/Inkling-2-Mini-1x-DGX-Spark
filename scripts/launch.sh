@@ -66,6 +66,7 @@ PADX=${PADX:-1}                                              # CUDA-graph paddin
 DFLASH_HOT_N=${DFLASH_HOT_N:-}                               # hot-vocab size for hot8 / hot16 (empty = 65536)
 DFLASH_PREFIX_TAIL=${DFLASH_PREFIX_TAIL:-2048}                 # SPEC=dflash2: on a prefix-cache hit, prefill the last N prompt tokens again so the drafter sees them (0 = off)
 DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only for prompts of at most this many tokens (longer prompts keep the cache as before)
+DFLASH_TAIL_SNAPSHOTS=${DFLASH_TAIL_SNAPSHOTS:-8}                # SPEC=dflash2: prompt-end draft windows kept for later prefix hits (40 MiB each, charged to the KV budget; 0 = off)
 [[ $ENGINE == vllm && -z ${SPEC:-} ]] && SPEC=dspark   # the vLLM profile keeps the DSpark draft
 SPEC=${SPEC:-dflash2}                  # dflash2 (default: third-party DFlash2 drafter) | dspark (the model's own draft, v2.7.2 profile) | none
 DFLASH_BV=${DFLASH_BV:-1}                                    # SPEC=dflash2 + OVERLAY=1: block verification on sampled steps (exact with RSFIX)
@@ -147,8 +148,8 @@ case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the store is ch
     echo "set KV12S / KV12S_POOL / KV12 / KV12_SLOTS instead of passing the KV store's variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prefix tail is DFlash2-only: passed by the launcher alone
-  *INKLING_DFLASH_PREFIX_TAIL*)                              # both INKLING_DFLASH_PREFIX_TAIL and its _MAX_INPUT
-    echo "set DFLASH_PREFIX_TAIL / DFLASH_PREFIX_TAIL_MAX_INPUT instead of passing INKLING_DFLASH_PREFIX_TAIL* in SGLANG_ENV" >&2; exit 2 ;;
+  *INKLING_DFLASH_PREFIX_TAIL*|*INKLING_DFLASH_TAIL_SNAPSHOTS*)  # INKLING_DFLASH_PREFIX_TAIL, its _MAX_INPUT, the snapshots
+    echo "set DFLASH_PREFIX_TAIL / DFLASH_PREFIX_TAIL_MAX_INPUT / DFLASH_TAIL_SNAPSHOTS instead of passing INKLING_DFLASH_* tail variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
 [[ $KV12S == 1 ]] && case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in
   *enable-unified-memory*|*cuda-graph-backend-prefill*)
@@ -296,6 +297,8 @@ if [[ $ENGINE == sglang ]]; then
                python3 -I /draft/sglang_inkling_dflash2.py && exec python3 "$@"' dflash2)
   fi
   dftail=; [[ $SPEC == dflash2 && $DFLASH_PREFIX_TAIL != 0 ]] && dftail=$DFLASH_PREFIX_TAIL
+  [[ $DFLASH_TAIL_SNAPSHOTS =~ ^[0-9]+$ ]] || { echo "DFLASH_TAIL_SNAPSHOTS must be a whole number (got '$DFLASH_TAIL_SNAPSHOTS')" >&2; exit 2; }
+  dfsnap=; [[ $SPEC == dflash2 && $OVERLAY == 1 && $DFLASH_TAIL_SNAPSHOTS != 0 ]] && dfsnap=$DFLASH_TAIL_SNAPSHOTS
   ov=()
   if [[ $OVERLAY == 1 ]]; then
     [[ -f $OVERLAY_DIR/sitecustomize.py ]] || { echo "OVERLAY=1 but no overlay at $OVERLAY_DIR" >&2; exit 1; }
@@ -306,7 +309,7 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
         -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_PFUSE_HOIST="$PFUSE_HOIST" -e INKLING_ATTN_GATE="$ATTN_GATE" -e INKLING_PROLOGUE="$PROLOGUE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
-        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
+        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_TAIL_SNAPSHOTS="$dfsnap" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
         -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"
         -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"

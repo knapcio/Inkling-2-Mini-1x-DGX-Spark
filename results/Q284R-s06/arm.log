@@ -1,0 +1,65 @@
+2026-11-25T02:47:19Z Q284R-s06 mode warm
+Q284R-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.56, "geomean_tok_s": 73.15, "aggregate_tok_s": 71.04, "median_ttft_ms": 165.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.85, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2437, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.317, "drift_pct_all": -0.317}}
+wrote results/Q284R-s06/warm-sbquick.json (1.4 min)
+2026-11-25T02:48:44Z Q284R-s06 mode full
+== 2026-11-25T03:48:44+01:00 speedbench full
+Q284R-s06: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.49, "geomean_tok_s": 73.43, "aggregate_tok_s": 71.54, "median_ttft_ms": 164.3, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.43, "median_tokens_per_step": 2.833, "steps_source": "response", "median_accept_rate": 0.2635, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.917, "drift_pct_all": -0.917}}
+wrote results/Q284R-s06/Q284R-s06-speedbench.json (4.8 min)
+== 2026-11-25T03:53:35+01:00 decode table
+prose      c1  aggregate    65.9 tok/s  per-stream   66.4  ttft 0.189 s  failed 0
+prose      c2  aggregate    90.9 tok/s  per-stream   47.2  ttft 0.231 s  failed 0
+prose      c4  aggregate   142.6 tok/s  per-stream   39.8  ttft 0.307 s  failed 0
+prose      c8  aggregate   212.3 tok/s  per-stream   28.6  ttft 0.326 s  failed 0
+prose      c16 aggregate   296.6 tok/s  per-stream   19.9  ttft 0.414 s  failed 0
+code       c1  aggregate    74.2 tok/s  per-stream   79.1  ttft 0.194 s  failed 0
+code       c2  aggregate    94.5 tok/s  per-stream   49.2  ttft 0.215 s  failed 0
+code       c4  aggregate   138.1 tok/s  per-stream   40.5  ttft 0.285 s  failed 0
+code       c8  aggregate   210.2 tok/s  per-stream   29.9  ttft 0.461 s  failed 0
+code       c16 aggregate   311.2 tok/s  per-stream   21.9  ttft 0.55 s  failed 0
+structured c1  aggregate    75.3 tok/s  per-stream   76.6  ttft 0.184 s  failed 0
+structured c2  aggregate   105.0 tok/s  per-stream   55.2  ttft 0.251 s  failed 0
+structured c4  aggregate   149.9 tok/s  per-stream   41.1  ttft 0.33 s  failed 0
+structured c8  aggregate   201.9 tok/s  per-stream   28.1  ttft 0.361 s  failed 0
+structured c16 aggregate   322.1 tok/s  per-stream   21.9  ttft 0.434 s  failed 0
+json       c1  aggregate    80.6 tok/s  per-stream   84.3  ttft 0.17 s  failed 0
+json       c2  aggregate   104.1 tok/s  per-stream   60.2  ttft 0.237 s  failed 0
+json       c4  aggregate   152.3 tok/s  per-stream   42.9  ttft 0.299 s  failed 0
+json       c8  aggregate   222.0 tok/s  per-stream   30.7  ttft 0.369 s  failed 0
+json       c16 aggregate   341.6 tok/s  per-stream   25.3  ttft 0.463 s  failed 0
+wrote results/Q284R-s06/Q284R-s06-decode.json
+| prompt type | c1 | c2 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|---:|
+| prose | 66.4 | 90.9 (47.2) | 142.6 (39.8) | 212.3 (28.6) | 296.6 (19.9) |
+| code | 79.1 | 94.5 (49.2) | 138.1 (40.5) | 210.2 (29.9) | 311.2 (21.9) |
+| structured | 76.6 | 105.0 (55.2) | 149.9 (41.1) | 201.9 (28.1) | 322.1 (21.9) |
+| json | 84.3 | 104.1 (60.2) | 152.3 (42.9) | 222.0 (30.7) | 341.6 (25.3) |
+== 2026-11-25T03:59:25+01:00 thinking load
+{"label": "Q284R-s06-c1", "started": "2026-11-25T03:59:25+01:00", "concurrency": 1, "requests": 3, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 61.11, "completion_tokens": 5163, "aggregate_tok_s": 84.5, "per_request_decode_tok_s_median": 81.7, "ttft_median_s": 0.22, "length_finishes": 2}
+{"label": "Q284R-s06-c8", "started": "2026-11-25T04:00:26+01:00", "concurrency": 8, "requests": 16, "failed": 0, "max_tokens": 4096, "temperature": 0.8, "effort": "high", "wall_s": 209.73, "completion_tokens": 57467, "aggregate_tok_s": 274.0, "per_request_decode_tok_s_median": 39.7, "ttft_median_s": 0.45, "length_finishes": 12}
+{"label": "Q284R-s06-c24", "started": "2026-11-25T04:03:56+01:00", "concurrency": 24, "requests": 48, "failed": 0, "max_tokens": 4096, "temperature": 0.8, "effort": "high", "wall_s": 316.56, "completion_tokens": 172184, "aggregate_tok_s": 543.9, "per_request_decode_tok_s_median": 25.7, "ttft_median_s": 0.72, "length_finishes": 37}
+== 2026-11-25T04:09:12+01:00 longctx
+128K     130922.0 34.264     3821.0      17.268       None      47.1 [36.8, 60.2]        -         -
+wrote results/Q284R-s06/Q284R-s06-longctx.json (3.3 min)
+== 2026-11-25T04:12:30+01:00 quality guard
+Q284R-s06-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.0, "geomean_tok_s": 72.69, "aggregate_tok_s": 70.64, "median_ttft_ms": 164.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.23, "median_tokens_per_step": 2.576, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -1.152, "drift_pct_all": -1.152}}
+Q284R-s06-guard: quality guard 30/30 passed
+wrote results/Q284R-s06/Q284R-s06-guard.json (1.8 min)
+== 2026-11-25T04:14:16+01:00 sanity
+chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
+chat: capital + river        PASS  {"answer": "The capital of Poland is Warsaw, which is crossed by the Vistula River."}
+effort none                  PASS  {"completion_tokens": 280, "reasoning_chars": 593, "prompt_tokens": 46, "answer": "count: (142 − 12) + (90 − 12) = 130 + 78 = 208.\n\nAnswer: 208"}
+effort low                   PASS  {"completion_tokens": 280, "reasoning_chars": 552, "prompt_tokens": 48, "answer": "y both but by one: (142−12)+(90−12)=130+78=208.\n\nAnswer: 208"}
+effort medium                PASS  {"completion_tokens": 275, "reasoning_chars": 514, "prompt_tokens": 48, "answer": "visible by exactly one: 142 + 90 − 2·12 = 208  \n\nAnswer: 208"}
+effort high                  PASS  {"completion_tokens": 292, "reasoning_chars": 573, "prompt_tokens": 48, "answer": "/77⌋ = 12  \n\nXOR count: 142 + 90 − 2·12 = 208  \n\nAnswer: 208"}
+effort: none <= high         PASS  {"lengths": {"none": 280, "low": 280, "medium": 275, "high": 292}}
+tool call                    PASS  {"finish": "tool_calls", "calls": [{"name": "get_weather", "arguments": "{\"city\": \"Krakow\", \"unit\": \"c\"}"}]}
+tool result -> answer        PASS  {"answer": "Right now in Krakow: 7°C with light rain."}
+json_schema output           PASS  {"parsed": {"city": "Gdańsk", "population_millions": 0.47, "landmarks": ["Main Market Square", "Long Market", "Westerplatte", "Gdańsk Maritime Museum"]}}
+needle 120K                  PASS  {"prompt_tokens": 120097, "seconds": 34.4, "expected": "MEADOW-FALCON-0347", "answer": "MEADOW-FALCON-0347"}
+11 / 11 passed
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 84.4, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+== 2026-11-25T04:16:34+01:00 done
+2026-11-25T03:16:34Z Q284R-s06 mode think1
+2026-11-25T03:18:16Z Q284R-s06 mode think8
+2026-11-25T03:20:10Z Q284R-s06 mode think48
