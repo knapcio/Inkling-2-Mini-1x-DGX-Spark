@@ -1,0 +1,2 @@
+{"label":"PXa1-s05","ready_utc":"2026-11-24T21:30:17Z","startup_s":132,"memavail_ready_gib":4.5,"kv":"[2026-11-24 21:30:13 PID132] max_total_num_tokens=2404608, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=4.82 GB"}
+{"memavail_end_gib":4.5}

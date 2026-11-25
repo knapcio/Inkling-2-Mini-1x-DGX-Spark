@@ -69,6 +69,9 @@ try:
     if _on("INKLING_NOEXP"):  # dead verify rows get no experts (exact for live rows; needs INKLING_VERIFY_CAP)
         import inkling_noexp
         inkling_noexp.install()
+    if _on("INKLING_PADX"):  # after noexp: CUDA-graph padding rows route to the phantom expert (exact for live rows)
+        import inkling_padx
+        inkling_padx.install()
     if _on("INKLING_DFLASH_BYTES"):  # DFlash2 drafter byte cuts (draft-only; needs SPEC=dflash2, exclusive with DRAFT_BYTES)
         import inkling_dfbytes
         inkling_dfbytes.install()

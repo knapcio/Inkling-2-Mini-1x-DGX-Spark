@@ -1,0 +1,15 @@
+2026-11-24T22:58:06Z PADX283-s05 mode warm
+PADX283-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.2, "geomean_tok_s": 72.82, "aggregate_tok_s": 70.62, "median_ttft_ms": 165.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.46, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.299, "drift_pct_all": -0.299}}
+wrote results/PADX283-s05/warm-sbquick.json (1.4 min)
+2026-11-24T22:59:32Z PADX283-s05 mode sbf
+PADX283-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.27, "geomean_tok_s": 72.51, "aggregate_tok_s": 70.58, "median_ttft_ms": 165.4, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.91, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.264, "drift_pct_all": -0.264}}
+wrote results/PADX283-s05/speedbench.json (4.9 min)
+2026-11-24T23:04:27Z PADX283-s05 mode thinkc9
+2026-11-24T23:06:28Z PADX283-s05 mode thinkc15
+2026-11-24T23:08:53Z PADX283-s05 mode thinkc16
+2026-11-24T23:11:23Z PADX283-s05 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 92.1, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-24T23:15:44Z PADX283-s05 mode nd128
+needle 128K                  PASS  {"prompt_tokens": 128023, "seconds": 34.7, "expected": "JUNIPER-COBALT-2002", "answer": "JUNIPER-COBALT-2002"}
+1 / 1 passed

@@ -4,8 +4,9 @@
 Stock: short_convolution (prefill kernel) -> qk_l2_clip_fwd_cutedsl (K, threshold from the config, no scale) or
 rms_norm without weight (V), over [T, 8, 128]. Fused: inkling_prologue.conv_post. Real layer-0 k / v conv weights
 when /model is mounted. Two sequences (a cached prefix in slot 1 + a fresh one), T in 2048 / 2049 / 3001 / 8192.
-Reports bit-equal fraction, max BF16 ulp distance and the error of both vs an FP64 post-op on the same BF16 conv
-output (fused must be <= 1.5x stock + 1e-7); then cold-L2 timing at 8192 rows (conv + post-op vs fused)."""
+Sweeps the row-sum orders of _triton._row_sumsq (PER x XOR, and -1 = the old tl.sum) and prints which give 0 differing
+elements. The default (inkling_prologue.SUM_ORDER) must be bit-identical to stock: 0 ulp at every size; also the
+error of both vs an FP64 post-op on the same BF16 conv output; then cold-L2 timing at 8192 rows."""
 import glob
 import json
 import os
@@ -14,6 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FAILED = []
+SWEEP = {}
 D, H = 1024, 128
 
 
@@ -60,6 +62,23 @@ def main():
         torch.cuda.synchronize()
         return statistics.median(a.elapsed_time(b) * 1e3 for a, b in ev)
 
+    def cute_sumsq(y, post):
+        """The CuTe row_sum tree on the BF16 conv output y [T, D] (FP32, eager torch: every op rounds once):
+        per lane a sequential fold over its vectors in register order, then a butterfly with descending offsets."""
+        t32 = y.float().view(y.shape[0], D // H, 2, 8, 8) if post == 1 else y.float().view(y.shape[0], D // H, 2, 16, 4)
+        lanes = t32.shape[3]
+        acc = torch.zeros(t32.shape[:2] + (lanes,), dtype=torch.float32, device=y.device)
+        for j in range(2):
+            for e in range(t32.shape[4]):
+                v = t32[:, :, j, :, e]
+                acc = acc + v * v
+        off = lanes // 2
+        while off:
+            idx = torch.arange(lanes, device=y.device) ^ off
+            acc = acc + acc[:, :, idx]
+            off //= 2
+        return acc[:, :, 0]
+
     def ordered(t):
         b = t.contiguous().view(torch.int16).int()
         return torch.where(b < 0, -(b & 0x7FFF), b)
@@ -82,6 +101,14 @@ def main():
             xa = (torch.randn(T, D + 64, device="cuda", generator=g) * hs.new_ones(D + 64)).to(torch.bfloat16)
             x = xa[:, :D]  # row stride D + 64 like a view of a wider projection
             x.mul_(hs.to(torch.bfloat16))
+            # order-sensitive rows (one big value + tiny ones that only survive if added together first); the conv
+            # mixes neighbouring rows, so these feed sums of many magnitudes
+            for r0 in range(5, T, 97):
+                x[r0].zero_()
+                x[r0, ::H] = 1.0
+                x[r0, 4::H] = 2.0 ** -12
+                x[r0, 5::H] = 2.0 ** -12
+                x[r0, 64::H] = 2.0 ** -12
 
             def stock():
                 y = short_convolution(x, w, cache, meta).view(T, D // H, H)
@@ -93,7 +120,26 @@ def main():
                 return conv_post(x, w, cache, meta, post, thr if post == 1 else 0.0,
                                  eps_clip if post == 1 else eps_norm)
 
-            ys, yf = stock(), fused()
+            ys = stock()
+            exact = []
+            for order in [(p_, x_) for p_ in range(5) for x_ in range(2)] + [(-1, 0)]:
+                yo = conv_post(x, w, cache, meta, post, thr if post == 1 else 0.0,
+                               eps_clip if post == 1 else eps_norm, order=order)
+                n_diff = int((ys.view(torch.int16) != yo.view(torch.int16)).sum().item())
+                SWEEP.setdefault((post, order), []).append(n_diff)
+                if n_diff == 0:
+                    exact.append(order)
+            print(f"T={T} {name}: orders with 0 differing elements: {exact or 'none'}", flush=True)
+            yf = fused()
+            ssf = torch.empty(T, D // H, dtype=torch.float32, device="cuda")
+            conv_post(x, w, cache, meta, post, thr if post == 1 else 0.0, eps_clip if post == 1 else eps_norm, ss=ssf)
+            ssr = cute_sumsq(short_convolution(x, w, cache, meta), post)
+            ss_ok = torch.equal(ssf.view(torch.int32), ssr.view(torch.int32))
+            raw_ok = torch.equal(ys.view(torch.int16), yf.view(torch.int16))
+            print(f"T={T} {name}: FP32 row sum vs the CuTe tree {'BIT-IDENTICAL' if ss_ok else 'DIFFERS'}; "
+                  f"output raw bits {'IDENTICAL' if raw_ok else 'DIFFER'}", flush=True)
+            if not (ss_ok and raw_ok):
+                FAILED.append(f"T={T} {name} bits")
             y = short_convolution(x, w, cache, meta).double().view(T, D // H, H)
             ss = (y * y).sum(-1, keepdim=True)
             if post == 1:
@@ -108,7 +154,7 @@ def main():
             tol = ref.abs() * 2.0 ** -7 + 1e-30
             within = bool(((yf.double() - ref).abs() <= tol + es).all())
             ok = (bool(torch.isfinite(yf).all()) and ef.max().item() <= 1.5 * es.max().item() + 1e-7
-                  and ef.mean().item() <= 1.5 * es.mean().item() + 1e-9 and within)
+                  and ef.mean().item() <= 1.5 * es.mean().item() + 1e-9 and within and ulp == 0)  # 0 ulp required
             print(f"T={T} {name}: bit-equal {100 * bit:.3f} %, max {ulp} ulp, err max stock {es.max().item():.2e} "
                   f"fused {ef.max().item():.2e}, mean stock {es.mean().item():.2e} fused {ef.mean().item():.2e} "
                   f"{'ok' if ok else 'FAIL'}", flush=True)
@@ -118,6 +164,10 @@ def main():
                 ts, tf = bench(stock), bench(fused)
                 print(f"   time stock {ts:.0f} us, fused {tf:.0f} us, saved {ts - tf:+.0f} us per call "
                       f"({40 * (ts - tf) / 1e3:+.1f} ms per 8K chunk over 40 SWA visits)", flush=True)
+    for post in (1, 2):
+        rows = sorted((sum(v), k[1]) for k, v in SWEEP.items() if k[0] == post)
+        print(f"post {post} ({'clip' if post == 1 else 'rmsnorm'}): differing elements over all sizes by (PER, XOR): "
+              + ", ".join(f"{o}={n}" for n, o in rows), flush=True)
     print("FAILED: " + ", ".join(FAILED) if FAILED else "ALL OK")
     return 1 if FAILED else 0
 

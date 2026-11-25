@@ -1,0 +1,8 @@
+2026-11-25T00:07:34Z PADX283off2-s05 mode warm
+PADX283off2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.99, "geomean_tok_s": 73.46, "aggregate_tok_s": 71.26, "median_ttft_ms": 163.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 39.04, "median_tokens_per_step": 2.672, "steps_source": "response", "median_accept_rate": 0.2449, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.133, "drift_pct_all": -0.133}}
+wrote results/PADX283off2-s05/warm-sbquick.json (1.4 min)
+2026-11-25T00:08:58Z PADX283off2-s05 mode sbf
+PADX283off2-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.96, "geomean_tok_s": 73.25, "aggregate_tok_s": 71.3, "median_ttft_ms": 163.0, "truncated_frac": 0.918, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.723, "median_step_ms": 39.46, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -2.907, "drift_pct_all": -2.907}}
+wrote results/PADX283off2-s05/speedbench.json (4.9 min)
+2026-11-25T00:13:50Z PADX283off2-s05 mode thinkc9
+2026-11-25T00:15:54Z PADX283off2-s05 mode thinkc15

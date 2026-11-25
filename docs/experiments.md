@@ -1265,3 +1265,80 @@ widths equal the fitting tool's per-request price lookup. The fitting tool (`too
 target's candidate probabilities (`tools/bvexpect.py`, capture field `tgt_cand_p`, not recorded for top-k / top-p /
 min-p filtered requests); on the capture this changed sampled scores by under 0.5 percentage points and left the
 prices unchanged.
+
+## v2.8.3: padding rows without experts, bit-identical prologue
+
+Basic tests on one box; full two-box qualification follows in v2.8.x. Release runs: on box A `results/PADX283g-s05/`
+and `results/PADX283off2-s05/` (released padx version against padx off, same session: speedbench full, thinking c9 /
+c15), `results/PADX283-s05/` and `results/PADX283off-s05/` (first padx version: thinking c16, worst-case load) and the
+padx screen
+`results/PXa0-s05/`, `results/PXa1-s05/`, `results/PXb1-s05/`, `results/PXb0-s05/`; on box B `results/KVS283a-s06/`, `results/KVS283b-s06/` (memory,
+needles) and `results/PF283-s06/` (prefill), `results/REL283-s06/` (speedbench full).
+
+### Padding rows (`inkling_padx`)
+
+A decode or target-verify CUDA graph replays at its captured batch size. With fewer live requests the tail rows are
+padding: the graph runner zeroes their positions, cache locations and request indices but keeps the previous replay's
+input ids, so every padding row still routes to 8 experts. Measured on the v2.8.1 stack (sampled thinking): a batch of 9
+replays the graph for 10 with padding rows, and its step took 125.3 ms against 116.1 ms for a full batch of 10 (one
+more real request); the difference was in the NVFP4 / MXFP8 grouped GEMMs (+8.1 / +1.9 ms). With `PADX=1` the padding rows' expert ids become the phantom expert (the out-of-range id
+that the dead-verify-row skip uses), so the SM120 kernels never touch them and the combine gives them 0. The live row
+count is written on the device on every replay and read inside the graph; eager calls and other graphs keep stock
+routing. A row is routed only if it is live for both padx and the dead-verify-row skip.
+
+Exactness: live rows bit-identical in the GPU check (14 shapes, alone and with the dead-verify-row path). Concurrent
+greedy output on this stack varies with the batch composition: two runs with padx off already differ on 57 of 60
+outputs, and padx on against off shows the same first-divergence class.
+
+Screen on box A, thinking (T=0.8), aggregate tok/s, ABBA, two runs per arm:
+
+| requests | padx off | padx on | aggregate | per-request median |
+|---|---|---|---:|---:|
+| 9 | 269.5 / 270.3 | 292.0 / 291.3 | +8 % | +6 % |
+| 10 | - | - | flat | - |
+| 15 | 354.9 / 375.9 | 400.5 / 392.3 | +8 % | +7 % |
+| 16 | 401.2 / 397.5 | 410.6 / 407.9 | +2.4 % | - |
+
+At 16 requests the gain comes from the end of the run, when requests drain and the batch pads.
+
+Gating per graph. The first version masked every captured graph and added 4 small kernels per MoE visit to each: 192
+per step, +0.36 ms (0.8 %) at c1, where nothing pads. Graphs of 1-8 requests can never replay with padding (the runner
+pads n live requests up to the smallest captured size >= n, and 1-8 are all captured), so the released version decides
+at capture time: graphs of 1-8 requests keep the stock route with zero extra kernels, graphs of 10 and up get the mask.
+Live rows are bit-identical in every shape; the small graphs are bit-identical to stock on every row (GPU check
+against written-out expectations).
+
+Released version against padx off, box A, same session (`PADX283g` / `PADX283off2`):
+
+| | padx off | padx on | change |
+|---|---:|---:|---:|
+| speedbench full, all 73 prompts | 73.25 | 73.17 | flat |
+| median step (tokens per step) | 39.46 ms (2.742) | 39.59 ms (2.742) | two padx-off runs differ by 0.09 ms |
+| thinking c9, aggregate (per-request median) | 269.3 (34.3) | 282.2 (35.6) | +4.8 % |
+| thinking c15, aggregate (per-request median) | 373.9 (27.9) | 392.5 (29.6) | +5.0 % (+6.1 %) |
+
+With the first version (`PADX283` / `PADX283off`; graphs of 16 and 24 requests are masked in both versions): thinking
+c16 415.5 vs 403.4 (+3.0 %), the worst-case load (thinking c24) 331.6 vs 324.6 (+2.2 %). The released version's c1
+greedy outputs equal v2.8.2's release run on 30 / 30 prompts, and the 128K needle passes.
+
+### Prologue in the stock row-sum order
+
+v2.8.2's fused prologue (K conv + L2 clip, V conv + value norm) flipped single elements by one BF16 ulp because it
+summed the squares in a different order, and it shipped opt-in. The v2.8.3 kernel reduces in the stock kernel's
+row-sum order: 0 ulp at 2,048 / 2,049 / 3,001 / 8,192 rows, including adversarial rows built to be sensitive to the
+summation order. Serving dump: greedy outputs identical to both controls on 30 / 30 prompts, log-probabilities
+bit-equal over 4,691 tokens. About -8.5 ms per 8K prefill chunk. It is on by default (`PROLOGUE=1`).
+
+Cold prefill, release defaults (box B, `PF283`, mean of 2 runs) against v2.8.2: 1K 2,864 vs 2,821 (+1.5 %), 8K 5,553
+vs 5,527 (+0.5 %), 32K 5,217 vs 5,189 (+0.6 %), 128K 3,788 vs 3,785 (+0.1 %); against the v2.8.1-tree control (mean of
+`PHAc` / `PHAc2`) +2.7 % at 8K, +2.8 % at 32K, +1.4 % at 128K.
+
+Memory (box B, `MEM_FRACTION=0.88`): KV pool 2,352,000 tokens; lowest MemAvailable under the worst-case load (thinking
+c24, 48 x 2,048 tokens, alongside a cold 240K needle) 5.6 / 5.5 / 5.4 / 5.3 GiB in `KVS283a` / `KVS283b` / `PF283` /
+`REL283` (48 / 48 requests completed, 340.1 / 357.4 tok/s aggregate; guard 3.5 GiB). Needles at 128K and 240K PASS;
+c1 greedy outputs equal v2.8.2's release run on 30 / 30 prompts in all four runs.
+
+Speedbench full, release defaults (`REL283`, box B, one run, 0 failed): all 72.90 (v2.8.2 72.78 / 72.82), prose
+65.02, code 81.56, structured 77.63, agentic 83.28, multilingual 57.65, long context 72.99; median time to first
+token 163.8 ms, median step 39.71 ms, 2.742 tokens per step. c1 decode is unchanged within the run-to-run spread;
+v2.8.3's gains are at concurrency (padding rows) and in prefill (the prologue).

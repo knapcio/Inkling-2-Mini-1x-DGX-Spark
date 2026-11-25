@@ -1,0 +1,2 @@
+{"label":"KVS283a-s06","ready_utc":"2026-11-24T22:57:57Z","startup_s":126,"memavail_ready_gib":5.9,"kv":"[2026-11-24 22:57:52 PID132] max_total_num_tokens=2352000, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.34 GB"}
+{"memavail_end_gib":5.7}

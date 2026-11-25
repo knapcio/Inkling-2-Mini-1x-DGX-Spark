@@ -1,0 +1,2 @@
+{"label":"PADX283off2-s05","ready_utc":"2026-11-25T00:07:34Z","startup_s":127,"memavail_ready_gib":5.4,"kv":"[2026-11-25 00:07:28 PID134] max_total_num_tokens=2371584, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.74 GB"}
+{"memavail_end_gib":5.2}

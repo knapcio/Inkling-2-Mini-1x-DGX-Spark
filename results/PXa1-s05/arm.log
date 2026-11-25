@@ -1,0 +1,13 @@
+2026-11-24T21:30:17Z PXa1-s05 mode warm
+PXa1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 68.48, "geomean_tok_s": 72.84, "aggregate_tok_s": 70.62, "median_ttft_ms": 164.3, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 40.46, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2537, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.036, "drift_pct_all": 0.036}}
+wrote results/PXa1-s05/warm-sbquick.json (1.4 min)
+2026-11-24T21:31:43Z PXa1-s05 mode thinkc9
+2026-11-24T21:33:42Z PXa1-s05 mode thinkc10
+2026-11-24T21:35:46Z PXa1-s05 mode thinkc15
+2026-11-24T21:38:14Z PXa1-s05 mode thinkc16
+2026-11-24T21:40:48Z PXa1-s05 mode lcdc9
+round 0: 30 prompts at concurrency 9
+round 1: 30 prompts at concurrency 9
+2026-11-24T21:41:49Z PXa1-s05 mode lcdc15
+round 0: 30 prompts at concurrency 15
+round 1: 30 prompts at concurrency 15

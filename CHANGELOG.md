@@ -1,5 +1,51 @@
 # Changelog
 
+## v2.8.3 (2026-11-25)
+
+Basic tests on one box; full two-box qualification follows in v2.8.x.
+
+Padding rows of CUDA-graph batches get no expert work, and the sliding-window prefill prologue is now bit-identical
+and on by default. Release defaults: thinking c9 / c15 +4.8 / +5.0 % against padx off (box A); cold prefill 1K / 8K /
+32K / 128K +1.5 / +0.5 / +0.6 / +0.1 % against v2.8.2 (box B); KV pool 2,352,000 tokens; worst case 5.3 GiB; speedbench full 72.90
+(unchanged).
+Results: box A `results/PADX283g-s05/`, `results/PADX283off2-s05/` (release version), `results/PADX283-s05/`,
+`results/PADX283off-s05/` (first version), screen `results/PXa0-s05/`, `results/PXa1-s05/`, `results/PXb1-s05/`,
+`results/PXb0-s05/`; box B `results/KVS283a-s06/`, `results/KVS283b-s06/`, `results/PF283-s06/`,
+`results/REL283-s06/`.
+
+- `inkling_padx` (new, `PADX=1`): a decode or verify CUDA graph replays at its captured batch size, and with fewer
+  live requests its padding rows still carried the previous replay's inputs and routed to 8 experts each. They now
+  route to the phantom expert that the dead-verify-row skip already uses, so the expert GEMMs skip them. The choice is
+  made per captured graph: graphs of 1-8 requests can never replay with padding (n live requests use the smallest
+  captured size >= n, and 1-8 are all captured), so they keep the stock route with no extra kernels; graphs of 10
+  requests and up get the mask. A first version masked every graph and added 4 small kernels per MoE visit (192 per
+  step, +0.36 ms or 0.8 % at c1, where nothing pads). Live rows are bit-identical in every shape, small graphs are
+  bit-identical to stock on every row, and the c1 greedy outputs equal v2.8.2's release run on 30 / 30 prompts.
+  - Release version against padx off, box A, same session: speedbench full 73.17 vs 73.25 (flat; median step 39.59
+    vs 39.46 ms, two padx-off runs differ by 0.09 ms; 2.742 tokens per step in both); thinking c9 282.2 vs 269.3
+    aggregate (+4.8 %, per-request median 35.6 vs 34.3), c15 392.5 vs 373.9 (+5.0 %, per request 29.6 vs 27.9,
+    +6.1 %). Needle at 128K PASS.
+  - First version (graphs of 16 and 24 requests are masked in both): thinking c16 415.5 vs 403.4 (+3.0 %), worst-case
+    load (thinking c24) 331.6 vs 324.6 (+2.2 %). Screen, two runs each: c9 +8 %, c15 +8 %, c16 +2.4 %, c10 flat.
+  - Concurrent greedy output depends on the batch composition on this stack (two runs with padx off differ on 57 / 60
+    outputs); padx on against off shows the same first-divergence class. `PADX=0` turns it off.
+- `PROLOGUE=1` (`inkling_prologue`) is now on: the fused K conv + L2 clip and V conv + value norm reduce in the stock
+  kernel's row-sum order, so the v2.8.2 one-ulp differences are gone. 0 ulp at 2,048 / 2,049 / 3,001 / 8,192 rows,
+  including adversarial rows that are sensitive to the summation order; in serving, greedy outputs identical to both
+  controls on 30 / 30 prompts, log-probabilities bit-equal over 4,691 tokens. About -8.5 ms per 8K prefill chunk.
+  Cold prefill, release defaults, box B, mean of 2 runs, against v2.8.2: 1K 2,864 vs 2,821 (+1.5 %), 8K 5,553 vs
+  5,527 (+0.5 %), 32K 5,217 vs 5,189 (+0.6 %), 128K 3,788 vs 3,785 (+0.1 %); against the v2.8.1-tree control +2.7 /
+  +2.8 / +1.4 % at 8K / 32K / 128K.
+- The prefill hoist (`PFUSE_HOIST`) stays opt-in.
+- Memory and needles, release defaults (box B, `MEM_FRACTION=0.88`): KV pool 2,352,000 tokens; lowest MemAvailable
+  under the worst-case load 5.3 GiB over four runs (5.6 / 5.5 / 5.4 / 5.3 GiB; 48 / 48 requests completed, 340.1 /
+  357.4 tok/s aggregate; guard 3.5 GiB); needles at 128K and 240K PASS; c1 greedy outputs equal v2.8.2's release run
+  on 30 / 30 prompts in all four runs.
+- Speedbench full, release defaults (box B, `results/REL283-s06/`, one run, 0 failed): all 72.90 (v2.8.2 72.78 /
+  72.82): prose 65.02, code 81.56, structured 77.63, agentic 83.28, multilingual 57.65, long context 72.99; median
+  time to first token 163.8 ms, median step 39.71 ms, 2.742 tokens per step. c1 decode is unchanged within the
+  run-to-run spread; the gains of this release are at concurrency (padding rows) and in prefill (the prologue).
+
 ## v2.8.2 (2026-11-24)
 
 Basic tests on one box; full two-box qualification follows in v2.8.x.

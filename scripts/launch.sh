@@ -62,6 +62,7 @@ RNNHOIST_MAX_BS=${RNNHOIST_MAX_BS:-32}                      # draft rnnhoist row
 DFLASH_BYTES_USER=${DFLASH_BYTES+set}                       # SPEC=dflash2 drafter byte cuts: mx8 (MXFP8 layers), hot8 / hot16
 DFLASH_BYTES=${DFLASH_BYTES:-}                               # (hot-vocab candidates); unset = mx8,hot8 with SPEC=dflash2 + OVERLAY=1
 DFLASH_FUSED=${DFLASH_FUSED:-}                               # SPEC=dflash2: sampled accept from the logits with sparse q (inkling_dfaccept); unset = 1 with SPEC=dflash2 + OVERLAY=1
+PADX=${PADX:-1}                                              # CUDA-graph padding rows -> phantom expert (inkling_padx, exact for live rows); 0: off
 DFLASH_HOT_N=${DFLASH_HOT_N:-}                               # hot-vocab size for hot8 / hot16 (empty = 65536)
 DFLASH_PREFIX_TAIL=${DFLASH_PREFIX_TAIL:-2048}                 # SPEC=dflash2: on a prefix-cache hit, prefill the last N prompt tokens again so the drafter sees them (0 = off)
 DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only for prompts of at most this many tokens (longer prompts keep the cache as before)
@@ -161,7 +162,7 @@ SCODES=${SCODES:-1}                                          # NVFP4 expert scal
 PFUSE=${PFUSE:-all}                                         # prefill glue fusion (empty = stock)
 PFUSE_HOIST=${PFUSE_HOIST:-0}                               # opt-in prefill loop-bank hoist over pfuse loop_mix (1: FP32-order class, not in the default pending a bracket; exact: bit-identical, slower; 0: off)
 ATTN_GATE=${ATTN_GATE:-1}                                   # gate_sink in the sliding-window prefill attention epilogue (bit-identical; 0: off)
-PROLOGUE=${PROLOGUE:-0}                                     # opt-in SWA prefill: K conv + L2 clip and V conv + value norm in one kernel each (1: FP32-order class, 1-ulp flips; not in the default)
+PROLOGUE=${PROLOGUE:-1}                                     # SWA prefill: K conv + L2 clip and V conv + value norm in one kernel each (bit-identical: the CuTe row-sum order; 0: off)
 [[ ",$PFUSE," == *,all,* || ",$PFUSE," == *,loopmix,* ]] || PFUSE_HOIST=0   # the hoist wraps pfuse loopmix
 _onoff() { case $(printf %s "$1" | tr '[:upper:]' '[:lower:]') in ''|0|off|false|no|none) echo 0 ;; *) echo 1 ;; esac; }
 [[ $(_onoff "$PFUSE_HOIST") == 0 ]] && PFUSE_HOIST=0
@@ -304,7 +305,7 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
         -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_PFUSE_HOIST="$PFUSE_HOIST" -e INKLING_ATTN_GATE="$ATTN_GATE" -e INKLING_PROLOGUE="$PROLOGUE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
-        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
+        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
         -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"
         -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"

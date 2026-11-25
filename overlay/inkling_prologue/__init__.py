@@ -80,7 +80,12 @@ class PrologueFatal(BaseException):
     pass
 
 
-def conv_post(x, weight, cache, md, post, thr, eps):
+# The CuTe reduction tree of the stock clip / RMSNorm row sum (see _triton._row_sumsq); fixed by
+# tools/gpu_check_prologue.py, which requires 0 ulp against the stock pair for these values.
+SUM_ORDER = {1: (0, 0), 2: (0, 0)}  # post -> (PER, XOR): sequential lane fold, descending butterfly (CuTe)
+
+
+def conv_post(x, weight, cache, md, post, thr, eps, order=None, ss=None):
     """Stock short_convolution (static weights, residual, prefill kernel) followed by the K clip (post 1) or the
     weightless value RMSNorm (post 2) over 128-wide heads, in one kernel. x [T, H*128] BF16."""
     import torch
@@ -89,11 +94,12 @@ def conv_post(x, weight, cache, md, post, thr, eps):
     from . import _triton
 
     width = weight.shape[1]
+    per, xor = SUM_ORDER[post] if order is None else order
     out = torch.empty_like(x, memory_format=torch.contiguous_format)
     _triton._sconv_post_kernel[(triton.cdiv(x.shape[0], 16), triton.cdiv(x.shape[1], HEAD))](
         x, weight, cache, md["safe_idx"], md["cache_mask"], md["cu"], md["si"], out, x.shape[0],
         x.stride(0), *weight.stride(), *cache.stride(), x.shape[1], width, (width + 1) ** -0.5, post,
-        float(thr), float(eps), 16, HEAD, enable_fp_fusion=False)
+        float(thr), float(eps), 16, HEAD, per, xor, int(per >= 0), ss, ss is not None, enable_fp_fusion=False)
     return out
 
 
@@ -186,5 +192,5 @@ def install(env=None):
         return False
     check_sources()
     _hook.when_imported("sglang.srt.models.inkling_common.inkling2_attn", _patch)
-    _log("enabled: SWA prefill K conv + L2 clip and V conv + value norm fused (exact up to FP32 order)")
+    _log("enabled: SWA prefill K conv + L2 clip and V conv + value norm fused (bit-identical to the stock conv + clip / RMSNorm)")
     return True
