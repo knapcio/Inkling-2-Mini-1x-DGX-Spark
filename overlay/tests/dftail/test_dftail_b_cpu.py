@@ -183,9 +183,10 @@ class IndexRules(unittest.TestCase):
         self.assertEqual(self.put(5000, 2952), 0)
         self.assertIsNone(self.put(5000, 2952))           # same snapshot: refreshed, no copy
         self.assertEqual(self.put(4000, 1952), 1)
+        old = self.ix.entries[1].version
         self.ix.find(self.t, 4992)                        # touches slot 0
         self.assertEqual(self.put(3000, 952), 1)          # LRU is slot 1
-        self.assertEqual(self.ix.entries[1].version, 1)
+        self.assertGreater(self.ix.entries[1].version, old)   # a replaced slot never repeats a version
         self.assertEqual(self.ix.entries[0].end, 5000)
 
     def test_window_after_the_extend(self):

@@ -1624,3 +1624,66 @@ turn reaches 16K tokens (the longest is 15,873), so under the 16K gate the agent
 their end-to-end times (raw sums of time to first token and decode) still spread from 215.2 to 223.2 s at 160-token
 turns and from 185.6 to 195.0 s at 512-token turns, about 4 % between arms of identical behaviour. That is the noise
 floor of agent-mode end-to-end against which the 8K gate's +0.3 to +1.4 % was read; the gate stays at 8,192 tokens.
+
+## v2.9.4: the prefix tail defers to a draft-tail snapshot (2026-11-25)
+
+The prefix tail (v2.8.1) and the draft-tail snapshots (v2.9) were applied independently: a cached prompt of at most
+4,096 tokens had its last 2,048 tokens re-prefilled by the target even when a snapshot already held the drafter's window
+for that prefix. In the v2.9 screen, snapshots alone gave speedbench long context +14.4 % against +6.7 % with both.
+`DFLASH_TAIL_DEFER=1` checks the snapshot slots before the tail bounds a request: a snapshot of the same prefix (tokens,
+cache salt, extra key) that ends past the tail's bound and whose window covers every position the tail would recompute
+is reserved, and the request keeps the stock prefix bound, capped at the snapshot's end. The radix lookup then decides
+the reusable prefix; the reservation (slot version, content digest, end, salt / extra key, snapshot generation) is
+checked after the lookup and again in the drafter's floor hook before the copy, and the ring floor is published only
+after the copy is enqueued. A slot that changed in between is never restored: the request keeps its cache hit and the
+drafter starts from the ordinary snapshot search. Ring floors are page-aligned (128 tokens), so with the switch on a
+slot holds one extra page starting on a page boundary; the restored window then starts on the page the tail would have
+recomputed from. Only SGLang's device-only radix cache qualifies (storage-backed trees stage loads outside the lookup),
+only a single-rank process (ranks would decide on their own slots), and never a logprob request.
+
+CPU checks: a replay of 400 random repeated-prompt steps through the overlay gives prefixes, ring floors, ring contents
+and counters identical to v2.9.3 with the switch off; with it on, 65 % more prefix tokens come from the cache and every
+drafter row read is the right position's.
+
+Speed (box B, on, off, off, on; warm, speedbench full, 32K / 128K decode, agent mode):
+
+| | on | off | off | on |
+|---|---:|---:|---:|---:|
+| speedbench full, all prompts, tok/s | 73.31 | 72.92 | 72.93 | 73.11 |
+| long context, tok/s | 75.01 | 73.39 | 73.52 | 74.94 |
+| long context, tokens per verify step (pooled) | 3.083 | 2.972 | 2.972 | 3.083 |
+| long context, median time to first token, s | 0.189 | 0.448 | 0.443 | 0.189 |
+| single-request step (median of 73), ms | 39.05 | 39.62 | 39.58 | 39.17 |
+
+Agentic, code, prose, structured and multilingual stay within 0.4 % of the off runs. Speedbench agent mode is
+unaffected: its histories are 5-16K tokens, all above the tail's 4,096-token limit, so the deferral never runs (end to
+end 217.4 / 218.0 s on against 220.9 / 215.0 s off at 160-token turns). Decode at 32K and 128K was repeated to four runs
+each way because the first two on runs read lower at 32K: 32K on 67.4 / 68.2 / 68.4 / 73.1 tok/s, off 70.0 / 70.2 / 63.4
+/ 69.4; 128K on 55.2 / 52.0 / 51.1 / 54.7, off 58.0 / 53.8 / 50.0 / 56.8. The cell is flat: its outputs differ even
+between two off runs, and same-prompt step counts range 100-215.
+
+Greedy: the on runs differ from the off runs on 7 / 73 speedbench and 3 / 30 warm prompts, the same prompts in both on
+runs (off against off: identical). A cached prefix replaces a recomputed one, the prefill floating-point-order class.
+Quality bracket (box A, inkq2, off / on / off / on / off): totals 559 / 559 / 557 / 561 / 557 of 575 (gsm8k 392 / 391 /
+389 / 391 / 388 of 400, long-context 100 / 100 everywhere, qeval 67 / 68 / 68 / 70 / 69 of 75); flips against each off
+run 4-10 (budget 18), McNemar p >= 0.219; no drop.
+
+Agent loops (box A, 24 x ~72K contexts, two turns; two pairs, the second in reverse order): 24 / 24 turn-2 hits in all
+four runs (time to first token 2.88-2.95 s). Only the short first phase (~1.1K-token cached prompts) can defer: its
+turn-2 time to first token was 4.84 / 4.81 s on against 5.21 / 5.23 s off, and the phase took 81.6 / 79.4 s against
+87.3 / 81.8 s (83.0 s on v2.9.3, `AG293-s05`).
+
+Memory (box B, thinking c24 with a cold 240K needle, `KV294`): worst MemAvailable 4.1 GiB, 48 / 48 completed, needles
+128K and 240K PASS. The global-layer KV pool is sized at start-up from the memory free at that moment, and the size
+varies between boots of the same configuration: over 40 boots on box A it ranged from 2,289K to 2,377K tokens, and
+MemAvailable when the server is ready ran inversely, 7.3 to 4.3 GiB. A large-pool boot lowers the worst case by up to
+~1 GiB on its own, with or without this change; compare worst cases at matched pool sizes. In the bracket arms at
+matched pools (2,338K-2,343K tokens) the worst MemAvailable was 4.8-4.9 GiB with and without the deferral. In the agent
+loops the first pair showed a large gap (on 3.9 GiB at a 2,354K-token pool, off 5.1 GiB at 2,325K); the reversed
+repeat came out the other way (on 5.1 GiB at 2,334K, off 4.6 GiB at 2,351K). The drop from the post-start plateau to
+the worst point, which removes the pool size, was 1.1 / 0.5 GiB on, 0.8 / 0.6 GiB off and 0.7 / 0.6 GiB on v2.9.3; it
+happens once, when the first long prompts prefill (the deferral does not act on them), and stays flat afterwards.
+
+Known limitation: a waiting request that holds a snapshot reservation but is not admitted in that scheduling round
+keeps the slot pinned for one forward, so one capture into that slot can be skipped. It costs at most one missed
+snapshot and never restores a wrong window.

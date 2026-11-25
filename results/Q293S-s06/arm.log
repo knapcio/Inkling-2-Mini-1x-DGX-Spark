@@ -1,0 +1,18 @@
+2026-11-25T18:20:50Z Q293S-s06 mode warm
+Q293S-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.9, "geomean_tok_s": 74.05, "aggregate_tok_s": 71.99, "median_ttft_ms": 162.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.97, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.14, "drift_pct_all": -0.14}}
+wrote results/Q293S-s06/warm-sbquick.json (1.4 min)
+2026-11-25T18:22:16Z Q293S-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 107.6, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T18:26:45Z Q293S-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 27.5, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T18:29:56Z Q293S-s06 mode kvstress
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 27.4, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-25T18:33:08Z Q293S-s06 mode lc
+Q293S-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+200K     205496   64.908     3166.0      0.493        None      47.6 [9.8, 231.4]        -         -
+250K     255211   90.28      2826.9      0.588        None      41.0 [19.4, 86.3]        -         -
+wrote results/Q293S-s06/longctx-lc.json (4.6 min)

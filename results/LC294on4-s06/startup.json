@@ -1,0 +1,2 @@
+{"label":"LC294on4-s06","ready_utc":"2026-11-25T21:20:58Z","startup_s":131,"memavail_ready_gib":5.8,"kv":"[2026-11-25 21:20:56 PID132] max_total_num_tokens=2320128, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=6.16 GB"}
+{"memavail_end_gib":5.3}

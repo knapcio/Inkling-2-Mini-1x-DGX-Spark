@@ -1,0 +1,2 @@
+{"label":"Q293S-s06","ready_utc":"2026-11-25T18:20:50Z","startup_s":136,"memavail_ready_gib":5.1,"kv":"[2026-11-25 18:20:48 PID134] max_total_num_tokens=2347520, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.32 GB"}
+{"memavail_end_gib":4.2}

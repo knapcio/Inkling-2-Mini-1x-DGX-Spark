@@ -5,7 +5,7 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-25, v2.9.3):** v2.9.2 (the base of v2.9.3) passed a two-box qualification: Q292R and Q292S on both boxes; v2.9.3's prompt copy was release-checked on both boxes.
+**Status (2026-11-25, v2.9.4):** v2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes.
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.
@@ -34,18 +34,19 @@ work, `SPEC=dspark` is the faster choice. Since v2.9.3 the prompt copy narrows t
 document: on speedbench `longctx` decode at 32K rises 10-14 % and at 128K 1.5-4.6 % (two boxes) (see "Prompt copy for long
 documents").
 
-V2.9.2 (the base of v2.9.3) passed a two-box qualification: Q292R and Q292S on both boxes; v2.9.3's prompt copy was release-checked on both boxes. The current column is one GB10 Spark on
+V2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes. The current column is one GB10 Spark on
 2026-11-24 with the release defaults (`SPEC=dflash2`, verify-width cap on, `CTX=262144`); the stock and v2.7.2
-columns are the earlier two-box medians. Cells marked v2.9.3, v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
+columns are the earlier two-box medians. Cells marked v2.9.4, v2.9.3, v2.9.2, v2.9.1 or v2.9 were measured on those release defaults
 (box B unless stated); the others are the v2.8.x or v2.8 runs. v2.9 added draft-tail snapshots for agent loops; v2.9.1 runs the sink
 gate on the global layers too (prefill); v2.9.2 adds the loop-bank hoist (prefill) and the prompt-end cache touch
-(agent-loop prefix hits); v2.9.3 adds the prompt copy for prompts of 8K tokens or more (long-context decode).
+(agent-loop prefix hits); v2.9.3 adds the prompt copy for prompts of 8K tokens or more (long-context decode); v2.9.4 lets the prefix tail defer to
+a draft-tail snapshot on repeated cached prompts of up to 4K tokens (speedbench long context +2.1 %).
 Single-request decode on short prompts is unchanged.
 
-| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.3)** |
+| | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.4)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
-| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.08** (v2.9.3, box B, mean of 2 runs; v2.9.2 73.19: unchanged, the prompt copy never fires on these prompts) |
+| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.21** (v2.9.4, box B, mean of 2 runs; the same tree with the deferral off 72.93, v2.9.3 73.08) |
 | agent loops (speedbench agent mode, 5-16K-token histories), end-to-end time against prefix tail and snapshots off, 160- / 512-token turns | - | - | **-4.4 % / -4.9 %** (v2.9 screen; decode 73.9 -> 78.3 tok/s) |
 | decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **65.1 / 140.5 / 203.5 / 288.3** |
 | decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **79.0 / 141.6 / 211.3 / 298.2** |
@@ -168,6 +169,26 @@ compute (prefill floating-point order only) and allocates no memory; it applies 
 sessions, and is pinned to the image's source (a different image refuses to start; `DFLASH_PREFIX_TAIL=0` runs
 without it).
 
+Since v2.9.4 the tail defers to a draft-tail snapshot (`DFLASH_TAIL_DEFER=1`, the default; it needs the snapshots on).
+Before a prompt of at most 4,096 tokens is bounded, the snapshot slots are checked for one of the same prefix (same
+tokens, cache salt and extra key) that ends past the tail's bound and already holds the drafter's whole window. If
+there is one, the request keeps its ordinary prefix-cache hit, capped at the snapshot's end, and the window is copied
+back from the slot instead of being recomputed by the target; otherwise the tail applies as before. The slot is
+reserved from the cache lookup to the copy and checked again just before it, and a slot that changed in between is
+not used. Not for logprob requests, servers with more than one rank, or hierarchical / external KV storage.
+`DFLASH_TAIL_DEFER=0` runs v2.9.3's behaviour exactly.
+
+Measured on box B, two runs each way (on, off, off, on), same tree: speedbench full long context +2.1 % (75.01 / 74.94
+against 73.39 / 73.52 tok/s; tokens per verify step 3.08 against 2.97; median time to first token on these cache hits
+0.19 against 0.45 s), all prompts +0.4 %, the other categories flat; single-request decode step 39.05 / 39.17 against
+39.62 / 39.58 ms. Speedbench agent mode is unaffected: its histories (5-16K tokens) are all above the tail's limit, so
+the deferral never runs there; the gain is on repeated cached prompts of 1K-4K tokens. Decode at 32K / 128K is flat
+(four runs each way: 32K on 67.4-73.1, off 63.4-70.2 tok/s). Greedy outputs differ from the deferral-off runs on 7 / 73
+speedbench and 3 / 30 warm prompts, the same ones in both runs with it on: a cached prefix in place of a recomputed
+one, the prefill floating-point-order class. Quality bracket (box A, off / on / off / on / off): 559 / 559 / 557 / 561 /
+557 of 575 correct, no drop. Agent loops (24 x ~72K): 24 / 24 turn-2 cache hits with and without it. Worst
+MemAvailable with thinking c24 and a cold 240K needle: 4.1 GiB.
+
 ### Draft-tail snapshots
 
 `SPEC=dflash2` draft-tail snapshots (`DFLASH_TAIL_SNAPSHOTS`, default 8 slots, v2.9): when a request's prefill
@@ -175,12 +196,14 @@ completes its prompt, the drafter's 2,048-position window at the prompt end is c
 prompt's content and cache salt. A later request that hits the same prefix in the cache gets that window copied back
 into its drafter ring, instead of a ring rebuilt from only the uncached suffix and without a re-prefill. Snapshots are
 restored only when content and salt match. Draft-only state: the target model's computation is untouched. 8 slots of
-2,048 positions x 5 draft layers take 320 MiB, charged to the KV budget (0.312 GiB). The slots are one shared LRU: in
+2,048 positions x 5 draft layers take 320 MiB, charged to the KV budget (0.312 GiB); with the prefix tail's deferral on
+(the default since v2.9.4, see "Prefix tail") a slot holds one 128-token page more, starting on a page boundary, so a
+restore can start on the page the tail would have recomputed from: 340 MiB (0.332 GiB). The slots are one shared LRU: in
 a server shared by several tenants, one tenant's requests can evict another's snapshots, which shows only as that
 tenant's draft acceptance and latency (the radix cache's own eviction is the same kind of channel). Run with
 `DFLASH_TAIL_SNAPSHOTS=0` where tenants must not observe each other's cache use. Any weight update or `flush_cache`
 clears every snapshot. With more than 8 concurrent long conversations only the most recently prefilled ones keep a snapshot;
-`DFLASH_TAIL_SNAPSHOTS` raises the count (up to 64) at 40 MiB of KV budget per slot. Snapshots touch only draft state
+`DFLASH_TAIL_SNAPSHOTS` raises the count (up to 64) at 40 MiB of KV budget per slot (42.5 MiB with the deferral). Snapshots touch only draft state
 and never change outputs.
 
 Measured on box B against the same tree with both levers off (A = the prefix tail shipped since v2.8.1, B =
@@ -206,7 +229,8 @@ turn-2 requests could miss the prefix cache entirely. When a request finished, t
 prompt end became the oldest evictable entry in the cache, so under load the earliest conversations lost it first;
 their next turn re-prefilled the whole context, which evicted the next-oldest prompt end, and the misses cascaded. In
 the dumped stock misses the prompt-end node had lost its sliding window and with it the saved state (11 of 12); in
-the twelfth part of the window was gone.
+the twelfth part of the window was gone. Reported upstream as
+[sgl-project/sglang#53149](https://github.com/sgl-project/sglang/issues/53149).
 After a request finishes, the overlay touches its prompt path with SGLang's own `touch_prefix` (the walk the scheduler
 uses for waiting requests: no allocation, no lock). It changes the eviction order only; nothing the model computes
 changes.
@@ -218,6 +242,13 @@ scheduling showed the same intermittent misses (5 of 24 agents in 2 of 5 runs). 
 24 / 24 hits at the default interval (AG292: time to first token 3.0 s, turn-2 wall 211 s); worst MemAvailable 4.8 GiB
 with 48 / 48 requests at c24 and needles at 128K / 240K passing (KVS292c); greedy outputs identical to the hoist-only
 tree on 73 / 73 speedbench and 30 / 30 warm prompts (REL292).
+
+A larger sliding-window pool is not a substitute for the touch. With `SWA_RATIO=0.074` instead of 0.037 (145K instead
+of 87K window tokens, at the cost of 16 % of the global-layer KV tokens) the same stress configuration (24 x ~72K,
+`--prefill-decode-interval 2`, without the touch) still missed the prefix cache for 8 of 24 agents on box A and 9 of 24
+on box B on turn 2 (one run on each box; time to first token 149 and 164 s), about as many as with the default pool
+(9-10 of 24 in three runs). What decides it is which windows are evicted first, not how many fit, so the prompt-end
+touch is the fix and the default pool stays as it is (`results/SWA1i2-s05/`, `results/SWA1i2-s06/`).
 
 Interactive streaming with many concurrent long prompts: `SGLANG_ARGS="--prefill-decode-interval 1"` shows the first
 tokens earlier (time to first token p50 373 -> 213 s on 24 x 72K) but finishes every response later (completion
@@ -557,6 +588,7 @@ quick: 30 prompts x 160 tokens, c1, T=0; decode table; thinking load; at long co
 | Fused sampled accept for the DFlash2 selector draft: the accept computed from the logits with a sparse draft q (no dense [requests, 7, vocabulary] q or [requests, 8, vocabulary] p), at 16 or more requests without a verify-cap cutoff | `DFLASH_FUSED=1` (`INKLING_DFLASH_FUSED_MIN_BS=16`) | thinking c24 per-request decode +2.3 % (ABBA, cap off); below 16 requests the stock accept | same law as the stock accept | ours |
 | Prefix tail: on a prefix-cache hit of a prompt of at most 4,096 tokens, the last 2,048 prompt tokens are prefilled again (SGLang's own prefix bound, as for logprob requests), so the drafter's 2,048-token window is filled instead of drafting from the uncached suffix only | `DFLASH_PREFIX_TAIL=2048`, `DFLASH_PREFIX_TAIL_MAX_INPUT=4096`; `0` = off | speedbench full 69.59 -> 72.86 (long context 63.09 -> 73.53, agentic 73.44 -> 82.74), same box (v2.8.1 at `MEM_FRACTION=0.89`, v2.8 at 0.85); +0.1-0.5 s time to first token on bounded hits | prefill-only: the same positions a cold prefill computes (floating-point order of the prefill chunking only); draft-side benefit | ours |
 | Draft-tail snapshots: the drafter's 2,048-position window at the end of each prompt is kept in one of 8 slots, keyed by content and cache salt, and copied back into the drafter ring on a later prefix-cache hit instead of a ring rebuilt from the uncached suffix | `DFLASH_TAIL_SNAPSHOTS=8`; `0` = off | with the prefix tail, against both off: agent loops -4.4 / -4.9 % end-to-end time at 160- / 512-token turns (decode 73.9 -> 78.3 tok/s); speedbench full long context +6.7 %, agentic +1.3 %, code +1.7 %; time to first token unchanged | draft-only state; greedy differences in the verify-schedule class (no token outside the reference's top-k); 320 MiB charged to the KV budget | ours |
+| Prefix tail defers to a snapshot (v2.9.4): a prompt of at most 4,096 tokens whose prefix has a draft-tail snapshot covering the drafter's whole window keeps its prefix-cache hit, and the window is restored instead of re-prefilled | `DFLASH_TAIL_DEFER=1`; `0` = v2.9.3 | box B, 2 runs each way: speedbench full long context +2.1 % (tokens per step 2.97 -> 3.08, time to first token on these hits 0.45 -> 0.19 s), all prompts +0.4 %; agent mode unaffected (histories above 4,096 tokens); decode at 32K / 128K flat | cached prefix in place of recomputed prefill (floating-point order); one extra 128-token page per snapshot slot (+20 MiB of KV budget) | ours |
 | Prompt copy: for prompts of 8K tokens or more, when the last 12 committed tokens recur earlier in the request's context with a match of at least 16 tokens, the tokens that followed replace the drafter's proposals for the rest of the block (two fused kernels per decode step, no host sync) | `DFLASH_PCOPY=12`, `DFLASH_PCOPY_MIN_CTX=8192`; `DFLASH_PCOPY=0` = off | speedbench `longctx` decode at 32K +9.8 %, 128K +2.4 % (mean of four runs per arm in two ABBAs, box A); speedbench full, agent mode and thinking c8 flat; single-request step within 0.1 ms | draft proposals only; sampled copies carry a point mass in the draft q (exact acceptance law, GPU Monte Carlo test); greedy outputs identical on speedbench full | ours; the copy rule is n-gram prompt lookup (idea: prompt lookup decoding, **Apoorv Saxena**, 2023) |
 | Exact sampled verification: the residual / bonus CDF pass of SGLang's reject sampler takes the first lane above the coin that is inside the vocabulary and has positive mass (stock could emit a zero-mass padded row or an out-of-range lane under FP32 rounding); the DFLASH selector walk no longer clamps a no-match to a zero-probability last candidate; the DSpark Markov sampler's Philox fold (SGLang PR #51681) and the blockwise-rejection fixes (SGLang PR #51692, a path the recipe does not use) | `RSFIX=1` | correctness fix, both profiles | law unchanged in exact arithmetic; only rounding events that emitted a zero-probability token change | ours (`reject`, `selector`); **SGLang PR #51681 and PR #51692** |
 
@@ -833,7 +865,8 @@ Profile and drafter switches:
 | `DFLASH_FUSED` (`INKLING_DFLASH_FUSED_ACCEPT`) | `1` with the overlays | sampled accept from the logits with a sparse draft q (`inkling_dfaccept`) for batches of `INKLING_DFLASH_FUSED_MIN_BS` (16) requests or more; smaller batches and calls with a verify-cap cutoff keep the stock accept; `0` = off |
 | `DFLASH_PREFIX_TAIL` (`INKLING_DFLASH_PREFIX_TAIL`) | `2048` | on a prefix-cache hit, prefill the last N prompt tokens again so the drafter sees them (`inkling_dftail`; DFLASH only, not streaming sessions; pinned to the image's source); `0` = off. Set by the launcher only: the launcher refuses `INKLING_DFLASH_PREFIX_TAIL*` in `SGLANG_ENV` / `SGLANG_ARGS` |
 | `DFLASH_PREFIX_TAIL_MAX_INPUT` (`INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT`) | `4096` | only prompts of at most this many tokens are bounded; longer prompts keep the cache as before. Raise it (e.g. 8192) for long-output or document-QA traffic; at a raised limit, agent loops with short turns on 5-8K histories lose ~5-9 % end to end |
-| `DFLASH_TAIL_SNAPSHOTS` (`INKLING_DFLASH_TAIL_SNAPSHOTS`) | `8` | prompt-end drafter windows kept for later prefix-cache hits (40 MiB per slot, charged to the KV budget; restored only on matching content and salt; cleared by weight updates and `flush_cache`); `0` = off, for example where tenants must not observe each other's cache use. Set by the launcher only |
+| `DFLASH_TAIL_SNAPSHOTS` (`INKLING_DFLASH_TAIL_SNAPSHOTS`) | `8` | prompt-end drafter windows kept for later prefix-cache hits (40 MiB per slot, 42.5 MiB with `DFLASH_TAIL_DEFER=1`, charged to the KV budget; restored only on matching content and salt; cleared by weight updates and `flush_cache`); `0` = off, for example where tenants must not observe each other's cache use. Set by the launcher only |
+| `DFLASH_TAIL_DEFER` (`INKLING_DFLASH_TAIL_DEFER`) | `1` | the prefix tail defers to a draft-tail snapshot that already covers the drafter's window: the request keeps its prefix-cache hit and the window is restored instead of recomputed (prompts of at most `DFLASH_PREFIX_TAIL_MAX_INPUT` tokens; needs `DFLASH_PREFIX_TAIL` and `DFLASH_TAIL_SNAPSHOTS` on; not for logprob requests, more than one rank or hierarchical / external KV storage). `0` = v2.9.3's behaviour. Set by the launcher only: the launcher refuses `INKLING_DFLASH_TAIL_DEFER` in `SGLANG_ENV` / `SGLANG_ARGS` |
 | `RSFIX` (`INKLING_RSFIX`) | `1` | exact sampled-verification fixes: `reject`, `selector`, `markov` (SGLang PR #51681), `blockwise` (SGLang PR #51692); both profiles |
 | `STEPLOG` | empty | `STEPLOG=<label>`: full-width DFLASH step capture to `~/.cache/inkling-2-mini-sglang/steplog/<label>/` for fitting verify-width policies (measurement only; excludes `DFCAP`) |
 

@@ -1,0 +1,9 @@
+2026-11-25T20:54:51Z LC294on3-s06 mode warm
+LC294on3-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.25, "geomean_tok_s": 74.59, "aggregate_tok_s": 72.51, "median_ttft_ms": 161.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.81, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.549, "drift_pct_all": -0.549}}
+wrote results/LC294on3-s06/warm-sbquick.json (1.4 min)
+2026-11-25T20:56:15Z LC294on3-s06 mode lc32
+LC294on3-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32694    6.079      5378.2      0.246        None      68.4 [54.3, 86.1]        45.383    2.908
+128K     130844   33.946     3854.5      0.454        None      51.1 [43.6, 59.7]        61.137    3.055
+wrote results/LC294on3-s06/longctx-lc32.json (5.0 min)

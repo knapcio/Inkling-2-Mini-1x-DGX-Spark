@@ -1,5 +1,49 @@
 # Changelog
 
+## v2.9.4 (2026-11-25)
+
+v2.9.3 plus the prefix tail deferring to draft-tail snapshots, on by default with `SPEC=dflash2`. v2.9.3 (the base of v2.9.4) passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes.
+The gain applies to repeated cached prompts of 1K-4K tokens; agent mode (histories above 4K tokens) is unaffected.
+
+- `DFLASH_TAIL_DEFER=1` (`inkling_dftail`, new default): before the prefix tail bounds a cached prompt of at most
+  4,096 tokens, the draft-tail snapshot slots are checked for one of the same prefix (tokens, cache salt, extra key)
+  that ends past the tail's bound and covers the drafter's whole window. If there is one, the request keeps its
+  ordinary prefix-cache hit, capped at the snapshot's end, and the window is restored from the slot instead of the
+  target re-prefilling the last 2,048 tokens; otherwise the tail applies as before. The slot is reserved from the
+  lookup to the restore (slot version, content digest, end, salt / extra key, snapshot generation) and checked after
+  the lookup and again before the restore; a changed slot is never restored. To cover exactly the positions the tail
+  would recompute, a slot now holds one extra 128-token page starting on a page boundary (8 slots: 340 MiB, 0.332 GiB
+  of KV budget, was 320 MiB). Not for logprob requests, more than one rank, or hierarchical / external KV storage.
+  `DFLASH_TAIL_DEFER=0` runs v2.9.3's code path exactly. The launcher refuses `INKLING_DFLASH_TAIL_DEFER` in
+  `SGLANG_ENV` / `SGLANG_ARGS`.
+- Box B, two runs each way (on, off, off, on): speedbench full long context +2.1 % (75.01 / 74.94 against 73.39 /
+  73.52 tok/s; tokens per verify step 2.97 -> 3.08; median time to first token on these hits 0.45 -> 0.19 s), all
+  prompts +0.4 %, other categories flat; single-request step 39.05 / 39.17 against 39.62 / 39.58 ms. Speedbench agent
+  mode is unaffected (every history is above 4,096 tokens). Decode at 32K / 128K flat over four runs each way (32K: on
+  67.4-73.1, off 63.4-70.2 tok/s). Greedy outputs differ from the off runs on 7 / 73 speedbench and 3 / 30 warm
+  prompts, identically in both on runs (cached prefix in place of recomputed prefill). Quality bracket (box A, inkq2,
+  off / on / off / on / off): totals 559 / 559 / 557 / 561 / 557 of 575, flips within budget, McNemar p >= 0.219; no
+  drop.
+- Agent loops (box A, 24 x ~72K contexts, two turns, two on / off pairs): 24 / 24 turn-2 hits in all four runs (time
+  to first token 2.88-2.95 s). Only the short first-phase turns (~1.1K-token cached prompts) defer: their turn-2 time to
+  first token was 4.84 / 4.81 s against 5.21 / 5.23 s. Worst MemAvailable follows the KV pool size each boot picks
+  (pairs: on 3.9 / 5.1 GiB, off 5.1 / 4.6 GiB); the drop from the post-start plateau to the worst point was 1.1 / 0.5
+  GiB on and 0.8 / 0.6 GiB off.
+- Memory (box B, thinking c24 with a cold 240K needle): worst MemAvailable 4.1 GiB, 48 / 48 completed, needles 128K and
+  240K PASS.
+- Docs: the eviction-order cause of the agent-loop prefix-cache misses that the prompt-end touch works around is
+  reported upstream as [sgl-project/sglang#53149](https://github.com/sgl-project/sglang/issues/53149). A larger
+  sliding-window pool does not prevent the misses: with `SWA_RATIO=0.074` (twice the default) and without the touch,
+  24 x ~72K agents at `--prefill-decode-interval 2` still missed on turn 2 for 8 of 24 (box A) and 9 of 24 (box B),
+  about as many as with the default pool; the default pool stays.
+- Results: `results/AB294on1-s06/`, `results/AB294off1-s06/`, `results/AB294off2-s06/`, `results/AB294on2-s06/`
+  (speedbench full, long context, agent mode); `results/LC294on3-s06/`, `results/LC294off3-s06/`,
+  `results/LC294off4-s06/`, `results/LC294on4-s06/` (32K / 128K repeats); `results/KV294-s06/` (memory);
+  `results/AG294on-s05/`, `results/AG294off-s05/`, `results/AG294off2-s05/`, `results/AG294on2-s05/` (agent loops); `results/QB294A1-s05/`, `results/QB294L1-s05/`,
+  `results/QB294A2-s05/`, `results/QB294L2-s05/`, `results/QB294A3-s05/` (quality bracket);
+  `results/SWA1i2-s05/`, `results/SWA1i2-s06/` (window-pool contrast); `results/KVS293-s05/`; v2.9.3 qualification:
+  `results/Q293R-s05/`, `results/Q293R-s06/`, `results/Q293S-s05/`, `results/Q293S-s06/`.
+
 ## v2.9.3 (2026-11-25)
 
 v2.9.2 plus the prompt copy for long prompts, on by default with `SPEC=dflash2`. v2.9.2 passed a two-box qualification
