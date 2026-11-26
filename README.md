@@ -26,6 +26,9 @@ directories and [how the runs were made](docs/benchmarks.md#how-the-runs-were-ma
 
 All 73 prompts: **+81 %** over stock's 40.6.
 
+Against the other public single-Spark recipes, measured with one harness on the same hardware (speed, lossy or not,
+quality, context, KV, prefill): [inkling-2-mini-spark-bench](https://github.com/knapcio/inkling-2-mini-spark-bench).
+
 **Decode by concurrency** (`bench/decode_table.py`, T=0, 256 tokens; c1 is one stream, above c1 the aggregate;
 v2.9.7 = mean of two Sparks, from the qualification runs on its serving path; stock is a two-box median; cells hold
 3-32 requests, so single cells swing by a few %):
