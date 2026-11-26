@@ -1,10 +1,10 @@
 2026-11-24T02:55:19Z Q272R-s05 mode warm
 Q272R-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.98, "geomean_tok_s": 62.99, "aggregate_tok_s": 61.0, "median_ttft_ms": 156.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.2, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.211, "drift_pct_all": -0.211}}
-wrote /home/knapcio/inkling/r2/results/Q272R-s05/warm-sbquick.json (1.6 min)
+wrote results/Q272R-s05/warm-sbquick.json (1.6 min)
 2026-11-24T02:56:54Z Q272R-s05 mode full
 == 2026-11-24T03:56:54+01:00 speedbench full
 Q272R-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 62.01, "geomean_tok_s": 63.83, "aggregate_tok_s": 61.23, "median_ttft_ms": 156.5, "truncated_frac": 0.918, "reasoning_token_frac": 0.651, "reasoning_char_frac": 0.717, "median_step_ms": 37.55, "median_tokens_per_step": 2.383, "steps_source": "response", "median_accept_rate": 0.1976, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.054, "drift_pct_all": 0.054}}
-wrote /home/knapcio/inkling/r2/results/Q272R-s05/Q272R-s05-speedbench.json (5.5 min)
+wrote results/Q272R-s05/Q272R-s05-speedbench.json (5.5 min)
 == 2026-11-24T04:02:23+01:00 decode table
 prose      c1  aggregate    51.9 tok/s  per-stream   52.6  ttft 0.16 s  failed 0
 prose      c2  aggregate    72.6 tok/s  per-stream   37.4  ttft 0.22 s  failed 0
@@ -26,7 +26,7 @@ json       c2  aggregate    88.1 tok/s  per-stream   46.6  ttft 0.222 s  failed 
 json       c4  aggregate   133.9 tok/s  per-stream   36.4  ttft 0.252 s  failed 0
 json       c8  aggregate   189.4 tok/s  per-stream   27.2  ttft 0.293 s  failed 0
 json       c16 aggregate   272.4 tok/s  per-stream   18.8  ttft 0.388 s  failed 0
-wrote /home/knapcio/inkling/r2/results/Q272R-s05/Q272R-s05-decode.json
+wrote results/Q272R-s05/Q272R-s05-decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 52.6 | 72.6 (37.4) | 114.3 (29.8) | 163.9 (22.0) | 242.2 (16.3) |
@@ -39,11 +39,11 @@ wrote /home/knapcio/inkling/r2/results/Q272R-s05/Q272R-s05-decode.json
 {"label": "Q272R-s05-c24", "started": "2026-11-24T04:14:41+01:00", "concurrency": 24, "requests": 48, "failed": 0, "max_tokens": 4096, "temperature": 0.8, "effort": "high", "wall_s": 372.79, "completion_tokens": 164810, "aggregate_tok_s": 442.1, "per_request_decode_tok_s_median": 21.5, "ttft_median_s": 0.64, "length_finishes": 37}
 == 2026-11-24T04:20:54+01:00 longctx
 128K     130922.0 34.991     3741.6      17.701       None      45.7 [39.7, 52.5]        -         -
-wrote /home/knapcio/inkling/r2/results/Q272R-s05/Q272R-s05-longctx.json (3.3 min)
+wrote results/Q272R-s05/Q272R-s05-longctx.json (3.3 min)
 == 2026-11-24T04:24:13+01:00 quality guard
 Q272R-s05-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.99, "geomean_tok_s": 62.78, "aggregate_tok_s": 60.96, "median_ttft_ms": 157.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.32, "median_tokens_per_step": 2.187, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.135, "drift_pct_all": -0.135}}
 Q272R-s05-guard: quality guard 30/30 passed
-wrote /home/knapcio/inkling/r2/results/Q272R-s05/Q272R-s05-guard.json (2.0 min)
+wrote results/Q272R-s05/Q272R-s05-guard.json (2.0 min)
 == 2026-11-24T04:26:11+01:00 sanity
 chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
 chat: capital + river        PASS  {"answer": "The capital of Poland is Warsaw, which is crossed by the Vistula River."}

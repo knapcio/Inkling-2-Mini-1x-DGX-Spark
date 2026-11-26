@@ -1,9 +1,9 @@
 2026-11-22T21:11:06Z DWN3-s06 mode warm
 DWN3-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.86, "geomean_tok_s": 62.95, "aggregate_tok_s": 60.96, "median_ttft_ms": 162.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.29, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.175, "drift_pct_all": -0.175}}
-wrote /home/knapcio/inkling/r2/results/DWN3-s06/warm-sbquick.json (1.6 min)
+wrote results/DWN3-s06/warm-sbquick.json (1.6 min)
 2026-11-22T21:12:41Z DWN3-s06 mode pf3264
 DWN3-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32780.0  6.447      5084.5      0.216        None      73.1 [63.3, 84.3]        47.492    3.407
 64K      65786.0  14.311     4596.9      0.216        None      61.5 [54.2, 69.8]        50.053    2.952
-wrote /home/knapcio/inkling/r2/results/DWN3-s06/longctx3264.json (5.9 min)
+wrote results/DWN3-s06/longctx3264.json (5.9 min)

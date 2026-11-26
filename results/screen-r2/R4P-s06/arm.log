@@ -1,6 +1,6 @@
 2026-11-22T00:11:34Z R4P-s06 mode warm
 R4P-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.53, "geomean_tok_s": 60.67, "aggregate_tok_s": 58.73, "median_ttft_ms": 164.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.827, "median_step_ms": 38.51, "median_tokens_per_step": 2.271, "steps_source": "response", "median_accept_rate": 0.1827, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -1.304, "drift_pct_all": -1.304}}
-wrote /home/knapcio/inkling/r2/results/R4P-s06/warm-sbquick.json (1.6 min)
+wrote results/R4P-s06/warm-sbquick.json (1.6 min)
 2026-11-22T00:13:12Z R4P-s06 mode pf
 R4P-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
@@ -8,11 +8,11 @@ context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI
 8K       8158.0   1.477      5523.4      0.234        None      -                        -         -
 32K      32701.0  6.288      5200.5      0.232        None      63.3 [50.5, 79.4]        -         -
 128K     130925.0 33.708     3884.1      16.908       None      43.8 [32.4, 59.2]        -         -
-wrote /home/knapcio/inkling/r2/results/R4P-s06/longctx.json (3.3 min)
+wrote results/R4P-s06/longctx.json (3.3 min)
 2026-11-22T00:16:28Z R4P-s06 mode guard
 R4P-s06-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.05, "geomean_tok_s": 60.65, "aggregate_tok_s": 58.72, "median_ttft_ms": 164.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.828, "median_step_ms": 37.85, "median_tokens_per_step": 2.216, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.084, "drift_pct_all": -0.084}}
 R4P-s06-guard: quality guard 30/30 passed
-wrote /home/knapcio/inkling/r2/results/R4P-s06/guard.json (2.0 min)
+wrote results/R4P-s06/guard.json (2.0 min)
 2026-11-22T00:18:28Z R4P-s06 mode sanity
 chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
 chat: capital + river        PASS  {"answer": "The capital of Poland is Warsaw, which is crossed by the Vistula River."}

@@ -1,9 +1,9 @@
 2026-11-23T10:41:37Z KVf-s05 mode warm
 KVf-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.87, "geomean_tok_s": 63.07, "aggregate_tok_s": 61.1, "median_ttft_ms": 162.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.1, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.075, "drift_pct_all": 0.075}}
-wrote /home/knapcio/inkling/r2/results/KVf-s05/warm-sbquick.json (1.6 min)
+wrote results/KVf-s05/warm-sbquick.json (1.6 min)
 2026-11-23T10:43:12Z KVf-s05 mode sbq
 KVf-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.99, "geomean_tok_s": 63.08, "aggregate_tok_s": 61.11, "median_ttft_ms": 160.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.81, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.495, "drift_pct_all": 0.495}}
-wrote /home/knapcio/inkling/r2/results/KVf-s05/sbquick.json (1.5 min)
+wrote results/KVf-s05/sbquick.json (1.5 min)
 2026-11-23T10:44:43Z KVf-s05 mode think8
 2026-11-23T10:46:53Z KVf-s05 mode kvstress
 needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 92.2, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
@@ -13,4 +13,4 @@ KVf-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 200K     205498   65.437     3140.4      0.313        None      43.9 [39.3, 49.1]        -         -
 250K     255213   97.17      2626.5      0.391        None      38.9 [27.8, 54.4]        -         -
-wrote /home/knapcio/inkling/r2/results/KVf-s05/longctx-lc.json (4.8 min)
+wrote results/KVf-s05/longctx-lc.json (4.8 min)

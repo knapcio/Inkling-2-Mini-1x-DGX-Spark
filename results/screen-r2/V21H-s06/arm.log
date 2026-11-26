@@ -1,9 +1,9 @@
 2026-11-21T18:49:32Z V21H-s06 mode warm
 V21H-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.76, "geomean_tok_s": 60.73, "aggregate_tok_s": 58.82, "median_ttft_ms": 167.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 38.61, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.007, "drift_pct_all": 0.007}}
-wrote /home/knapcio/inkling/r2/results/V21H-s06/warm-sbquick.json (1.6 min)
+wrote results/V21H-s06/warm-sbquick.json (1.6 min)
 2026-11-21T18:51:10Z V21H-s06 mode sbq
 V21H-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.77, "geomean_tok_s": 60.7, "aggregate_tok_s": 58.78, "median_ttft_ms": 166.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 38.29, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.137, "drift_pct_all": -0.137}}
-wrote /home/knapcio/inkling/r2/results/V21H-s06/sbquick.json (1.6 min)
+wrote results/V21H-s06/sbquick.json (1.6 min)
 2026-11-21T18:52:45Z V21H-s06 mode think1
 2026-11-21T18:54:38Z V21H-s06 mode think4
 2026-11-21T18:56:24Z V21H-s06 mode think8
@@ -17,7 +17,7 @@ code       c1  aggregate    62.4 tok/s  per-stream   59.8  ttft 0.199 s  failed 
 code       c4  aggregate   115.0 tok/s  per-stream   31.9  ttft 0.292 s  failed 0
 code       c8  aggregate   168.9 tok/s  per-stream   23.4  ttft 0.483 s  failed 0
 code       c16 aggregate   246.7 tok/s  per-stream   16.9  ttft 0.416 s  failed 0
-wrote /home/knapcio/inkling/r2/results/V21H-s06/decode-pc.json
+wrote results/V21H-s06/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 50.6 | 102.2 (27.4) | 149.5 (20.2) | 218.1 (14.3) |
@@ -25,4 +25,4 @@ wrote /home/knapcio/inkling/r2/results/V21H-s06/decode-pc.json
 2026-11-21T19:05:55Z V21H-s06 mode guard
 V21H-s06-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.64, "geomean_tok_s": 60.65, "aggregate_tok_s": 58.74, "median_ttft_ms": 167.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 37.77, "median_tokens_per_step": 2.14, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.373, "drift_pct_all": 0.373}}
 V21H-s06-guard: quality guard 30/30 passed
-wrote /home/knapcio/inkling/r2/results/V21H-s06/guard.json (2.0 min)
+wrote results/V21H-s06/guard.json (2.0 min)

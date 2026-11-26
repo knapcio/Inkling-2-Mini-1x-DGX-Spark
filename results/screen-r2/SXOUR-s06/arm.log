@@ -1,6 +1,6 @@
 2026-11-22T17:46:26Z SXOUR-s06 mode warm
 SXOUR-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.4, "geomean_tok_s": 63.51, "aggregate_tok_s": 61.54, "median_ttft_ms": 160.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.91, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.432, "drift_pct_all": 0.432}}
-wrote /home/knapcio/inkling/r2/results/SXOUR-s06/warm-sbquick.json (1.6 min)
+wrote results/SXOUR-s06/warm-sbquick.json (1.6 min)
 2026-11-22T17:48:00Z SXOUR-s06 mode sxb
 code   rep 0   67.77 tok/s  ttft  159 ms
 prose  rep 0   63.70 tok/s  ttft  189 ms
@@ -14,4 +14,4 @@ math   rep 2   77.69 tok/s  ttft  182 ms
 median 67.77 tok/s | code 67.77 prose 63.65 math 77.69 | accept 0.000 | canary '408'
 2026-11-22T17:48:27Z SXOUR-s06 mode sbq
 SXOUR-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.41, "geomean_tok_s": 63.52, "aggregate_tok_s": 61.51, "median_ttft_ms": 159.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.53, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.072, "drift_pct_all": -0.072}}
-wrote /home/knapcio/inkling/r2/results/SXOUR-s06/sbquick.json (1.5 min)
+wrote results/SXOUR-s06/sbquick.json (1.5 min)

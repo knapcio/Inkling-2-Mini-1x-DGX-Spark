@@ -1,9 +1,9 @@
 2026-11-21T19:12:38Z R2PS16-s06 mode warm
 R2PS16-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 54.45, "geomean_tok_s": 56.56, "aggregate_tok_s": 55.01, "median_ttft_ms": 165.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.801, "reasoning_char_frac": 0.842, "median_step_ms": 41.16, "median_tokens_per_step": 2.289, "steps_source": "response", "median_accept_rate": 0.1861, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.515, "drift_pct_all": -0.515}}
-wrote /home/knapcio/inkling/r2/results/R2PS16-s06/warm-sbquick.json (1.7 min)
+wrote results/R2PS16-s06/warm-sbquick.json (1.7 min)
 2026-11-21T19:14:23Z R2PS16-s06 mode sbq
 R2PS16-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 54.83, "geomean_tok_s": 57.05, "aggregate_tok_s": 55.5, "median_ttft_ms": 165.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.801, "reasoning_char_frac": 0.843, "median_step_ms": 40.57, "median_tokens_per_step": 2.289, "steps_source": "response", "median_accept_rate": 0.1841, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.145, "drift_pct_all": 0.145}}
-wrote /home/knapcio/inkling/r2/results/R2PS16-s06/sbquick.json (1.7 min)
+wrote results/R2PS16-s06/sbquick.json (1.7 min)
 2026-11-21T19:16:02Z R2PS16-s06 mode think8
 2026-11-21T19:18:27Z R2PS16-s06 mode pf
 R2PS16-s06  longctx: 3.275 chars/token (tokenize)
@@ -12,4 +12,4 @@ context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI
 8K       8159.0   1.938      4210.0      1.087        None      -                        -         -
 32K      32702.0  8.366      3908.9      0.198        None      66.0 [49.5, 87.9]        -         -
 128K     130920.0 47.58      2751.6      47.439       None      42.5 [32.8, 55.0]        -         -
-wrote /home/knapcio/inkling/r2/results/R2PS16-s06/longctx.json (5.1 min)
+wrote results/R2PS16-s06/longctx.json (5.1 min)

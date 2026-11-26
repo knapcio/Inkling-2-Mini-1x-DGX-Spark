@@ -1,6 +1,6 @@
 2026-11-22T14:17:37Z U2a-s05 mode warm
 U2a-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.37, "geomean_tok_s": 63.45, "aggregate_tok_s": 61.46, "median_ttft_ms": 159.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.97, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.369, "drift_pct_all": -0.369}}
-wrote /home/knapcio/inkling/r2/results/U2a-s05/warm-sbquick.json (1.6 min)
+wrote results/U2a-s05/warm-sbquick.json (1.6 min)
 2026-11-22T14:19:11Z U2a-s05 mode think1
 2026-11-22T14:21:07Z U2a-s05 mode think8
 2026-11-22T14:23:16Z U2a-s05 mode think24
@@ -13,7 +13,7 @@ code       c1  aggregate    65.1 tok/s  per-stream   62.4  ttft 0.189 s  failed 
 code       c4  aggregate   121.5 tok/s  per-stream   33.7  ttft 0.283 s  failed 0
 code       c8  aggregate   176.4 tok/s  per-stream   24.5  ttft 0.446 s  failed 0
 code       c16 aggregate   261.9 tok/s  per-stream   18.2  ttft 0.546 s  failed 0
-wrote /home/knapcio/inkling/r2/results/U2a-s05/decode-pc.json
+wrote results/U2a-s05/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 52.9 | 109.5 (28.6) | 161.1 (21.6) | 235.1 (15.7) |

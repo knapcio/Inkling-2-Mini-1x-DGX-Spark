@@ -3,7 +3,7 @@
 
     python3 -I prefill_budget.py [path/to/docs/prefill/bench.json]
 
-Labels: [B] GB10 microbenchmark of the stock kernel (docs/prefill/bench.json, Spark_06), [E] measured end to end
+Labels: [B] GB10 microbenchmark of the stock kernel (docs/prefill/bench.json, box B), [E] measured end to end
 (docs/experiments.md speedbench longctx cold; README published), [D] derived = closing term or byte arithmetic,
 [A] assumption. Rates: NVFP4 grouped GEMM composite 164 TFLOP/s at T=8192 (w13 186 / w2 133), NOT the 300 that
 roofline.log assumed; the rebuilt compute-only floor uses the measured per-stage kernel times directly.

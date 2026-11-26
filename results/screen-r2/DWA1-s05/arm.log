@@ -1,9 +1,9 @@
 2026-11-22T19:00:41Z DWA1-s05 mode warm
 DWA1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.16, "geomean_tok_s": 63.23, "aggregate_tok_s": 61.23, "median_ttft_ms": 158.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.08, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.261, "drift_pct_all": -0.261}}
-wrote /home/knapcio/inkling/r2/results/DWA1-s05/warm-sbquick.json (1.7 min)
+wrote results/DWA1-s05/warm-sbquick.json (1.7 min)
 2026-11-22T19:02:24Z DWA1-s05 mode pf3264
 DWA1-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32780.0  6.406      5117.1      0.211        None      65.8 [59.6, 72.7]        45.448    2.942
 64K      65785.0  14.377     4575.7      0.222        None      58.9 [54.2, 64.0]        48.386    2.771
-wrote /home/knapcio/inkling/r2/results/DWA1-s05/longctx3264.json (6.1 min)
+wrote results/DWA1-s05/longctx3264.json (6.1 min)

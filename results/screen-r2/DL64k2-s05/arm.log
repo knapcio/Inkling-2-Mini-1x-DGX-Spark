@@ -1,9 +1,9 @@
 2026-11-22T22:02:11Z DL64k2-s05 mode warm
 DL64k2-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.97, "geomean_tok_s": 63.09, "aggregate_tok_s": 61.1, "median_ttft_ms": 159.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.19, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.49, "drift_pct_all": -0.49}}
-wrote /home/knapcio/inkling/r2/results/DL64k2-s05/warm-sbquick.json (1.6 min)
+wrote results/DL64k2-s05/warm-sbquick.json (1.6 min)
 2026-11-22T22:03:46Z DL64k2-s05 mode lcd
 DL64k2-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 128K     130842   34.242     3821.1      0.273        None      53.1 [46.5, 60.6]        56.847    3.048
 250K     256609   93.083     2756.8      0.348        None      36.0 [32.8, 39.6]        69.251    2.481
-wrote /home/knapcio/inkling/r2/results/DL64k2-s05/longctx-lcd.json (11.0 min)
+wrote results/DL64k2-s05/longctx-lcd.json (11.0 min)

@@ -1,9 +1,9 @@
 2026-11-21T15:19:48Z R2CHK-s05 mode warm
 R2CHK-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 50.05, "geomean_tok_s": 52.59, "aggregate_tok_s": 51.07, "median_ttft_ms": 173.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.844, "median_step_ms": 45.04, "median_tokens_per_step": 2.239, "steps_source": "response", "median_accept_rate": 0.1841, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.081, "drift_pct_all": 0.081}}
-wrote /home/knapcio/inkling/r2/results/R2CHK-s05/warm-sbquick.json (1.9 min)
+wrote results/R2CHK-s05/warm-sbquick.json (1.9 min)
 2026-11-21T15:21:40Z R2CHK-s05 mode sbq
 R2CHK-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 50.27, "geomean_tok_s": 52.59, "aggregate_tok_s": 51.06, "median_ttft_ms": 174.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.843, "median_step_ms": 45.02, "median_tokens_per_step": 2.272, "steps_source": "response", "median_accept_rate": 0.1827, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.074, "drift_pct_all": -0.074}}
-wrote /home/knapcio/inkling/r2/results/R2CHK-s05/sbquick.json (1.8 min)
+wrote results/R2CHK-s05/sbquick.json (1.8 min)
 2026-11-21T15:23:28Z R2CHK-s05 mode dtp
 prose      c1  aggregate    43.7 tok/s  per-stream   45.5  ttft 0.209 s  failed 0
 prose      c4  aggregate    89.4 tok/s  per-stream   23.7  ttft 0.304 s  failed 0
@@ -13,7 +13,7 @@ code       c1  aggregate    50.8 tok/s  per-stream   54.0  ttft 0.202 s  failed 
 code       c4  aggregate   103.0 tok/s  per-stream   29.0  ttft 0.308 s  failed 0
 code       c8  aggregate   143.6 tok/s  per-stream   19.7  ttft 0.45 s  failed 0
 code       c16 aggregate   226.6 tok/s  per-stream   15.5  ttft 0.579 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R2CHK-s05/decode-pc.json
+wrote results/R2CHK-s05/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 45.5 | 89.4 (23.7) | 125.8 (16.3) | 194.3 (12.9) |

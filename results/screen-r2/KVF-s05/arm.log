@@ -1,10 +1,10 @@
 2026-11-22T14:34:10Z KVF-s05 mode warm
 KVF-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.82, "geomean_tok_s": 62.9, "aggregate_tok_s": 60.92, "median_ttft_ms": 161.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.25, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.002, "drift_pct_all": 0.002}}
-wrote /home/knapcio/inkling/r2/results/KVF-s05/warm-sbquick.json (1.6 min)
+wrote results/KVF-s05/warm-sbquick.json (1.6 min)
 2026-11-22T14:35:45Z KVF-s05 mode lcb
 KVF-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32705.0  6.372      5132.6      0.221        None      73.2 [57.4, 93.3]        -         -
 128K     130924.0 34.549     3789.5      17.306       None      47.0 [34.2, 64.7]        -         -
 250K     255913.0 91.31      2802.7      0.365        None      34.6 [27.6, 43.3]        -         -
-wrote /home/knapcio/inkling/r2/results/KVF-s05/longctx-lcb.json (7.7 min)
+wrote results/KVF-s05/longctx-lcb.json (7.7 min)

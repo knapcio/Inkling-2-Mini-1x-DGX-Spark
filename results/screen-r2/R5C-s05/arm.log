@@ -1,9 +1,9 @@
 2026-11-22T01:32:35Z R5C-s05 mode warm
 R5C-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.87, "geomean_tok_s": 60.86, "aggregate_tok_s": 58.93, "median_ttft_ms": 162.3, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 38.54, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.36, "drift_pct_all": -0.36}}
-wrote /home/knapcio/inkling/r2/results/R5C-s05/warm-sbquick.json (1.6 min)
+wrote results/R5C-s05/warm-sbquick.json (1.6 min)
 2026-11-22T01:34:13Z R5C-s05 mode sbq
 R5C-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.88, "geomean_tok_s": 60.81, "aggregate_tok_s": 58.88, "median_ttft_ms": 163.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 38.25, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.218, "drift_pct_all": 0.218}}
-wrote /home/knapcio/inkling/r2/results/R5C-s05/sbquick.json (1.6 min)
+wrote results/R5C-s05/sbquick.json (1.6 min)
 2026-11-22T01:35:48Z R5C-s05 mode think8
 2026-11-22T01:38:07Z R5C-s05 mode think24
 2026-11-22T01:41:46Z R5C-s05 mode dt
@@ -27,7 +27,7 @@ json       c2  aggregate    84.6 tok/s  per-stream   45.7  ttft 0.241 s  failed 
 json       c4  aggregate   127.5 tok/s  per-stream   34.6  ttft 0.26 s  failed 0
 json       c8  aggregate   180.8 tok/s  per-stream   23.3  ttft 0.33 s  failed 0
 json       c16 aggregate   266.3 tok/s  per-stream   17.9  ttft 0.388 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R5C-s05/decode.json
+wrote results/R5C-s05/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 50.8 | 69.6 (35.8) | 107.1 (28.3) | 157.0 (20.9) | 229.8 (15.1) |

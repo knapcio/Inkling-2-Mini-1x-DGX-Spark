@@ -1,9 +1,9 @@
 2026-11-21T14:36:08Z R2V1b-s05 mode warm
 R2V1b-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 52.79, "geomean_tok_s": 55.43, "aggregate_tok_s": 53.86, "median_ttft_ms": 171.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.844, "median_step_ms": 42.29, "median_tokens_per_step": 2.239, "steps_source": "response", "median_accept_rate": 0.1841, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.265, "drift_pct_all": -0.265}}
-wrote /home/knapcio/inkling/r2/results/R2V1b-s05/warm-sbquick.json (1.8 min)
+wrote results/R2V1b-s05/warm-sbquick.json (1.8 min)
 2026-11-21T14:37:55Z R2V1b-s05 mode sbq
 R2V1b-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 52.98, "geomean_tok_s": 55.46, "aggregate_tok_s": 53.89, "median_ttft_ms": 173.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.843, "median_step_ms": 42.33, "median_tokens_per_step": 2.255, "steps_source": "response", "median_accept_rate": 0.1804, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.031, "drift_pct_all": 0.031}}
-wrote /home/knapcio/inkling/r2/results/R2V1b-s05/sbquick.json (1.7 min)
+wrote results/R2V1b-s05/sbquick.json (1.7 min)
 2026-11-21T14:39:38Z R2V1b-s05 mode think1
 2026-11-21T14:41:33Z R2V1b-s05 mode think4
 2026-11-21T14:43:28Z R2V1b-s05 mode think8
@@ -17,7 +17,7 @@ code       c1  aggregate    53.0 tok/s  per-stream   56.9  ttft 0.197 s  failed 
 code       c4  aggregate   105.0 tok/s  per-stream   29.4  ttft 0.295 s  failed 0
 code       c8  aggregate   152.4 tok/s  per-stream   21.3  ttft 0.377 s  failed 0
 code       c16 aggregate   230.2 tok/s  per-stream   16.0  ttft 0.523 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R2V1b-s05/decode-pc.json
+wrote results/R2V1b-s05/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 47.5 | 96.1 (25.2) | 135.6 (17.9) | 202.8 (13.6) |

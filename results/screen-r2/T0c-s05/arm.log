@@ -1,6 +1,6 @@
 2026-11-22T11:03:20Z T0c-s05 mode warm
 T0c-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.95, "geomean_tok_s": 63.08, "aggregate_tok_s": 61.09, "median_ttft_ms": 158.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.1, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.182, "drift_pct_all": -0.182}}
-wrote /home/knapcio/inkling/r2/results/T0c-s05/warm-sbquick.json (1.6 min)
+wrote results/T0c-s05/warm-sbquick.json (1.6 min)
 2026-11-22T11:04:55Z T0c-s05 mode think1
 2026-11-22T11:06:34Z T0c-s05 mode think8
 2026-11-22T11:08:46Z T0c-s05 mode think24

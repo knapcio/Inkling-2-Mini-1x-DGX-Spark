@@ -1,9 +1,9 @@
 2026-11-22T21:34:24Z DLon2-s06 mode warm
 DLon2-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.89, "geomean_tok_s": 62.94, "aggregate_tok_s": 60.96, "median_ttft_ms": 160.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.24, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.132, "drift_pct_all": -0.132}}
-wrote /home/knapcio/inkling/r2/results/DLon2-s06/warm-sbquick.json (1.6 min)
+wrote results/DLon2-s06/warm-sbquick.json (1.6 min)
 2026-11-22T21:35:59Z DLon2-s06 mode lcd
 DLon2-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 128K     130843   34.308     3813.8      0.264        None      49.0 [42.5, 56.4]        56.471    2.607
 250K     256610   93.01      2759.0      0.343        None      43.0 [35.2, 52.5]        70.689    2.952
-wrote /home/knapcio/inkling/r2/results/DLon2-s06/longctx-lcd.json (10.9 min)
+wrote results/DLon2-s06/longctx-lcd.json (10.9 min)

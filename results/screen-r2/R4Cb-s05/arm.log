@@ -1,9 +1,9 @@
 2026-11-22T00:49:31Z R4Cb-s05 mode warm
 R4Cb-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.81, "geomean_tok_s": 60.77, "aggregate_tok_s": 58.83, "median_ttft_ms": 164.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 38.6, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.284, "drift_pct_all": -0.284}}
-wrote /home/knapcio/inkling/r2/results/R4Cb-s05/warm-sbquick.json (1.6 min)
+wrote results/R4Cb-s05/warm-sbquick.json (1.6 min)
 2026-11-22T00:51:09Z R4Cb-s05 mode sbq
 R4Cb-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 56.7, "geomean_tok_s": 60.69, "aggregate_tok_s": 58.77, "median_ttft_ms": 163.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 38.28, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.087, "drift_pct_all": -0.087}}
-wrote /home/knapcio/inkling/r2/results/R4Cb-s05/sbquick.json (1.6 min)
+wrote results/R4Cb-s05/sbquick.json (1.6 min)
 2026-11-22T00:52:44Z R4Cb-s05 mode think8
 2026-11-22T00:55:01Z R4Cb-s05 mode think24
 2026-11-22T00:59:54Z R4Cb-s05 mode dt
@@ -27,7 +27,7 @@ json       c2  aggregate    84.7 tok/s  per-stream   45.7  ttft 0.231 s  failed 
 json       c4  aggregate   127.9 tok/s  per-stream   34.8  ttft 0.262 s  failed 0
 json       c8  aggregate   178.8 tok/s  per-stream   24.0  ttft 0.308 s  failed 0
 json       c16 aggregate   259.9 tok/s  per-stream   18.1  ttft 0.559 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R4Cb-s05/decode.json
+wrote results/R4Cb-s05/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 50.5 | 69.7 (35.8) | 106.5 (27.9) | 153.7 (20.4) | 227.3 (15.1) |

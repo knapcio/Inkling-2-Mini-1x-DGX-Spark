@@ -1,9 +1,9 @@
 2026-11-21T22:00:44Z R3Cb-s05 mode warm
 R3Cb-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 57.25, "geomean_tok_s": 61.22, "aggregate_tok_s": 59.3, "median_ttft_ms": 166.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 38.31, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.387, "drift_pct_all": 0.387}}
-wrote /home/knapcio/inkling/r2/results/R3Cb-s05/warm-sbquick.json (1.6 min)
+wrote results/R3Cb-s05/warm-sbquick.json (1.6 min)
 2026-11-21T22:02:22Z R3Cb-s05 mode sbq
 R3Cb-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 57.2, "geomean_tok_s": 61.17, "aggregate_tok_s": 59.24, "median_ttft_ms": 166.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 37.98, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.17, "drift_pct_all": -0.17}}
-wrote /home/knapcio/inkling/r2/results/R3Cb-s05/sbquick.json (1.6 min)
+wrote results/R3Cb-s05/sbquick.json (1.6 min)
 2026-11-21T22:03:56Z R3Cb-s05 mode think4
 2026-11-21T22:05:37Z R3Cb-s05 mode think8
 2026-11-21T22:08:00Z R3Cb-s05 mode think24
@@ -28,7 +28,7 @@ json       c2  aggregate    82.5 tok/s  per-stream   44.5  ttft 0.246 s  failed 
 json       c4  aggregate   120.7 tok/s  per-stream   31.4  ttft 0.262 s  failed 0
 json       c8  aggregate   175.2 tok/s  per-stream   23.7  ttft 0.469 s  failed 0
 json       c16 aggregate   259.5 tok/s  per-stream   17.4  ttft 0.508 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R3Cb-s05/decode.json
+wrote results/R3Cb-s05/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 50.9 | 68.0 (35.0) | 100.5 (27.3) | 150.1 (20.1) | 217.4 (14.3) |

@@ -1,9 +1,9 @@
 2026-11-22T05:50:03Z P2t006-s06 mode warm
 P2t006-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.06, "geomean_tok_s": 63.7, "aggregate_tok_s": 61.86, "median_ttft_ms": 159.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 35.55, "median_tokens_per_step": 2.12, "steps_source": "response", "median_accept_rate": 0.162, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.301, "drift_pct_all": 0.301}}
-wrote /home/knapcio/inkling/r2/results/P2t006-s06/warm-sbquick.json (1.6 min)
+wrote results/P2t006-s06/warm-sbquick.json (1.6 min)
 2026-11-22T05:51:37Z P2t006-s06 mode sbq
 P2t006-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.03, "geomean_tok_s": 63.66, "aggregate_tok_s": 61.8, "median_ttft_ms": 159.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 35.68, "median_tokens_per_step": 2.12, "steps_source": "response", "median_accept_rate": 0.1628, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.116, "drift_pct_all": 0.116}}
-wrote /home/knapcio/inkling/r2/results/P2t006-s06/sbquick.json (1.5 min)
+wrote results/P2t006-s06/sbquick.json (1.5 min)
 2026-11-22T05:53:07Z P2t006-s06 mode think8
 2026-11-22T05:55:23Z P2t006-s06 mode think24
 2026-11-22T05:59:04Z P2t006-s06 mode dt
@@ -27,7 +27,7 @@ json       c2  aggregate    89.7 tok/s  per-stream   47.7  ttft 0.232 s  failed 
 json       c4  aggregate   128.9 tok/s  per-stream   34.0  ttft 0.273 s  failed 0
 json       c8  aggregate   178.7 tok/s  per-stream   25.1  ttft 0.367 s  failed 0
 json       c16 aggregate   263.8 tok/s  per-stream   17.8  ttft 0.562 s  failed 0
-wrote /home/knapcio/inkling/r2/results/P2t006-s06/decode.json
+wrote results/P2t006-s06/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 53.3 | 74.1 (38.8) | 107.5 (28.7) | 158.9 (21.2) | 233.4 (15.5) |

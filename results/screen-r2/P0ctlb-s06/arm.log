@@ -1,9 +1,9 @@
 2026-11-22T06:30:33Z P0ctlb-s06 mode warm
 P0ctlb-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.37, "geomean_tok_s": 63.55, "aggregate_tok_s": 61.55, "median_ttft_ms": 159.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.86, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.068, "drift_pct_all": 0.068}}
-wrote /home/knapcio/inkling/r2/results/P0ctlb-s06/warm-sbquick.json (1.6 min)
+wrote results/P0ctlb-s06/warm-sbquick.json (1.6 min)
 2026-11-22T06:32:07Z P0ctlb-s06 mode sbq
 P0ctlb-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.5, "geomean_tok_s": 63.59, "aggregate_tok_s": 61.6, "median_ttft_ms": 158.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.51, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.274, "drift_pct_all": 0.274}}
-wrote /home/knapcio/inkling/r2/results/P0ctlb-s06/sbquick.json (1.5 min)
+wrote results/P0ctlb-s06/sbquick.json (1.5 min)
 2026-11-22T06:33:38Z P0ctlb-s06 mode think8
 2026-11-22T06:35:50Z P0ctlb-s06 mode think24
 2026-11-22T06:39:26Z P0ctlb-s06 mode dt
@@ -27,7 +27,7 @@ json       c2  aggregate    87.7 tok/s  per-stream   47.4  ttft 0.236 s  failed 
 json       c4  aggregate   131.0 tok/s  per-stream   35.5  ttft 0.254 s  failed 0
 json       c8  aggregate   182.7 tok/s  per-stream   24.5  ttft 0.3 s  failed 0
 json       c16 aggregate   269.0 tok/s  per-stream   18.0  ttft 0.483 s  failed 0
-wrote /home/knapcio/inkling/r2/results/P0ctlb-s06/decode.json
+wrote results/P0ctlb-s06/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 53.2 | 72.1 (37.1) | 106.2 (28.6) | 157.8 (20.7) | 232.6 (15.4) |

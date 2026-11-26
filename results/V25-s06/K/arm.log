@@ -1,6 +1,6 @@
 2026-11-23T07:36:40Z V25K2-s06 mode warm
 V25K2-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.17, "geomean_tok_s": 63.32, "aggregate_tok_s": 61.35, "median_ttft_ms": 160.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.04, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.166, "drift_pct_all": -0.166}}
-wrote /home/knapcio/inkling/r2/results/V25K2-s06/warm-sbquick.json (1.6 min)
+wrote results/V25K2-s06/warm-sbquick.json (1.6 min)
 2026-11-23T07:38:15Z V25K2-s06 mode kvstress
 needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 89.1, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
 1 / 1 passed
@@ -9,4 +9,4 @@ V25K2-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 200K     205496   66.183     3105.0      0.314        None      43.8 [18.8, 102.0]       -         -
 250K     255211   96.121     2655.1      0.369        None      37.9 [20.2, 71.3]        -         -
-wrote /home/knapcio/inkling/r2/results/V25K2-s06/longctx-lc.json (4.8 min)
+wrote results/V25K2-s06/longctx-lc.json (4.8 min)

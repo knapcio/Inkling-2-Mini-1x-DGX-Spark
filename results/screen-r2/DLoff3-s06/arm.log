@@ -1,9 +1,9 @@
 2026-11-22T22:41:46Z DLoff3-s06 mode warm
 DLoff3-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.88, "geomean_tok_s": 63.01, "aggregate_tok_s": 61.04, "median_ttft_ms": 160.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.2, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.015, "drift_pct_all": -0.015}}
-wrote /home/knapcio/inkling/r2/results/DLoff3-s06/warm-sbquick.json (1.6 min)
+wrote results/DLoff3-s06/warm-sbquick.json (1.6 min)
 2026-11-22T22:43:21Z DLoff3-s06 mode lcd
 DLoff3-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 128K     130841   34.553     3786.7      0.286        None      53.2 [42.1, 67.3]        57.671    2.911
 250K     256608   95.222     2694.8      0.35         None      37.7 [31.4, 45.4]        74.748    2.829
-wrote /home/knapcio/inkling/r2/results/DLoff3-s06/longctx-lcd.json (11.1 min)
+wrote results/DLoff3-s06/longctx-lcd.json (11.1 min)

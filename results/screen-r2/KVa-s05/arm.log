@@ -1,9 +1,9 @@
 2026-11-23T09:49:49Z KVa-s05 mode warm
 KVa-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.3, "geomean_tok_s": 63.39, "aggregate_tok_s": 61.4, "median_ttft_ms": 160.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.94, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.369, "drift_pct_all": 0.369}}
-wrote /home/knapcio/inkling/r2/results/KVa-s05/warm-sbquick.json (1.6 min)
+wrote results/KVa-s05/warm-sbquick.json (1.6 min)
 2026-11-23T09:51:23Z KVa-s05 mode sbq
 KVa-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.34, "geomean_tok_s": 63.41, "aggregate_tok_s": 61.41, "median_ttft_ms": 161.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.65, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.183, "drift_pct_all": -0.183}}
-wrote /home/knapcio/inkling/r2/results/KVa-s05/sbquick.json (1.5 min)
+wrote results/KVa-s05/sbquick.json (1.5 min)
 2026-11-23T09:52:54Z KVa-s05 mode think8
 2026-11-23T09:55:02Z KVa-s05 mode kvstress
 needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 89.9, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
@@ -13,4 +13,4 @@ KVa-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 200K     205496   65.16      3153.7      0.309        None      40.5 [37.4, 43.9]        -         -
 250K     255211   94.076     2712.8      0.379        None      37.2 [28.2, 48.9]        -         -
-wrote /home/knapcio/inkling/r2/results/KVa-s05/longctx-lc.json (4.7 min)
+wrote results/KVa-s05/longctx-lc.json (4.7 min)

@@ -1,9 +1,9 @@
 2026-11-21T16:00:05Z R2CERT-s05 mode warm
 R2CERT-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 54.01, "geomean_tok_s": 56.61, "aggregate_tok_s": 55.04, "median_ttft_ms": 171.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.844, "median_step_ms": 41.68, "median_tokens_per_step": 2.239, "steps_source": "response", "median_accept_rate": 0.1841, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.947, "drift_pct_all": 0.947}}
-wrote /home/knapcio/inkling/r2/results/R2CERT-s05/warm-sbquick.json (1.7 min)
+wrote results/R2CERT-s05/warm-sbquick.json (1.7 min)
 2026-11-21T16:01:50Z R2CERT-s05 mode sbq
 R2CERT-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 54.39, "geomean_tok_s": 56.7, "aggregate_tok_s": 55.1, "median_ttft_ms": 173.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.843, "median_step_ms": 41.71, "median_tokens_per_step": 2.272, "steps_source": "response", "median_accept_rate": 0.1827, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.017, "drift_pct_all": -0.017}}
-wrote /home/knapcio/inkling/r2/results/R2CERT-s05/sbquick.json (1.7 min)
+wrote results/R2CERT-s05/sbquick.json (1.7 min)
 2026-11-21T16:03:31Z R2CERT-s05 mode dtp
 prose      c1  aggregate    47.3 tok/s  per-stream   49.3  ttft 0.204 s  failed 0
 prose      c4  aggregate    90.2 tok/s  per-stream   23.3  ttft 0.288 s  failed 0
@@ -13,11 +13,11 @@ code       c1  aggregate    54.8 tok/s  per-stream   58.5  ttft 0.196 s  failed 
 code       c4  aggregate   107.1 tok/s  per-stream   29.2  ttft 0.312 s  failed 0
 code       c8  aggregate   146.2 tok/s  per-stream   20.5  ttft 0.507 s  failed 0
 code       c16 aggregate   227.9 tok/s  per-stream   16.0  ttft 0.536 s  failed 0
-wrote /home/knapcio/inkling/r2/results/R2CERT-s05/decode-pc.json
+wrote results/R2CERT-s05/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 49.3 | 90.2 (23.3) | 122.9 (16.2) | 194.5 (13.1) |
 | code | 58.5 | 107.1 (29.2) | 146.2 (20.5) | 227.9 (16.0) |
 2026-11-21T16:07:22Z R2CERT-s05 mode sbq2
 R2CERT-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 54.39, "geomean_tok_s": 56.65, "aggregate_tok_s": 55.06, "median_ttft_ms": 171.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.843, "median_step_ms": 41.78, "median_tokens_per_step": 2.272, "steps_source": "response", "median_accept_rate": 0.1827, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.425, "drift_pct_all": 0.425}}
-wrote /home/knapcio/inkling/r2/results/R2CERT-s05/sbquick2.json (1.7 min)
+wrote results/R2CERT-s05/sbquick2.json (1.7 min)

@@ -1,6 +1,6 @@
 2026-11-22T13:39:14Z FPcb-s06 mode warm
 FPcb-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.08, "geomean_tok_s": 63.14, "aggregate_tok_s": 61.16, "median_ttft_ms": 161.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.15, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.138, "drift_pct_all": -0.138}}
-wrote /home/knapcio/inkling/r2/results/FPcb-s06/warm-sbquick.json (1.6 min)
+wrote results/FPcb-s06/warm-sbquick.json (1.6 min)
 2026-11-22T13:40:49Z FPcb-s06 mode think8
 2026-11-22T13:42:57Z FPcb-s06 mode think24
 2026-11-22T13:46:28Z FPcb-s06 mode dtp
@@ -12,7 +12,7 @@ code       c1  aggregate    64.9 tok/s  per-stream   62.2  ttft 0.19 s  failed 0
 code       c4  aggregate   120.7 tok/s  per-stream   33.5  ttft 0.28 s  failed 0
 code       c8  aggregate   174.3 tok/s  per-stream   23.8  ttft 0.451 s  failed 0
 code       c16 aggregate   256.6 tok/s  per-stream   18.1  ttft 0.484 s  failed 0
-wrote /home/knapcio/inkling/r2/results/FPcb-s06/decode-pc.json
+wrote results/FPcb-s06/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 52.7 | 108.7 (28.5) | 158.8 (21.1) | 229.4 (15.3) |

@@ -1,6 +1,6 @@
 == 2026-11-21T07:56:59+01:00 speedbench full
 F1-sglang-base-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 39.88, "geomean_tok_s": 41.09, "aggregate_tok_s": 38.79, "median_ttft_ms": 182.2, "truncated_frac": 0.932, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.72, "median_step_ms": 60.14, "median_tokens_per_step": 2.452, "steps_source": "response", "median_accept_rate": 0.2074, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.014, "drift_pct_all": 0.014}}
-wrote /home/knapcio/inkling/repo/results/F1-sglang-base-s05/F1-sglang-base-s05-speedbench.json (8.6 min)
+wrote results/F1-sglang-base-s05/F1-sglang-base-s05-speedbench.json (8.6 min)
 == 2026-11-21T08:05:36+01:00 decode table
 prose      c1  aggregate    32.0 tok/s  per-stream   33.6  ttft 0.234 s  failed 0
 prose      c2  aggregate    51.6 tok/s  per-stream   26.5  ttft 0.288 s  failed 0
@@ -22,7 +22,7 @@ json       c2  aggregate    58.9 tok/s  per-stream   32.5  ttft 0.269 s  failed 
 json       c4  aggregate    90.6 tok/s  per-stream   23.7  ttft 0.341 s  failed 0
 json       c8  aggregate   142.7 tok/s  per-stream   20.1  ttft 0.479 s  failed 0
 json       c16 aggregate   236.3 tok/s  per-stream   16.6  ttft 0.518 s  failed 0
-wrote /home/knapcio/inkling/repo/results/F1-sglang-base-s05/F1-sglang-base-s05-decode.json
+wrote results/F1-sglang-base-s05/F1-sglang-base-s05-decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 33.6 | 51.6 (26.5) | 76.0 (20.7) | 118.4 (15.9) | 190.8 (12.6) |
@@ -35,7 +35,7 @@ wrote /home/knapcio/inkling/repo/results/F1-sglang-base-s05/F1-sglang-base-s05-d
 {"label": "F1-sglang-base-s05-c24", "started": "2026-11-21T08:21:18+01:00", "concurrency": 24, "requests": 48, "failed": 0, "max_tokens": 4096, "temperature": 0.8, "effort": "high", "wall_s": 469.78, "completion_tokens": 178918, "aggregate_tok_s": 380.9, "per_request_decode_tok_s_median": 17.8, "ttft_median_s": 0.82, "length_finishes": 40}
 == 2026-11-21T08:29:08+01:00 longctx
 128K     130920.0 54.13      2418.6      27.14        None      37.8 [27.1, 52.8]        -         -
-wrote /home/knapcio/inkling/repo/results/F1-sglang-base-s05/F1-sglang-base-s05-longctx.json (4.9 min)
+wrote results/F1-sglang-base-s05/F1-sglang-base-s05-longctx.json (4.9 min)
 == 2026-11-21T08:34:04+01:00 sanity
 chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
 chat: capital + river        PASS  {"answer": "Warsaw is the capital of Poland, and the Vistula River flows through it."}

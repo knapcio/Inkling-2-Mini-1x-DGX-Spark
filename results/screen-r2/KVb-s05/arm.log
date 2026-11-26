@@ -1,9 +1,9 @@
 2026-11-23T10:07:05Z KVb-s05 mode warm
 KVb-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.3, "geomean_tok_s": 63.54, "aggregate_tok_s": 61.54, "median_ttft_ms": 161.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.87, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.048, "drift_pct_all": -0.048}}
-wrote /home/knapcio/inkling/r2/results/KVb-s05/warm-sbquick.json (1.6 min)
+wrote results/KVb-s05/warm-sbquick.json (1.6 min)
 2026-11-23T10:08:39Z KVb-s05 mode sbq
 KVb-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.42, "geomean_tok_s": 63.52, "aggregate_tok_s": 61.52, "median_ttft_ms": 159.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.56, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.017, "drift_pct_all": 0.017}}
-wrote /home/knapcio/inkling/r2/results/KVb-s05/sbquick.json (1.5 min)
+wrote results/KVb-s05/sbquick.json (1.5 min)
 2026-11-23T10:10:10Z KVb-s05 mode think8
 2026-11-23T10:12:22Z KVb-s05 mode kvstress
 needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 90.8, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
@@ -13,4 +13,4 @@ KVb-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 200K     205495   65.289     3147.5      0.334        None      46.9 [33.2, 66.4]        -         -
 250K     255210   93.385     2732.9      0.386        None      38.3 [24.2, 60.6]        -         -
-wrote /home/knapcio/inkling/r2/results/KVb-s05/longctx-lc.json (4.7 min)
+wrote results/KVb-s05/longctx-lc.json (4.7 min)

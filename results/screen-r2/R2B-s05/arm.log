@@ -1,18 +1,18 @@
 2026-11-21T12:43:46Z R2B-s05 mode warm
 R2B-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 52.37, "geomean_tok_s": 54.93, "aggregate_tok_s": 53.37, "median_ttft_ms": 171.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.844, "median_step_ms": 43.03, "median_tokens_per_step": 2.239, "steps_source": "response", "median_accept_rate": 0.1841, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.132, "drift_pct_all": 0.132}}
-wrote /home/knapcio/inkling/r2/results/R2B-s05/warm-sbquick.json (1.8 min)
+wrote results/R2B-s05/warm-sbquick.json (1.8 min)
 2026-11-21T12:45:34Z R2B-s05 mode prof
 {"error":"This endpoint requires admin API key, but this server was started without one (admin-api-key). Restart with --admin-api-key to enable."}
-ls: cannot access '/home/knapcio/.cache/inkling-2-mini-sglang/profile/R2B-s05-c1': No such file or directory
+ls: cannot access '~/.cache/inkling-2-mini-sglang/profile/R2B-s05-c1': No such file or directory
 {"error":"This endpoint requires admin API key, but this server was started without one (admin-api-key). Restart with --admin-api-key to enable."}
-ls: cannot access '/home/knapcio/.cache/inkling-2-mini-sglang/profile/R2B-s05-c4': No such file or directory
+ls: cannot access '~/.cache/inkling-2-mini-sglang/profile/R2B-s05-c4': No such file or directory
 {"error":"This endpoint requires admin API key, but this server was started without one (admin-api-key). Restart with --admin-api-key to enable."}
-ls: cannot access '/home/knapcio/.cache/inkling-2-mini-sglang/profile/R2B-s05-c8': No such file or directory
+ls: cannot access '~/.cache/inkling-2-mini-sglang/profile/R2B-s05-c8': No such file or directory
 {"error":"This endpoint requires admin API key, but this server was started without one (admin-api-key). Restart with --admin-api-key to enable."}
-ls: cannot access '/home/knapcio/.cache/inkling-2-mini-sglang/profile/R2B-s05-c24': No such file or directory
+ls: cannot access '~/.cache/inkling-2-mini-sglang/profile/R2B-s05-c24': No such file or directory
 2026-11-21T12:51:55Z R2B-s05 mode sbq
 R2B-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 52.53, "geomean_tok_s": 54.77, "aggregate_tok_s": 53.22, "median_ttft_ms": 174.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.802, "reasoning_char_frac": 0.843, "median_step_ms": 43.24, "median_tokens_per_step": 2.272, "steps_source": "response", "median_accept_rate": 0.1827, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.64, "drift_pct_all": -0.64}}
-wrote /home/knapcio/inkling/r2/results/R2B-s05/sbquick.json (1.7 min)
+wrote results/R2B-s05/sbquick.json (1.7 min)
 2026-11-21T12:53:39Z R2B-s05 mode think1
 2026-11-21T12:55:44Z R2B-s05 mode think8
 2026-11-21T12:58:21Z R2B-s05 mode think24
@@ -21,4 +21,4 @@ R2B-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 8K       8159.0   1.888      4321.5      0.248        None      -                        -         -
 32K      32702.0  8.228      3974.5      0.245        None      64.3 [44.8, 92.3]        -         -
-wrote /home/knapcio/inkling/r2/results/R2B-s05/longctx32.json (0.8 min)
+wrote results/R2B-s05/longctx32.json (0.8 min)

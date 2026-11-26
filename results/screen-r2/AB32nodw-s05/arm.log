@@ -1,8 +1,8 @@
 2026-11-22T18:31:30Z AB32nodw-s05 mode warm
 AB32nodw-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.0, "geomean_tok_s": 63.07, "aggregate_tok_s": 61.09, "median_ttft_ms": 161.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.13, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.083, "drift_pct_all": -0.083}}
-wrote /home/knapcio/inkling/r2/results/AB32nodw-s05/warm-sbquick.json (1.6 min)
+wrote results/AB32nodw-s05/warm-sbquick.json (1.6 min)
 2026-11-22T18:33:05Z AB32nodw-s05 mode pf32m
 AB32nodw-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32744.0  6.336      5167.9      0.201        None      75.3 [63.8, 88.7]        47.732    3.49
-wrote /home/knapcio/inkling/r2/results/AB32nodw-s05/longctx32m.json (1.5 min)
+wrote results/AB32nodw-s05/longctx32m.json (1.5 min)

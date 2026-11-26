@@ -1,10 +1,10 @@
 2026-11-22T15:40:40Z DWc-s06 mode warm
 DWc-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.34, "geomean_tok_s": 63.42, "aggregate_tok_s": 61.43, "median_ttft_ms": 159.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.97, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.051, "drift_pct_all": -0.051}}
-wrote /home/knapcio/inkling/r2/results/DWc-s06/warm-sbquick.json (1.6 min)
+wrote results/DWc-s06/warm-sbquick.json (1.6 min)
 2026-11-22T15:42:14Z DWc-s06 mode lcb
 DWc-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32701.0  6.398      5111.1      0.208        None      67.0 [45.8, 98.2]        -         -
 128K     130925.0 34.57      3787.2      17.329       None      42.7 [32.8, 55.5]        -         -
 250K     255909.0 93.679     2731.8      0.383        None      31.9 [23.5, 43.3]        -         -
-wrote /home/knapcio/inkling/r2/results/DWc-s06/longctx-lcb.json (7.9 min)
+wrote results/DWc-s06/longctx-lcb.json (7.9 min)

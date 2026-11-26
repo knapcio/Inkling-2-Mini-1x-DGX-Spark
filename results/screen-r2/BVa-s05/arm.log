@@ -1,6 +1,6 @@
 2026-11-22T11:16:46Z BVa-s05 mode warm
 BVa-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.12, "geomean_tok_s": 63.2, "aggregate_tok_s": 61.21, "median_ttft_ms": 160.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.08, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.059, "drift_pct_all": -0.059}}
-wrote /home/knapcio/inkling/r2/results/BVa-s05/warm-sbquick.json (1.6 min)
+wrote results/BVa-s05/warm-sbquick.json (1.6 min)
 2026-11-22T11:18:20Z BVa-s05 mode think1
 2026-11-22T11:20:00Z BVa-s05 mode think8
 2026-11-22T11:22:11Z BVa-s05 mode think24

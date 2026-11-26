@@ -1,7 +1,7 @@
 2026-11-21T10:42:18Z START L1-steplog-u8 memavail=39.4
 2026-11-21T10:46:16Z READY memavail=39.3
 L1-steplog-u8: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 37.11, "geomean_tok_s": 38.22, "aggregate_tok_s": 36.08, "median_ttft_ms": 191.3, "truncated_frac": 0.932, "reasoning_token_frac": 0.659, "reasoning_char_frac": 0.72, "median_step_ms": 64.65, "median_tokens_per_step": 2.452, "steps_source": "response", "median_accept_rate": 0.2074, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.126, "drift_pct_all": -0.126}}
-wrote /home/knapcio/inkling/repo/results/engine-m0/L1-steplog-u8/L1-steplog-u8-speedbench.json (9.2 min)
+wrote ./results/engine-m0/L1-steplog-u8/L1-steplog-u8-speedbench.json (9.2 min)
 {"label": "L1-steplog-u8-think-c1", "started": "2026-11-21T11:58:24+01:00", "concurrency": 1, "requests": 12, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 476.64, "completion_tokens": 23358, "aggregate_tok_s": 49.0, "per_request_decode_tok_s_median": 48.7, "ttft_median_s": 0.27, "length_finishes": 10}
 {"label": "L1-steplog-u8-think-c8", "started": "2026-11-21T12:06:21+01:00", "concurrency": 8, "requests": 16, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 170.95, "completion_tokens": 30898, "aggregate_tok_s": 180.7, "per_request_decode_tok_s_median": 25.3, "ttft_median_s": 0.74, "length_finishes": 14}
 2026-11-21T11:09:28Z END L1-steplog-u8 memavail=117.9

@@ -1,9 +1,9 @@
 2026-11-22T05:49:11Z P2t006-s05 mode warm
 P2t006-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.56, "geomean_tok_s": 64.23, "aggregate_tok_s": 62.36, "median_ttft_ms": 158.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 35.32, "median_tokens_per_step": 2.12, "steps_source": "response", "median_accept_rate": 0.162, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.173, "drift_pct_all": -0.173}}
-wrote /home/knapcio/inkling/r2/results/P2t006-s05/warm-sbquick.json (1.6 min)
+wrote results/P2t006-s05/warm-sbquick.json (1.6 min)
 2026-11-22T05:50:44Z P2t006-s05 mode sbq
 P2t006-s05: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.43, "geomean_tok_s": 64.12, "aggregate_tok_s": 62.22, "median_ttft_ms": 157.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 35.45, "median_tokens_per_step": 2.12, "steps_source": "response", "median_accept_rate": 0.1628, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.081, "drift_pct_all": -0.081}}
-wrote /home/knapcio/inkling/r2/results/P2t006-s05/sbquick.json (1.5 min)
+wrote results/P2t006-s05/sbquick.json (1.5 min)
 2026-11-22T05:52:14Z P2t006-s05 mode think8
 2026-11-22T05:54:29Z P2t006-s05 mode think24
 2026-11-22T05:58:06Z P2t006-s05 mode dt
@@ -27,7 +27,7 @@ json       c2  aggregate    90.0 tok/s  per-stream   47.8  ttft 0.228 s  failed 
 json       c4  aggregate   129.0 tok/s  per-stream   33.4  ttft 0.261 s  failed 0
 json       c8  aggregate   176.9 tok/s  per-stream   24.4  ttft 0.436 s  failed 0
 json       c16 aggregate   267.1 tok/s  per-stream   18.5  ttft 0.545 s  failed 0
-wrote /home/knapcio/inkling/r2/results/P2t006-s05/decode.json
+wrote results/P2t006-s05/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 53.8 | 74.3 (38.9) | 109.5 (28.8) | 158.1 (21.0) | 230.1 (15.5) |

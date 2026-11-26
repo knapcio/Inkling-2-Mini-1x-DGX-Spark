@@ -1,12 +1,12 @@
 2026-11-22T10:41:19Z D4b-s06 mode warm
 D4b-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.92, "geomean_tok_s": 63.8, "aggregate_tok_s": 61.86, "median_ttft_ms": 159.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.54, "median_tokens_per_step": 2.24, "steps_source": "response", "median_accept_rate": 0.1781, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 2.023, "drift_pct_all": 2.023}}
-wrote /home/knapcio/inkling/r2/results/D4b-s06/warm-sbquick.json (1.6 min)
+wrote results/D4b-s06/warm-sbquick.json (1.6 min)
 2026-11-22T10:42:53Z D4b-s06 mode sbq
 D4b-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.2, "geomean_tok_s": 63.85, "aggregate_tok_s": 61.83, "median_ttft_ms": 158.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.33, "median_tokens_per_step": 2.225, "steps_source": "response", "median_accept_rate": 0.1799, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.144, "drift_pct_all": -0.144}}
-wrote /home/knapcio/inkling/r2/results/D4b-s06/sbquick.json (1.5 min)
+wrote results/D4b-s06/sbquick.json (1.5 min)
 2026-11-22T10:44:23Z D4b-s06 mode sbq2
 D4b-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 60.32, "geomean_tok_s": 63.82, "aggregate_tok_s": 61.8, "median_ttft_ms": 159.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 36.57, "median_tokens_per_step": 2.225, "steps_source": "response", "median_accept_rate": 0.1799, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.091, "drift_pct_all": 0.091}}
-wrote /home/knapcio/inkling/r2/results/D4b-s06/sbquick2.json (1.5 min)
+wrote results/D4b-s06/sbquick2.json (1.5 min)
 2026-11-22T10:45:53Z D4b-s06 mode think1
 2026-11-22T10:47:44Z D4b-s06 mode dt
 prose      c1  aggregate    52.7 tok/s  per-stream   54.0  ttft 0.163 s  failed 0
@@ -29,7 +29,7 @@ json       c2  aggregate    88.7 tok/s  per-stream   47.7  ttft 0.232 s  failed 
 json       c4  aggregate   130.2 tok/s  per-stream   35.2  ttft 0.258 s  failed 0
 json       c8  aggregate   187.7 tok/s  per-stream   24.7  ttft 0.333 s  failed 0
 json       c16 aggregate   266.9 tok/s  per-stream   17.9  ttft 0.57 s  failed 0
-wrote /home/knapcio/inkling/r2/results/D4b-s06/decode.json
+wrote results/D4b-s06/decode.json
 | prompt type | c1 | c2 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|---:|
 | prose | 54.0 | 72.7 (37.4) | 108.1 (28.5) | 158.3 (21.1) | 230.2 (15.3) |

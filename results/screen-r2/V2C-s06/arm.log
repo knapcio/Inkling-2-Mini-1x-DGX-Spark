@@ -1,9 +1,9 @@
 2026-11-21T18:25:26Z V2C-s06 mode warm
 V2C-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 53.5, "geomean_tok_s": 57.25, "aggregate_tok_s": 55.38, "median_ttft_ms": 169.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 41.03, "median_tokens_per_step": 2.255, "steps_source": "response", "median_accept_rate": 0.1793, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.241, "drift_pct_all": 0.241}}
-wrote /home/knapcio/inkling/r2/results/V2C-s06/warm-sbquick.json (1.7 min)
+wrote results/V2C-s06/warm-sbquick.json (1.7 min)
 2026-11-21T18:27:10Z V2C-s06 mode sbq
 V2C-s06: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 53.31, "geomean_tok_s": 57.2, "aggregate_tok_s": 55.34, "median_ttft_ms": 168.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 40.76, "median_tokens_per_step": 2.194, "steps_source": "response", "median_accept_rate": 0.1744, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.262, "drift_pct_all": 0.262}}
-wrote /home/knapcio/inkling/r2/results/V2C-s06/sbquick.json (1.7 min)
+wrote results/V2C-s06/sbquick.json (1.7 min)
 2026-11-21T18:28:50Z V2C-s06 mode think1
 2026-11-21T18:30:47Z V2C-s06 mode think4
 2026-11-21T18:32:33Z V2C-s06 mode think8
@@ -17,7 +17,7 @@ code       c1  aggregate    59.1 tok/s  per-stream   56.6  ttft 0.204 s  failed 
 code       c4  aggregate   112.9 tok/s  per-stream   31.2  ttft 0.297 s  failed 0
 code       c8  aggregate   166.4 tok/s  per-stream   23.5  ttft 0.483 s  failed 0
 code       c16 aggregate   235.5 tok/s  per-stream   16.6  ttft 0.434 s  failed 0
-wrote /home/knapcio/inkling/r2/results/V2C-s06/decode-pc.json
+wrote results/V2C-s06/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 47.4 | 101.2 (27.2) | 150.4 (20.0) | 212.7 (14.2) |
@@ -25,4 +25,4 @@ wrote /home/knapcio/inkling/r2/results/V2C-s06/decode-pc.json
 2026-11-21T18:43:30Z V2C-s06 mode guard
 V2C-s06-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 53.32, "geomean_tok_s": 57.23, "aggregate_tok_s": 55.35, "median_ttft_ms": 171.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 40.08, "median_tokens_per_step": 2.14, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.085, "drift_pct_all": -0.085}}
 V2C-s06-guard: quality guard 30/30 passed
-wrote /home/knapcio/inkling/r2/results/V2C-s06/guard.json (2.1 min)
+wrote results/V2C-s06/guard.json (2.1 min)

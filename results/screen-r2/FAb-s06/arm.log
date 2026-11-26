@@ -1,6 +1,6 @@
 2026-11-22T14:24:39Z FAb-s06 mode warm
 FAb-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 59.46, "geomean_tok_s": 63.58, "aggregate_tok_s": 61.58, "median_ttft_ms": 159.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 36.85, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.395, "drift_pct_all": -0.395}}
-wrote /home/knapcio/inkling/r2/results/FAb-s06/warm-sbquick.json (1.6 min)
+wrote results/FAb-s06/warm-sbquick.json (1.6 min)
 2026-11-22T14:26:13Z FAb-s06 mode think8
 2026-11-22T14:28:21Z FAb-s06 mode think24
 2026-11-22T14:31:53Z FAb-s06 mode dtp
@@ -12,7 +12,7 @@ code       c1  aggregate    65.4 tok/s  per-stream   62.7  ttft 0.191 s  failed 
 code       c4  aggregate   121.4 tok/s  per-stream   32.6  ttft 0.279 s  failed 0
 code       c8  aggregate   176.1 tok/s  per-stream   24.6  ttft 0.436 s  failed 0
 code       c16 aggregate   266.2 tok/s  per-stream   18.6  ttft 0.478 s  failed 0
-wrote /home/knapcio/inkling/r2/results/FAb-s06/decode-pc.json
+wrote results/FAb-s06/decode-pc.json
 | prompt type | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
 | prose | 53.0 | 110.0 (28.8) | 157.9 (20.8) | 239.6 (15.7) |

@@ -1,6 +1,6 @@
 2026-11-21T17:04:27Z R2PFA-s05 mode warm
 R2PFA-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 51.66, "geomean_tok_s": 55.48, "aggregate_tok_s": 53.64, "median_ttft_ms": 172.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 43.06, "median_tokens_per_step": 2.255, "steps_source": "response", "median_accept_rate": 0.1814, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.178, "drift_pct_all": -0.178}}
-wrote /home/knapcio/inkling/r2/results/R2PFA-s05/warm-sbquick.json (1.8 min)
+wrote results/R2PFA-s05/warm-sbquick.json (1.8 min)
 2026-11-21T17:06:13Z R2PFA-s05 mode pf
 R2PFA-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
@@ -8,11 +8,11 @@ context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI
 8K       8159.0   1.487      5486.9      0.248        None      -                        -         -
 32K      32702.0  6.315      5178.5      0.242        None      56.1 [36.6, 85.9]        -         -
 128K     130920.0 34.294     3817.6      17.238       None      43.2 [30.5, 61.1]        -         -
-wrote /home/knapcio/inkling/r2/results/R2PFA-s05/longctx.json (3.4 min)
+wrote results/R2PFA-s05/longctx.json (3.4 min)
 2026-11-21T17:09:34Z R2PFA-s05 mode guard
 R2PFA-s05-guard: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 51.36, "geomean_tok_s": 55.25, "aggregate_tok_s": 53.55, "median_ttft_ms": 173.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.782, "reasoning_char_frac": 0.826, "median_step_ms": 42.34, "median_tokens_per_step": 2.216, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 1, "drift_pct_identical": -1.257, "drift_pct_all": -3.21}}
 R2PFA-s05-guard: quality guard 30/30 passed
-wrote /home/knapcio/inkling/r2/results/R2PFA-s05/guard.json (2.2 min)
+wrote results/R2PFA-s05/guard.json (2.2 min)
 2026-11-21T17:11:47Z R2PFA-s05 mode sanity
 chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
 chat: capital + river        PASS  {"answer": "The capital of Poland is Warsaw, which is crossed by the Vistula River."}

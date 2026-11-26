@@ -1,13 +1,13 @@
 2026-11-22T15:17:13Z KV3-s05 mode warm
 KV3-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.93, "geomean_tok_s": 63.01, "aggregate_tok_s": 61.01, "median_ttft_ms": 161.3, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.2, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.005, "drift_pct_all": -0.005}}
-wrote /home/knapcio/inkling/r2/results/KV3-s05/warm-sbquick.json (1.6 min)
+wrote results/KV3-s05/warm-sbquick.json (1.6 min)
 2026-11-22T15:18:48Z KV3-s05 mode lcb
 KV3-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32702.0  6.364      5138.6      0.222        None      65.2 [44.1, 96.3]        -         -
 128K     130920.0 34.491     3795.8      17.259       None      47.4 [36.4, 61.7]        -         -
 250K     255910.0 93.032     2750.8      0.39         None      36.8 [29.9, 45.2]        -         -
-wrote /home/knapcio/inkling/r2/results/KV3-s05/longctx-lcb.json (7.8 min)
+wrote results/KV3-s05/longctx-lcb.json (7.8 min)
 2026-11-22T15:26:33Z KV3-s05 mode sanity
 chat: 17*23                  PASS  {"answer": "391", "completion_tokens": 44}
 chat: capital + river        PASS  {"answer": "The capital of Poland is Warsaw, which is crossed by the Vistula River."}

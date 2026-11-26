@@ -1,8 +1,8 @@
 2026-11-22T18:24:13Z AB32all-s05 mode warm
 AB32all-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.99, "geomean_tok_s": 63.12, "aggregate_tok_s": 61.15, "median_ttft_ms": 159.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.14, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.679, "drift_pct_all": 0.679}}
-wrote /home/knapcio/inkling/r2/results/AB32all-s05/warm-sbquick.json (1.6 min)
+wrote results/AB32all-s05/warm-sbquick.json (1.6 min)
 2026-11-22T18:25:48Z AB32all-s05 mode pf32m
 AB32all-s05  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 32K      32744.0  6.317      5183.5      0.211        None      69.2 [64.2, 74.7]        47.245    3.234
-wrote /home/knapcio/inkling/r2/results/AB32all-s05/longctx32m.json (1.6 min)
+wrote results/AB32all-s05/longctx32m.json (1.6 min)

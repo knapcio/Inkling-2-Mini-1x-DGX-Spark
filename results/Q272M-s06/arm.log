@@ -1,10 +1,10 @@
 2026-11-24T03:14:20Z Q272M-s06 mode warm
 Q272M-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 58.92, "geomean_tok_s": 63.0, "aggregate_tok_s": 61.02, "median_ttft_ms": 157.6, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.827, "median_step_ms": 37.23, "median_tokens_per_step": 2.224, "steps_source": "response", "median_accept_rate": 0.1748, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.341, "drift_pct_all": -0.341}}
-wrote /home/knapcio/inkling/r2/results/Q272M-s06/warm-sbquick.json (1.6 min)
+wrote results/Q272M-s06/warm-sbquick.json (1.6 min)
 2026-11-24T03:15:56Z Q272M-s06 mode ctx1mq
 needle 1000K                 PASS  {"prompt_tokens": 999296, "seconds": 931.0, "expected": "PYLON-MEADOW-2343", "answer": "PYLON-MEADOW-2343"}
 1 / 1 passed
 Q272M-s06  longctx: 3.275 chars/token (tokenize)
 context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
 1000K    1024202  971.187    1054.6      1.679        None      13.8 [7.6, 24.9]         194.172   2.683
-wrote /home/knapcio/inkling/r2/results/Q272M-s06/longctx-1m.json (17.5 min)
+wrote results/Q272M-s06/longctx-1m.json (17.5 min)
