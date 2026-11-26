@@ -5,7 +5,7 @@ Serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachine
 [incoai/Inkling-2-Mini-DFlash2](https://huggingface.co/incoai/Inkling-2-Mini-DFlash2), on SGLang, plus a set of
 import-time speed overlays that leave the target model's output distribution as it is.
 
-**Status (2026-11-26, v2.9.7, the final release of this round):** v2.9.3 passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes; v2.9.5's shared verify settle is bit-exact in the GPU check and was measured on box A, and v2.9.5 and v2.9.6 passed two-box qualifications (Q295R / Q295S, Q296R / Q296S); v2.9.7 turns v2.9.6's MXFP8 drafter context projections off by default (opt-in, `DFLASH_CTX8=1`).
+**Status (2026-11-26, v2.9.7, the final release of this round):** v2.9.3 passed a two-box qualification: Q293R and Q293S on both boxes; v2.9.4's prefix-tail deferral was release-checked on both boxes; v2.9.5's shared verify settle is bit-exact in the GPU check and was measured on box A, and v2.9.5 and v2.9.6 passed two-box qualifications (Q295R / Q295S, Q296R / Q296S); v2.9.7 turns v2.9.6's MXFP8 drafter context projections off by default (opt-in, `DFLASH_CTX8=1`). On v2.9.7's defaults, the 24-agent check on both boxes and a 12-turn, 24-agent soak on box B ran with 0 failures; every later turn hit the prefix cache, and the lowest MemAvailable was 3.8 GiB (`results/AG2961-s05/`, `results/AG2961-s06/`, `results/SOAK2961-s06/`).
 
 One default profile: SGLang `lmsysorg/sglang:inkling-2-mini`, pinned by digest, drafting with DFlash2, a 5-layer
 block-diffusion draft with a 2,048-token draft window and a 16-candidate selector, pinned at revision `4f9088ea`.

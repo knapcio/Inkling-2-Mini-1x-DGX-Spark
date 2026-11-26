@@ -19,6 +19,13 @@ default is v2.9.5's (the projections run in BF16); nothing else changed, so v2.9
   cold 240K needle after each (3 / 3 PASS per run), 200K / 250K contexts 2 / 2 each (`results/Q295R-s05/`,
   `results/Q295R-s06/`, `results/Q295S-s05/`, `results/Q295S-s06/`, `results/Q296R-s05/`, `results/Q296R-s06/`,
   `results/Q296S-s05/`, `results/Q296S-s06/`).
+- Agent checks on the final defaults (2026-11-26), 24 agents with ~72K-token prompts:
+  - **Both boxes:** 0 failures. The second turn's first token came in 2.8 / 3.1 s against 371 / 369 s cold (box A /
+    B), and the worst MemAvailable was 5.0 / 4.5 GiB.
+  - **12-turn soak on box B (26 min, 288 requests):** 0 failures. Every turn after the first was served from the prefix
+    cache (first token 3.1-6.6 s against 369 s cold). The median MemAvailable stayed at 4.6 GiB from turn 2 to turn 12;
+    the lowest single sample was 3.8 GiB, at the start of turn 12.
+  - **Results:** `results/AG2961-s05/`, `results/AG2961-s06/`, `results/SOAK2961-s06/`.
 - docs/experiments.md: closed experiment, lossless packing of the sliding-window KV (bit-exact, but the packed visit
   was 0.66-0.84x of BF16 at 1 and at 16-48 requests and ~1.0x at 4-8; `results/GKSWA-s06/`).
 - Results: `results/CTX296a-on1-s05/`, `results/CTX296a-off1-s05/`, `results/CTX296a-off2-s05/`, `results/CTX296a-on2-s05/`,
