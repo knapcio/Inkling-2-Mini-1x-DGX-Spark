@@ -69,6 +69,8 @@ DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only f
 DFLASH_TAIL_SNAPSHOTS=${DFLASH_TAIL_SNAPSHOTS:-8}                # SPEC=dflash2: prompt-end draft windows kept for later prefix hits (40 MiB each, charged to the KV budget; 0 = off)
 DFLASH_TAIL_DEFER=${DFLASH_TAIL_DEFER:-1}                        # ... the prefix tail defers to a snapshot that already covers the drafter's window (the target keeps its cache hit; 0 = v2.9.3: tail and snapshots independent)
 DFLASH_PCOPY=${DFLASH_PCOPY:-12}                               # SPEC=dflash2: prompt-copy forced drafts for long prompts (12 = on, the measured rule; 0 = off)
+DFLASH_CTX8=${DFLASH_CTX8:-1}                                  # SPEC=dflash2 + OVERLAY=1: the drafter's context projections (fc + stacked K/V, eager after verify) on b12x MXFP8 (draft-only; 0 = BF16)
+DFLASH_CTX8_MAX_M=${DFLASH_CTX8_MAX_M:-}                       # ... largest append (rows) on MXFP8; larger calls keep BF16 (empty = 256)
 DFLASH_PCOPY_MIN_CTX=${DFLASH_PCOPY_MIN_CTX:-8192}             # ... only for requests whose prompt has at least this many tokens (shorter prompts: no copy)
 PROMPT_TOUCH=${PROMPT_TOUCH:-1}                              # OVERLAY=1: after a request finishes, refresh its prompt-end cache checkpoint so the next turn of a long conversation keeps its prefix hit (cache LRU order only; 0 = off)
 [[ $ENGINE == vllm && -z ${SPEC:-} ]] && SPEC=dspark   # the vLLM profile keeps the DSpark draft
@@ -152,8 +154,8 @@ case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the store is ch
     echo "set KV12S / KV12S_POOL / KV12S_SETTLE / KV12 / KV12_SLOTS instead of passing the KV store's variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prefix tail is DFlash2-only: passed by the launcher alone
-  *INKLING_DFLASH_PREFIX_TAIL*|*INKLING_DFLASH_TAIL_SNAPSHOTS*|*INKLING_DFLASH_TAIL_DEFER*|*INKLING_DFLASH_PCOPY*)  # the tail, its _MAX_INPUT, the snapshots, the deferral, the prompt copy and its _MIN_CTX
-    echo "set DFLASH_PREFIX_TAIL / DFLASH_PREFIX_TAIL_MAX_INPUT / DFLASH_TAIL_SNAPSHOTS / DFLASH_TAIL_DEFER / DFLASH_PCOPY / DFLASH_PCOPY_MIN_CTX instead of passing INKLING_DFLASH_* variables in SGLANG_ENV" >&2; exit 2 ;;
+  *INKLING_DFLASH_PREFIX_TAIL*|*INKLING_DFLASH_TAIL_SNAPSHOTS*|*INKLING_DFLASH_TAIL_DEFER*|*INKLING_DFLASH_PCOPY*|*INKLING_DFLASH_CTX8*)  # the tail, its _MAX_INPUT, the snapshots, the deferral, the prompt copy and its _MIN_CTX, the MXFP8 context projections
+    echo "set DFLASH_PREFIX_TAIL / DFLASH_PREFIX_TAIL_MAX_INPUT / DFLASH_TAIL_SNAPSHOTS / DFLASH_TAIL_DEFER / DFLASH_PCOPY / DFLASH_PCOPY_MIN_CTX / DFLASH_CTX8 / DFLASH_CTX8_MAX_M instead of passing INKLING_DFLASH_* variables in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prompt-end refresh is switched by the launcher alone
   *INKLING_PROMPT_TOUCH*)
@@ -321,6 +323,13 @@ if [[ $ENGINE == sglang ]]; then
     dfpcopymin=$DFLASH_PCOPY_MIN_CTX
   fi
   ptouch=0; [[ $OVERLAY == 1 && $PROMPT_TOUCH == 1 ]] && ptouch=1
+  case $DFLASH_CTX8 in 0|1) ;; *) echo "DFLASH_CTX8 must be 0 or 1 (got '$DFLASH_CTX8')" >&2; exit 2 ;; esac
+  dfctx8=0; dfctx8max=; [[ $SPEC == dflash2 && $OVERLAY == 1 && $DFLASH_CTX8 == 1 ]] && dfctx8=1   # inert for the other profiles
+  if [[ $dfctx8 == 1 && -n $DFLASH_CTX8_MAX_M ]]; then
+    [[ $DFLASH_CTX8_MAX_M =~ ^[0-9]{1,4}$ ]] && (( 10#$DFLASH_CTX8_MAX_M >= 1 && 10#$DFLASH_CTX8_MAX_M <= 4096 )) || {
+      echo "DFLASH_CTX8_MAX_M must be 1..4096 (got '$DFLASH_CTX8_MAX_M')" >&2; exit 2; }
+    dfctx8max=$(( 10#$DFLASH_CTX8_MAX_M ))
+  fi
   ov=()
   if [[ $OVERLAY == 1 ]]; then
     [[ -f $OVERLAY_DIR/sitecustomize.py ]] || { echo "OVERLAY=1 but no overlay at $OVERLAY_DIR" >&2; exit 1; }
@@ -331,7 +340,7 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_PICO12="$PICO12" -e INKLING_PREFILL="$PREFILL" -e INKLING_PREFILL_QKVR_OUT=strided
         -e INKLING_CERT_HEAD="$CERT_HEAD" -e INKLING_WIDE="$WIDE" -e INKLING_WIDE_SCOPE="$WIDE_SCOPE"
         -e INKLING_VATTN="$VATTN" -e INKLING_ATTN="$ATTN" -e INKLING_PFUSE="$PFUSE" -e INKLING_PFUSE_HOIST="$PFUSE_HOIST" -e INKLING_ATTN_GATE="$ATTN_GATE" -e INKLING_PROLOGUE="$PROLOGUE" -e INKLING_MOE2="$MOE2" -e INKLING_SCODES="$SCODES"
-        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_TAIL_SNAPSHOTS="$dfsnap" -e INKLING_DFLASH_TAIL_DEFER="$dfdefer" -e INKLING_DFLASH_PCOPY="$dfpcopy" -e INKLING_DFLASH_PCOPY_MIN_CTX="$dfpcopymin" -e INKLING_PROMPT_TOUCH="$ptouch" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
+        -e INKLING_VERIFY_CAP_FASTPROBS="$VCAP_FASTPROBS" -e INKLING_VERIFY_CAP_FUSED_ACCEPT="$VCAP_FUSED" -e INKLING_NOEXP="$NOEXP" -e INKLING_PADX="$PADX" -e INKLING_DFLASH_BYTES="$DFLASH_BYTES" -e INKLING_DFLASH_HOT_N="$DFLASH_HOT_N" -e INKLING_DFLASH_PREFIX_TAIL="$dftail" -e INKLING_DFLASH_PREFIX_TAIL_MAX_INPUT="$DFLASH_PREFIX_TAIL_MAX_INPUT" -e INKLING_DFLASH_TAIL_SNAPSHOTS="$dfsnap" -e INKLING_DFLASH_TAIL_DEFER="$dfdefer" -e INKLING_DFLASH_PCOPY="$dfpcopy" -e INKLING_DFLASH_PCOPY_MIN_CTX="$dfpcopymin" -e INKLING_DFLASH_CTX8="$dfctx8" -e INKLING_DFLASH_CTX8_MAX_M="$dfctx8max" -e INKLING_PROMPT_TOUCH="$ptouch" -e INKLING_DFLASH_FUSED_ACCEPT="$DFLASH_FUSED" -e INKLING_RSFIX="$RSFIX"
         -e INKLING_KV12="$KV12" -e INKLING_KV12_MAX_PAGES="$KV12_SLOTS"
         -e INKLING_CERT_WIDE="$CERT_WIDE" -e INKLING_CERT_WIDE_MAX_ROWS="$CERT_WIDE_MAX_ROWS" -e INKLING_CERT_WIDE_STATS="$CERT_WIDE_STATS"
         -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"

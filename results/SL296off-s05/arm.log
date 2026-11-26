@@ -1,0 +1,3 @@
+2026-11-25T23:05:08Z SL296off-s05 mode warm
+SL296off-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 61.44, "geomean_tok_s": 65.92, "aggregate_tok_s": 63.29, "median_ttft_ms": 160.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 49.23, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2884, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.555, "drift_pct_all": -0.555}}
+wrote results/SL296off-s05/warm-sbquick.json (1.5 min)

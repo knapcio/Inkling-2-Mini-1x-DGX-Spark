@@ -50,15 +50,21 @@ _FA4_WORKSPACE = os.environ.get("INKLING_KV12S_FA4_WORKSPACE", "0").strip().lowe
 # Which SGLang pools carry the packed store: "static" (non-unified SWAKVPool, static.py)
 # or "unified" (the --enable-unified-memory arena, v2.7.1).
 _POOL = os.environ.get("INKLING_KV12S_POOL", "static").strip().lower()
-# How the DFLASH hook settles a verify step on the packed global visits: "1" (default) builds the page candidates
-# once for all visits, as the DSpark hook does since v2.7.3, and runs each settle kernel once over all visits
-# (device.LaneGroup); "shared" only shares the candidates; "0" settles each visit on its own (v2.9.4). All three
-# store the same K/V bits. The store's bytes are identical too, except where side-slot claims of one visit race
-# inside one launch (pages promoted together near arena exhaustion); every mode, the per-visit one included,
-# resolves those in scheduling order, and every outcome is exact.
+# How the DFLASH hook settles a verify step on the packed global visits: "shared" (the default, here and in
+# scripts/launch.sh) builds the page candidates once for all visits, as the DSpark hook does since v2.7.3; "1" also
+# runs each settle kernel once over all visits (device.LaneGroup; opt-in); "0" settles each visit on its own
+# (v2.9.4). All three store the same K/V bits. The store's bytes are identical too, except where side-slot claims of
+# one visit race inside one launch (pages promoted together near arena exhaustion); every mode, the per-visit one
+# included, resolves those in scheduling order, and every outcome is exact.
 _SETTLE_MODES = {"1": "batch", "on": "batch", "true": "batch", "yes": "batch", "batch": "batch", "shared": "shared",
                  "0": "layer", "off": "layer", "false": "layer", "no": "layer", "layer": "layer"}
-_DFLASH_SETTLE_RAW = os.environ.get("INKLING_KV12S_DFLASH_SETTLE", "1").strip().lower()
+
+
+def _settle_raw(environ):
+    return environ.get("INKLING_KV12S_DFLASH_SETTLE", "shared").strip().lower()
+
+
+_DFLASH_SETTLE_RAW = _settle_raw(os.environ)
 _DFLASH_SETTLE = _SETTLE_MODES.get(_DFLASH_SETTLE_RAW)
 
 

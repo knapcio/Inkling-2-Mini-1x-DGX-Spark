@@ -1,0 +1,3 @@
+2026-11-25T23:01:18Z SL296on-s05 mode warm
+SL296on-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 61.42, "geomean_tok_s": 66.34, "aggregate_tok_s": 63.76, "median_ttft_ms": 161.4, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 49.18, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2871, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.462, "drift_pct_all": 0.462}}
+wrote results/SL296on-s05/warm-sbquick.json (1.5 min)

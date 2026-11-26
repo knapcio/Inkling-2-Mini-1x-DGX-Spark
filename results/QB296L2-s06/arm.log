@@ -1,0 +1,8 @@
+2026-11-26T02:53:11Z QB296L2-s06 mode warm
+QB296L2-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 71.36, "geomean_tok_s": 75.75, "aggregate_tok_s": 73.6, "median_ttft_ms": 160.9, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.43, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2525, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.206, "drift_pct_all": -0.206}}
+wrote results/QB296L2-s06/warm-sbquick.json (1.4 min)
+2026-11-26T02:54:33Z QB296L2-s06 mode inkq2
+[inkq QB296L2-s06] gsm8k: 390/400 in 485 s
+[inkq QB296L2-s06] lc: 100/100 in 452 s
+[inkq QB296L2-s06] qeval: 67/75 in 142 s
+[inkq QB296L2-s06] total 557/575 in 1078.9 s; families {'gsm8k': [390, 400], 'lc': [100, 100], 'qeval': [67, 75]}; min prompt tokens 1569; failed requests 0

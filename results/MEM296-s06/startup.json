@@ -1,0 +1,2 @@
+{"label":"MEM296-s06","ready_utc":"2026-11-26T00:15:57Z","startup_s":126,"memavail_ready_gib":5.2,"kv":"[2026-11-26 00:15:56 PID131] max_total_num_tokens=2341632, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.47 GB"}
+{"memavail_end_gib":4.3}

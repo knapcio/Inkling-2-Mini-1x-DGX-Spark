@@ -1,0 +1,9 @@
+2026-11-26T02:22:44Z LCS296off1-s05 mode warm
+LCS296off1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 61.36, "geomean_tok_s": 65.89, "aggregate_tok_s": 63.28, "median_ttft_ms": 162.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 49.24, "median_tokens_per_step": 3.0, "steps_source": "response", "median_accept_rate": 0.2884, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.161, "drift_pct_all": 0.161}}
+wrote results/LCS296off1-s05/warm-sbquick.json (1.5 min)
+2026-11-26T02:24:16Z LCS296off1-s05 mode lcsl
+LCS296off1-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32742.0  6.136      5336.0      0.274        None      64.1 [54.5, 75.4]        55.667    3.518
+128K     130961.0 33.786     3876.2      17.001       None      51.3 [45.8, 57.5]        67.356    3.379
+wrote results/LCS296off1-s05/longctx-lcsl.json (9.3 min)

@@ -1,0 +1,50 @@
+{
+ "prompts_token_equal": 32,
+ "prompts_token_differ": 2,
+ "prompts_unverifiable": 0,
+ "on_steps_excluded": 106,
+ "matched_steps": 1349,
+ "coverage_on": 0.8869165023011177,
+ "coverage_off": 0.8845901639344262,
+ "slot_agreement": [
+  0.9710896960711638,
+  0.9310600444773907,
+  0.9058561897702001,
+  0.8747220163083765,
+  0.8539659006671608,
+  0.8235730170496665,
+  0.7983691623424759
+ ],
+ "block_agreement": 0.7057079318013343,
+ "first_slot_agreement": 0.9710896960711638,
+ "accepted_on": 2.1371386212008896,
+ "accepted_off": 2.1363973313565605,
+ "accepted_on_minus_off": 0.0007412898443291327,
+ "accepted_when_block_equal": 2.4401260504201683,
+ "target_consistent": 1.0,
+ "on_arm": {
+  "files": 26,
+  "requests": 38,
+  "incomplete_requests": 0,
+  "greedy_steps": 1613,
+  "invalid_ids": 0,
+  "ambiguous_keys": 44,
+  "ambiguous_steps": 92,
+  "tokens_per_step": 3.249845009299442
+ },
+ "off_arm": {
+  "files": 27,
+  "requests": 38,
+  "incomplete_requests": 0,
+  "greedy_steps": 1621,
+  "invalid_ids": 0,
+  "ambiguous_keys": 46,
+  "ambiguous_steps": 96,
+  "tokens_per_step": 3.2467612584824184
+ },
+ "greedy_outputs_equal": [
+  28,
+  30
+ ],
+ "request_sets_equal": true
+}

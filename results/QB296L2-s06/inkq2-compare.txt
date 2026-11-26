@@ -1,0 +1,29 @@
+QB296A1-s06: total 557/575, families {'gsm8k': [388, 400], 'lc': [100, 100], 'qeval': [69, 75]}, length finishes 4, failed requests 0, wall 1074.0 s
+QB296A2-s06: total 558/575, families {'gsm8k': [390, 400], 'lc': [100, 100], 'qeval': [68, 75]}, length finishes 6, failed requests 0, wall 1069.8 s
+QB296A3-s06: total 561/575, families {'gsm8k': [392, 400], 'lc': [100, 100], 'qeval': [69, 75]}, length finishes 4, failed requests 0, wall 1067.0 s
+QB296L1-s06: total 557/575, families {'gsm8k': [391, 400], 'lc': [100, 100], 'qeval': [66, 75]}, length finishes 7, failed requests 0, wall 1068.6 s
+QB296L2-s06: total 557/575, families {'gsm8k': [390, 400], 'lc': [100, 100], 'qeval': [67, 75]}, length finishes 7, failed requests 0, wall 1078.9 s
+baselines: totals [557, 558, 561], pairwise flips [7, 10, 7] -> flip budget 18.0; total range [556, 562]
+lever QB296L1-s06: PASS
+  PASS  total: 557 in [556, 562]
+  PASS  flips vs QB296A1-s06: 10 (lever-only 5, A-only 5)
+  PASS  McNemar vs QB296A1-s06: p 1.000
+  PASS  flips vs QB296A2-s06: 9 (lever-only 4, A-only 5)
+  PASS  McNemar vs QB296A2-s06: p 1.000
+  PASS  flips vs QB296A3-s06: 8 (lever-only 2, A-only 6)
+  PASS  McNemar vs QB296A3-s06: p 0.289
+  PASS  family gsm8k: 391 >= 388 - 2
+  PASS  family lc: 100 >= 100 - 2
+  PASS  family qeval: 66 >= 68 - 2
+lever QB296L2-s06: PASS
+  PASS  total: 557 in [556, 562]
+  PASS  flips vs QB296A1-s06: 10 (lever-only 5, A-only 5)
+  PASS  McNemar vs QB296A1-s06: p 1.000
+  PASS  flips vs QB296A2-s06: 7 (lever-only 3, A-only 4)
+  PASS  McNemar vs QB296A2-s06: p 1.000
+  PASS  flips vs QB296A3-s06: 10 (lever-only 3, A-only 7)
+  PASS  McNemar vs QB296A3-s06: p 0.344
+  PASS  family gsm8k: 390 >= 388 - 2
+  PASS  family lc: 100 >= 100 - 2
+  PASS  family qeval: 67 >= 68 - 2
+VERDICT PASS (both lever runs must pass)

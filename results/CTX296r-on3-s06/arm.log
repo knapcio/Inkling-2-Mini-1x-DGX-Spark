@@ -1,0 +1,23 @@
+2026-11-26T00:24:39Z CTX296r-on3-s06 mode warm
+CTX296r-on3-s06-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 71.34, "geomean_tok_s": 75.67, "aggregate_tok_s": 73.53, "median_ttft_ms": 160.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.45, "median_tokens_per_step": 2.741, "steps_source": "response", "median_accept_rate": 0.2525, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.01, "drift_pct_all": -0.01}}
+wrote results/CTX296r-on3-s06/warm-sbquick.json (1.3 min)
+2026-11-26T00:26:00Z CTX296r-on3-s06 mode dtp
+prose      c1  aggregate    66.4 tok/s  per-stream   66.8  ttft 0.185 s  failed 0
+prose      c4  aggregate   142.4 tok/s  per-stream   38.2  ttft 0.313 s  failed 0
+prose      c8  aggregate   204.1 tok/s  per-stream   27.8  ttft 0.391 s  failed 0
+prose      c16 aggregate   295.9 tok/s  per-stream   20.0  ttft 0.539 s  failed 0
+code       c1  aggregate    74.6 tok/s  per-stream   79.9  ttft 0.187 s  failed 0
+code       c4  aggregate   137.4 tok/s  per-stream   38.9  ttft 0.329 s  failed 0
+code       c8  aggregate   206.0 tok/s  per-stream   28.8  ttft 0.339 s  failed 0
+code       c16 aggregate   305.9 tok/s  per-stream   21.7  ttft 0.489 s  failed 0
+wrote results/CTX296r-on3-s06/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 66.8 | 142.4 (38.2) | 204.1 (27.8) | 295.9 (20.0) |
+| code | 79.9 | 137.4 (38.9) | 206.0 (28.8) | 305.9 (21.7) |
+2026-11-26T00:28:41Z CTX296r-on3-s06 mode lc32
+CTX296r-on3-s06  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32693    6.108      5352.5      0.246        None      66.1 [52.9, 82.6]        46.173    2.993
+128K     130843   34.062     3841.3      0.452        None      56.4 [46.6, 68.1]        61.138    3.359
+wrote results/CTX296r-on3-s06/longctx-lc32.json (4.9 min)

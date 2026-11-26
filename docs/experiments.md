@@ -1754,3 +1754,107 @@ Memory (box A, `KV295mem`, booted with `1`; `shared` allocates the same less a 7
 (48 x 2,048 tokens) together with a cold 240K-token needle, worst MemAvailable 4.9 GiB (v2.9.3, same box and recipe:
 4.6 GiB), 48 / 48 completed, 337.3 tok/s aggregate; needles 128K and 240K pass.
 
+## v2.9.6: MXFP8 context projections for the DFlash2 drafter (2026-11-26)
+
+After each verify step the DFLASH worker appends the committed rows' target features to the drafter's context window,
+eagerly. That append is the context `fc` (four 2,304-wide target features -> 2,304, then `hidden_norm`), then the five
+layers' stacked K/V projection (2,304 -> 10,240), then a fused K RMSNorm + RoPE and one prefix-valid ring write per
+layer. The two BF16 GEMMs read 89.7 MB per step. In the v2.9.3 profile the region cost 0.466 ms at greedy c1
+(1.2 % of the step): 230 us for the `fc` and 207 us for the K/V GEMM.
+
+Two ways to make it cheaper:
+- Run the append inside a CUDA graph. SGLang already has a flag for that (`SGLANG_OPT_DFLASH_AUX_GRAPH`), which was
+  screened flat earlier. The kernels stay the same, so only the region's 11 launch gaps (0.025 ms) could go.
+- MXFP8 copies of the two weights on the b12x GEMM the drafter's layers already use (`mx8w`); built as `DFLASH_CTX8`.
+
+`inkling_dfbytes/ctx8.py` wraps `DFlashDraftModel.project_target_hidden` and `FusedKVMaterializeHelper.materialize`.
+On the MXFP8 path the latter runs the stock body line by line with only its `torch.mm` replaced; the three stock
+functions it relies on are pinned by source hash. Rows 1-256 run on b12x; larger calls (long prefills) and any input
+the quantizer cannot take run the stock function.
+
+GPU check (`tools/gpu_check_ctx8.py`, box B, real drafter weights, no server):
+
+| check | result |
+|---|---|
+| ctx8 append with its GEMM swapped back to `torch.mm`, 1 / 8 / 32 / 64 / 192 / 256 rows | K/V bytes identical to stock |
+| 257 rows | stock path, bit for bit |
+| b12x writes the stock workspace rows in place (1 / 3 / 127 / 129 / 255 rows) | yes |
+| CUDA graph replay against eager, repeat runs | bitwise equal |
+| b12x kernels compiled after the start-up warm-up, rows 1-256 | none (4 tile plans) |
+| fc output against BF16 (relative error / lowest row cosine) | 3.6-3.8 % / 0.9992 |
+| K and V end to end against BF16 | 5.1-5.5 % / 0.998 |
+
+Eager fc + K/V append with ring writes, L2 flushed (ms):
+
+| rows | BF16 | MXFP8 |
+|---:|---:|---:|
+| 8 | 0.447 | 0.269 |
+| 32 | 0.467 | 0.275 |
+| 64 | 0.467 | 0.283 |
+| 192 | 0.527 | 0.346 |
+
+Serving, box B, two ABBA runs (on, off, off, on). The first ran speedbench full, the decode table and `longctx`
+(lc32); the repeat ran the decode table and lc32. Both used the v2.9.5 candidate tree with `KV12S_SETTLE=1` on both
+sides.
+- Single-request decode step, paired per request over the 73 speedbench full requests: -0.195 ms median, -0.182 ms
+  mean, 54 / 73 faster. Speedbench full: 74.02 / 74.48 with the lever against 73.62 / 73.66 without; tokens per step
+  2.849 against 2.842.
+- Greedy outputs:
+  - Speedbench quick: 30 / 30 identical.
+  - Speedbench full: 68 / 73 identical; the same 5 prompts (code-06, longctx-01, -02, -07, -08) differ in both on
+    arms. Off against off and on against on are 73 / 73.
+  - The drafter changes which tokens are accepted, the verify blocks then fall elsewhere, and a near-tie can resolve
+    the other way: the class the verify-width cap and the draft-tail snapshots also show.
+
+Decode table, four arms each side (tok/s; c1 per stream, c4-c16 aggregate):
+
+| | on, mean | off, range | on vs off mean |
+|---|---:|---:|---:|
+| code c1 | 80.1 | 79.2-79.5 | +1.0 % |
+| code c4 | 140.2 | 133.4-142.1 | +0.9 % |
+| code c8 | 205.7 | 202.6-212.4 | -1.2 % |
+| code c16 | 310.1 | 291.8-308.2 | +2.6 % |
+| prose c1 | 66.9 | 66.5-66.8 | +0.3 % |
+| prose c4 | 141.4 | 138.5-143.9 | +0.1 % |
+| prose c8 | 207.3 | 203.8-214.1 | -0.4 % |
+| prose c16 | 296.9 | 293.9-297.5 | +0.6 % |
+
+lc32, four arms each side:
+- Tokens per step: 3.037 against 3.138 at 32K and 3.260 against 3.323 at 128K.
+- Decode tok/s: 67.8 against 68.8 at 32K and 54.6 against 55.1 at 128K.
+- All are inside the off range; per-arm spread is about ±5 %.
+- lc32 writes new documents in every run, so these do not pair. To check whether the drafter loses acceptance at long
+  context, box A ran the same 32K and 128K sizes with fixed documents and a step capture (4 documents each, cold and
+  cached, 1,024 tokens, greedy, full-width verify; on / off / off / on; `tools/ctx8_lcpair.py`).
+- Repeat runs of one setting were bit-identical. Between settings, the requests are paired over the tokens both arms
+  generated identically (up to the first differing token):
+
+| | paired requests | tokens | tokens per step, on | off | on / off | first-slot agreement |
+|---|---:|---:|---:|---:|---:|---:|
+| 32K | 8 / 8 | 4,401 | 4.0525 | 4.0525 | 1.000 | 97.5 % |
+| 128K | 8 / 8 | 3,693 | 3.4482 | 3.4450 | 1.001 | 98.2 % |
+
+- Over whole requests the lever arms had more tokens per step: 3.669 against 3.518 at 32K and 3.561 against 3.379 at
+  128K. Those texts part at the first differing token, though: 6 of 8 requests per length, after 27 to 832 tokens.
+- On the 30 speedbench quick prompts (steplog pair, box A), drafted tokens agree on 97.1 / 93.1 / 90.6 / 87.5 / 85.4 /
+  82.4 / 79.8 % of slots 1-7. Accepted drafts per matched step: 2.137 with the lever against 2.136 without.
+
+Quality: the inkq2 bracket (box B, 575 items: gsm8k 400, long-context retrieval 100, qeval 75;
+A L A L A, A = `DFLASH_CTX8=0`, L = `DFLASH_CTX8=1`) passes under protocol v2.
+
+| arm | total | gsm8k | lc | qeval | flips vs A1 / A2 / A3 | McNemar p (lowest) |
+|---|---:|---:|---:|---:|---|---:|
+| A1 | 557 | 388 | 100 | 69 | | |
+| A2 | 558 | 390 | 100 | 68 | | |
+| A3 | 561 | 392 | 100 | 69 | | |
+| L1 | 557 | 391 | 100 | 66 | 10 / 9 / 8 | 0.289 |
+| L2 | 557 | 390 | 100 | 67 | 10 / 7 / 10 | 0.344 |
+
+The baselines flip 7-10 items between themselves (budget 18). Both lever runs sit at the low end of the baselines'
+range, and qeval is 1-3 below them; every criterion passes. Results: `results/QB296A1-s06/` ... `results/QB296A3-s06/`
+(the compare output is in `results/QB296L2-s06/inkq2-compare.txt`).
+
+Memory (box B, `MEM296`, lever on):
+- Thinking c24 (48 x 2,048 tokens) together with a cold 240K-token needle: lowest MemAvailable 4.2 GiB, 48 / 48
+  completed, 334.4 tok/s aggregate. Needles 128K and 240K pass.
+- The KV pool sized 2,341,632 tokens (v2.9.4 on the same box: 2,351,872).

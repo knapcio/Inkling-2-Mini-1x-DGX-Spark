@@ -1,5 +1,69 @@
 # Changelog
 
+## v2.9.6 (2026-11-26)
+
+v2.9.5 plus MXFP8 context projections for the DFlash2 drafter. Draft proposals only.
+
+- `DFLASH_CTX8=1` (`inkling_dfbytes` ctx8, new default with `SPEC=dflash2`): after every verify, the drafter writes
+  the committed rows into its context window. That append runs two BF16 projections: the context `fc` (9216 -> 2304)
+  and the five layers' stacked K/V (2304 -> 10240), 89.7 MB per step, 0.47 ms of a c1 step in the v2.9.3 profile.
+  - They now read MXFP8 copies (47.7 MB, the `mx8` format) on FlashInfer's b12x GEMM for 1-256 rows
+    (`DFLASH_CTX8_MAX_M`); larger calls keep BF16.
+  - Everything after the two GEMMs is the stock code, pinned by source hash.
+  - Every b12x tile plan is compiled at start-up: 2.0-2.1 s on a serving boot, 46.6 s in a cold check container that
+    also built FlashInfer's quantizer.
+  - While the lever is on, online weight updates are refused (the copies are derived weights).
+  - It is not armed when SGLang's aux CUDA graphs are requested. `DFLASH_CTX8=0` gives the BF16 path.
+- GPU check (`tools/gpu_check_ctx8.py`, box B, real drafter weights, no server):
+  - With its GEMM swapped back, the append writes bytes identical to stock at 1-256 rows; 257 rows take the stock
+    path bit for bit. CUDA graph replay equals eager. No kernel compiles after the start-up warm-up.
+  - Error against BF16: 3.6-3.8 % on the fc output, 5.1-5.5 % end to end on K and V (row cosine >= 0.998).
+  - Eager fc + K/V append with ring writes: 0.447 -> 0.269 ms at 8 rows, -0.18 to -0.19 ms from 8 to 192 rows.
+- Box B, ABBA (on, off, off, on: speedbench full, decode table, `longctx` lc32), then a second ABBA (decode table,
+  lc32). Both ran on the v2.9.5 candidate tree with `KV12S_SETTLE=1` on both sides.
+  - Single-request decode step: -0.195 ms median per request, paired over the 73 speedbench full requests (54 / 73
+    faster); median per-request step 38.33 / 38.06 ms with the lever, 38.55 / 38.48 without.
+  - Speedbench full: 74.02 / 74.48 with the lever, 73.62 / 73.66 without; tokens per step 2.849 against 2.842.
+  - Decode table, mean of four arms against four (code / prose at c1, c4, c8, c16): code +1.0 / +0.9 / -1.2 / +2.6 %,
+    prose +0.3 / +0.1 / -0.4 / +0.6 %; every cell inside the off arms' range.
+  - lc32, mean of four against four: tokens per step 3.037 vs 3.138 at 32K and 3.260 vs 3.323 at 128K; decode tok/s
+    67.8 vs 68.8 and 54.6 vs 55.1. All inside the off range (per-arm spread about ±5 %). lc32 draws new documents in
+    every run; the fixed-document runs below pair the same tokens.
+  - Greedy outputs: 30 / 30 speedbench quick prompts identical. On speedbench full, 68 / 73 are identical; the same 5
+    differ in both on arms (code-06, longctx-01, -02, -07, -08), while off against off and on against on are 73 / 73.
+    That is the verify-schedule floating-point class: a different acceptance moves the verify blocks.
+- Box A, long context with fixed documents (speedbench `longctx`, 4 documents at 32K and 4 at 128K, each cold and
+  cached, 1,024 tokens, greedy, steplog capture, on / off / off / on, `tools/ctx8_lcpair.py`):
+  - Repeat runs are bit-identical (off against off and on against on).
+  - Tokens per step over the tokens both arms generated identically, paired per request (8 / 8 per length): 32K
+    4.0525 against 4.0525 (1.000), 128K 3.4482 against 3.4450 (1.001).
+  - Drafted tokens agree on 97.5 % (32K) and 98.2 % (128K) of first slots.
+  - Whole requests: 3.669 against 3.518 tokens per step at 32K and 3.561 against 3.379 at 128K; the texts differ after
+    the first differing token, so these do not pair.
+  - Greedy texts: 6 of 8 requests per length differ within 1,024 tokens, deterministically, in the same
+    verify-schedule class.
+- Box A, steplog pair on speedbench quick (greedy, full-width verify, `tools/ctx8_agree.py`): drafted tokens agree on
+  97.1 % of first slots and 70.6 % of whole blocks. Accepted drafts per matched step: 2.137 against 2.136.
+- Quality (box B, inkq2 bracket A L A L A, lever off / on): PASS.
+  - Totals 557 / 558 / 561 without the lever and 557 / 557 with it, of 575.
+  - gsm8k 388 / 390 / 392 against 391 / 390; long-context retrieval 100 / 100 in every arm; qeval 69 / 68 / 69 against
+    66 / 67.
+  - Flips 7-10 against each baseline (budget 18), McNemar p >= 0.29.
+  - Both lever runs sit at the low end of the baselines' range, and qeval is 1-3 below them, inside the bracket's
+    tolerance (protocol v2, one-sided).
+- Memory (box B, lever on): lowest MemAvailable 4.2 GiB under thinking c24 with a cold 240K needle prefill; kvstress
+  48 / 48 (334.4 tok/s); needles 128K and 240K pass.
+- `inkling_kv12s`: with `INKLING_KV12S_DFLASH_SETTLE` unset, the overlay now settles with shared page candidates
+  (`shared`), the launcher's default; before, it fell back to `1`.
+- Results:
+  - `results/CTX296on1-s06/`, `results/CTX296off1-s06/`, `results/CTX296off2-s06/`, `results/CTX296on2-s06/`;
+  - `results/CTX296r-on3-s06/`, `results/CTX296r-off3-s06/`, `results/CTX296r-off4-s06/`, `results/CTX296r-on4-s06/`;
+  - `results/LCS296on1-s05/`, `results/LCS296off1-s05/`, `results/LCS296off2-s05/`, `results/LCS296on2-s05/`;
+  - `results/SL296on-s05/`, `results/SL296off-s05/`;
+  - `results/QB296A1-s06/`, `results/QB296L1-s06/`, `results/QB296A2-s06/`, `results/QB296L2-s06/`,
+    `results/QB296A3-s06/`;
+  - `results/MEM296-s06/`.
+
 ## v2.9.5 (2026-11-26)
 
 v2.9.4 plus a cheaper settle of the packed global KV store after each DFlash2 verify step. Exact.

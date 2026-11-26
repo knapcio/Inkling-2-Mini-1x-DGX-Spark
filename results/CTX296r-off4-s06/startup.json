@@ -1,0 +1,2 @@
+{"label":"CTX296r-off4-s06","ready_utc":"2026-11-26T00:47:21Z","startup_s":132,"memavail_ready_gib":4.4,"kv":"[2026-11-26 00:47:16 PID134] max_total_num_tokens=2356608, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=4.75 GB"}
+{"memavail_end_gib":4.1}

@@ -136,6 +136,11 @@ class SettleHookTests(unittest.TestCase):
         prepared = ("prepared", ids.tolist())
         self.assertEqual(log, [("pages", "a"), ("settle", "a", prepared), ("settle", "b", prepared)])
 
+    def test_unset_default_is_shared(self):
+        self.assertEqual(hooks._settle_raw({}), "shared")
+        self.assertEqual(hooks._SETTLE_MODES[hooks._settle_raw({})], "shared")
+        self.assertEqual(hooks._SETTLE_MODES[hooks._settle_raw({"INKLING_KV12S_DFLASH_SETTLE": " 1 "})], "batch")
+
     def test_switch_values(self):
         self.assertEqual({hooks._SETTLE_MODES[v] for v in ("1", "on", "batch")}, {"batch"})
         self.assertEqual(hooks._SETTLE_MODES["shared"], "shared")
