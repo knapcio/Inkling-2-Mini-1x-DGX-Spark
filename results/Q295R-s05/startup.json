@@ -1,0 +1,2 @@
+{"label":"Q295R-s05","ready_utc":"2026-11-26T00:38:27Z","startup_s":132,"memavail_ready_gib":5.5,"kv":"[2026-11-26 00:38:24 PID134] max_total_num_tokens=2332288, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.79 GB"}
+{"memavail_end_gib":5.2}

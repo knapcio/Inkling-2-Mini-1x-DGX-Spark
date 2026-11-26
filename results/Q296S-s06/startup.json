@@ -1,0 +1,2 @@
+{"label":"Q296S-s06","ready_utc":"2026-11-26T04:35:01Z","startup_s":132,"memavail_ready_gib":5.4,"kv":"[2026-11-26 04:34:57 PID132] max_total_num_tokens=2335104, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.71 GB"}
+{"memavail_end_gib":4.4}

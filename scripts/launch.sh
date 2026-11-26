@@ -69,7 +69,7 @@ DFLASH_PREFIX_TAIL_MAX_INPUT=${DFLASH_PREFIX_TAIL_MAX_INPUT:-4096}  # ... only f
 DFLASH_TAIL_SNAPSHOTS=${DFLASH_TAIL_SNAPSHOTS:-8}                # SPEC=dflash2: prompt-end draft windows kept for later prefix hits (40 MiB each, charged to the KV budget; 0 = off)
 DFLASH_TAIL_DEFER=${DFLASH_TAIL_DEFER:-1}                        # ... the prefix tail defers to a snapshot that already covers the drafter's window (the target keeps its cache hit; 0 = v2.9.3: tail and snapshots independent)
 DFLASH_PCOPY=${DFLASH_PCOPY:-12}                               # SPEC=dflash2: prompt-copy forced drafts for long prompts (12 = on, the measured rule; 0 = off)
-DFLASH_CTX8=${DFLASH_CTX8:-1}                                  # SPEC=dflash2 + OVERLAY=1: the drafter's context projections (fc + stacked K/V, eager after verify) on b12x MXFP8 (draft-only; 0 = BF16)
+DFLASH_CTX8=${DFLASH_CTX8:-0}                                  # SPEC=dflash2 + OVERLAY=1: 1 = the drafter's context projections (fc + stacked K/V, eager after verify) on b12x MXFP8 (draft-only; opt-in since v2.9.6.1: c1 -0.2 ms per step, but code c8 lost 2.3 % on box A); 0 = BF16 (default)
 DFLASH_CTX8_MAX_M=${DFLASH_CTX8_MAX_M:-}                       # ... largest append (rows) on MXFP8; larger calls keep BF16 (empty = 256)
 DFLASH_PCOPY_MIN_CTX=${DFLASH_PCOPY_MIN_CTX:-8192}             # ... only for requests whose prompt has at least this many tokens (shorter prompts: no copy)
 PROMPT_TOUCH=${PROMPT_TOUCH:-1}                              # OVERLAY=1: after a request finishes, refresh its prompt-end cache checkpoint so the next turn of a long conversation keeps its prefix hit (cache LRU order only; 0 = off)

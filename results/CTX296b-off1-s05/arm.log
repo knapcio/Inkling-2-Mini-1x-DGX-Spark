@@ -1,0 +1,17 @@
+2026-11-26T05:31:44Z CTX296b-off1-s05 mode warm
+CTX296b-off1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.93, "geomean_tok_s": 74.32, "aggregate_tok_s": 72.26, "median_ttft_ms": 161.2, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.88, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.148, "drift_pct_all": -0.148}}
+wrote results/CTX296b-off1-s05/warm-sbquick.json (1.4 min)
+2026-11-26T05:33:06Z CTX296b-off1-s05 mode dtp
+prose      c1  aggregate    66.0 tok/s  per-stream   66.4  ttft 0.184 s  failed 0
+prose      c4  aggregate   143.1 tok/s  per-stream   39.0  ttft 0.317 s  failed 0
+prose      c8  aggregate   205.3 tok/s  per-stream   28.1  ttft 0.32 s  failed 0
+prose      c16 aggregate   301.8 tok/s  per-stream   21.0  ttft 0.484 s  failed 0
+code       c1  aggregate    74.2 tok/s  per-stream   78.9  ttft 0.186 s  failed 0
+code       c4  aggregate   141.1 tok/s  per-stream   39.9  ttft 0.326 s  failed 0
+code       c8  aggregate   211.8 tok/s  per-stream   29.4  ttft 0.343 s  failed 0
+code       c16 aggregate   306.5 tok/s  per-stream   21.1  ttft 0.491 s  failed 0
+wrote results/CTX296b-off1-s05/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 66.4 | 143.1 (39.0) | 205.3 (28.1) | 301.8 (21.0) |
+| code | 78.9 | 141.1 (39.9) | 211.8 (29.4) | 306.5 (21.1) |

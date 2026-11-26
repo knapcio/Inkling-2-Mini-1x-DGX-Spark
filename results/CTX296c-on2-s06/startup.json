@@ -1,0 +1,2 @@
+{"label":"CTX296c-on2-s06","ready_utc":"2026-11-26T05:24:14Z","startup_s":132,"memavail_ready_gib":4.9,"kv":"[2026-11-26 05:24:08 PID133] max_total_num_tokens=2348672, chunked_prefill_size=8192, max_prefill_tokens=8192, max_running_requests=48, context_len=262144, available_gpu_mem=5.36 GB"}
+{"memavail_end_gib":4.7}

@@ -1,0 +1,20 @@
+writer: all 65,536 BF16 words, packed and overflow paths   bitwise
+writer vs Torch reference: SM / EX / escape stream / OFF / overflow choice   identical
+verify readers R1 (bs 1-4, q 8 and 1) and R2 (bs 5-48) through the serving dispatch: partials and gate/sink output   bitwise against stock
+malformed descriptors, ids and lengths: counted once per CTA; well-formed and warm-up dummies: none
+verify visit (store of the 8-row block + compact attention + gate/sink), CUDA-graph replay, cold L2, median us
+  bs  1 full (  1031 keys/request)  BF16     43.8 us (  96.5 GB/s)   packed     58.6 us   speed 0.747x
+  bs  1 half (   640 keys/request)  BF16     33.6 us (  78.0 GB/s)   packed     50.8 us   speed 0.661x
+  bs  4 full (  1031 keys/request)  BF16    139.9 us ( 120.7 GB/s)   packed    138.9 us   speed 1.007x
+  bs  4 half (   410 keys/request)  BF16     71.3 us (  94.2 GB/s)   packed     89.8 us   speed 0.795x
+  bs  8 full (  1031 keys/request)  BF16    227.1 us ( 148.8 GB/s)   packed    227.0 us   speed 1.001x
+  bs  8 half (   586 keys/request)  BF16    149.0 us ( 128.9 GB/s)   packed    174.0 us   speed 0.856x
+  bs 16 full (  1031 keys/request)  BF16    386.8 us ( 174.7 GB/s)   packed    473.1 us   speed 0.818x
+  bs 16 half (   473 keys/request)  BF16    214.0 us ( 145.0 GB/s)   packed    269.9 us   speed 0.793x
+  bs 24 full (  1031 keys/request)  BF16    531.5 us ( 190.7 GB/s)   packed    633.9 us   speed 0.838x
+  bs 24 half (   569 keys/request)  BF16    335.9 us ( 166.4 GB/s)   packed    487.1 us   speed 0.690x
+  bs 48 full (  1031 keys/request)  BF16   1027.7 us ( 197.2 GB/s)   packed   1219.3 us   speed 0.843x
+  bs 48 half (   557 keys/request)  BF16    621.2 us ( 176.4 GB/s)   packed    820.1 us   speed 0.757x
+prefill window gather, 8K chunk + 1K prefix: 335.5 us per window visit (13.4 ms per 8K chunk over 40 visits)
+GATE K: c8 full-window 1.001x (bar 1.12x), c1 full-window 0.747x (bar >= 0.971x): PARK
+ALL CHECKS BITWISE (191 s); Gate K PARK

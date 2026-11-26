@@ -1,0 +1,26 @@
+2026-11-26T03:38:44Z CTX296a-off1-s05 mode warm
+CTX296a-off1-s05-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.12, "geomean_tok_s": 74.58, "aggregate_tok_s": 72.51, "median_ttft_ms": 162.7, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 38.77, "median_tokens_per_step": 2.695, "steps_source": "response", "median_accept_rate": 0.2458, "median_draft_per_step": 7.0}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.055, "drift_pct_all": -0.055}}
+wrote results/CTX296a-off1-s05/warm-sbquick.json (1.4 min)
+2026-11-26T03:40:07Z CTX296a-off1-s05 mode sbf
+CTX296a-off1-s05: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.99, "geomean_tok_s": 73.61, "aggregate_tok_s": 71.62, "median_ttft_ms": 161.8, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.98, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.052, "drift_pct_all": 0.052}}
+wrote results/CTX296a-off1-s05/speedbench.json (4.8 min)
+2026-11-26T03:44:56Z CTX296a-off1-s05 mode dtp
+prose      c1  aggregate    66.2 tok/s  per-stream   66.6  ttft 0.185 s  failed 0
+prose      c4  aggregate   138.9 tok/s  per-stream   37.4  ttft 0.318 s  failed 0
+prose      c8  aggregate   208.8 tok/s  per-stream   28.8  ttft 0.321 s  failed 0
+prose      c16 aggregate   297.7 tok/s  per-stream   20.2  ttft 0.539 s  failed 0
+code       c1  aggregate    74.4 tok/s  per-stream   79.3  ttft 0.187 s  failed 0
+code       c4  aggregate   148.2 tok/s  per-stream   39.1  ttft 0.336 s  failed 0
+code       c8  aggregate   212.1 tok/s  per-stream   29.4  ttft 0.339 s  failed 0
+code       c16 aggregate   305.6 tok/s  per-stream   21.6  ttft 0.553 s  failed 0
+wrote results/CTX296a-off1-s05/decode-pc.json
+| prompt type | c1 | c4 | c8 | c16 |
+|---|---:|---:|---:|---:|
+| prose | 66.6 | 138.9 (37.4) | 208.8 (28.8) | 297.7 (20.2) |
+| code | 79.3 | 148.2 (39.1) | 212.1 (29.4) | 305.6 (21.6) |
+2026-11-26T03:47:36Z CTX296a-off1-s05 mode lc32
+CTX296a-off1-s05  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+32K      32700    6.1        5360.7      0.266        None      68.8 [55.2, 85.8]        46.264    3.063
+128K     130841   33.917     3857.7      0.445        None      60.1 [48.1, 75.0]        61.086    3.901
+wrote results/CTX296a-off1-s05/longctx-lc32.json (4.8 min)

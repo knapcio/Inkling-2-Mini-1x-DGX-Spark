@@ -1858,3 +1858,45 @@ Memory (box B, `MEM296`, lever on):
 - Thinking c24 (48 x 2,048 tokens) together with a cold 240K-token needle: lowest MemAvailable 4.2 GiB, 48 / 48
   completed, 334.4 tok/s aggregate. Needles 128K and 240K pass.
 - The KV pool sized 2,341,632 tokens (v2.9.4 on the same box: 2,351,872).
+
+## Closed: lossless packing of the sliding-window KV (2026-11-26)
+
+The packed global KV store's exact 12-bit format (sign + mantissa byte, 4-bit exponent code, escapes, raw overflow)
+was extended to the target's 40 sliding-window visits.
+- **Written through.** Every write packs at once, and a writer drops the escapes of the rows it rewrites; there is no
+  staging, seal or settle.
+- **Readers.** The stock windowed compact kernel (up to 32 verify rows) and the in-kernel-bias verify kernel (above
+  32) are used as they are, with only the K/V tile load replaced.
+- **Prefill.** Each request's window span is decoded into the existing BF16 prefix scratch.
+- **Capacity.** Planned at +4.5-4.8 % global KV tokens (window tokens at 124,320 instead of 163,840 bytes).
+- **Speed.** Expected from the 24 % fewer K/V bytes in the verify window reads, the larger share at thinking c8.
+
+GPU check (`gpu_check_swa12s.py --quick`, box B, no server; `results/GK297-s06/`): everything bitwise.
+- All 65,536 BF16 words, through the packed path and the overflow path.
+- The writer against its Torch model, byte for byte.
+- Both verify readers against the stock kernels: partials and gate/sink output, with overflowed pages and chunks of
+  more than 16 escapes.
+- Malformed descriptors are counted for the abort path; prefill warm-up dummies count nothing.
+
+The verify visit itself (store of the 8-row block + attention + gate/sink, CUDA-graph replay, L2 flushed before each
+sample) was slower or equal at every size:
+
+| requests | full window (1,031 keys): BF16 / packed us | speed | half window: BF16 / packed us | speed |
+|---:|---:|---:|---:|---:|
+| 1 | 43.8 / 58.6 | 0.747x | 33.6 / 50.8 | 0.661x |
+| 4 | 139.9 / 138.9 | 1.007x | 71.3 / 89.8 | 0.795x |
+| 8 | 227.1 / 227.0 | 1.001x | 149.0 / 174.0 | 0.856x |
+| 16 | 386.8 / 473.1 | 0.818x | 214.0 / 269.9 | 0.793x |
+| 24 | 531.5 / 633.9 | 0.838x | 335.9 / 487.1 | 0.690x |
+| 48 | 1,027.7 / 1,219.3 | 0.843x | 621.2 / 820.1 | 0.757x |
+
+The time box required at least 1.12x at 8 requests and no more than 3 % loss at 1 request; the lever stopped there,
+before any serving run.
+- **Why.** The BF16 window read runs at 97-197 GB/s, well under the ~235 GB/s the packed global reader approaches
+  on long contexts, so fewer bytes do not pay for the decode on a 1,024-key window.
+- **Where the time goes.** Per 32-key chunk the decode adds a chain of dependent loads (page, overflow reference,
+  chunk offsets, escape words) and the escape patch.
+- **Same limit as before.** This is the limit the global 12-bit reader already noted for short contexts: its gain
+  needs long contexts (1.15-1.27x at 128K).
+- **Prefill cost.** The window gather would also have cost 13.4 ms per 8K prefill chunk.
+- **Status.** The build stays out of the release; `KV12S_SWA` does not exist in the recipe.
