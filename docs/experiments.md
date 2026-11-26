@@ -1859,7 +1859,9 @@ Memory (box B, `MEM296`, lever on):
   completed, 334.4 tok/s aggregate. Needles 128K and 240K pass.
 - The KV pool sized 2,341,632 tokens (v2.9.4 on the same box: 2,351,872).
 
-## Closed: lossless packing of the sliding-window KV (2026-11-26)
+## SWA KV packing (closed experiment)
+
+Closed 2026-11-26.
 
 The packed global KV store's exact 12-bit format (sign + mantissa byte, 4-bit exponent code, escapes, raw overflow)
 was extended to the target's 40 sliding-window visits.
@@ -1871,7 +1873,7 @@ was extended to the target's 40 sliding-window visits.
 - **Capacity.** Planned at +4.5-4.8 % global KV tokens (window tokens at 124,320 instead of 163,840 bytes).
 - **Speed.** Expected from the 24 % fewer K/V bytes in the verify window reads, the larger share at thinking c8.
 
-GPU check (`gpu_check_swa12s.py --quick`, box B, no server; `results/GK297-s06/`): everything bitwise.
+GPU check (`gpu_check_swa12s.py --quick`, box B, no server; `results/GKSWA-s06/`): everything bitwise.
 - All 65,536 BF16 words, through the packed path and the overflow path.
 - The writer against its Torch model, byte for byte.
 - Both verify readers against the stock kernels: partials and gate/sink output, with overflowed pages and chunks of

@@ -1,6 +1,8 @@
 # Changelog
 
-## v2.9.6.1 (2026-11-26)
+## v2.9.7 (2026-11-26)
+
+First tagged as v2.9.6.1 (same code, renamed; that tag is withdrawn). The final release of this round.
 
 v2.9.6 with `DFLASH_CTX8=0` as the default: the MXFP8 drafter context projections become opt-in. Serving code with the
 default is v2.9.5's (the projections run in BF16); nothing else changed, so v2.9.6's qualification stands.
@@ -18,11 +20,11 @@ default is v2.9.5's (the projections run in BF16); nothing else changed, so v2.9
   `results/Q295R-s06/`, `results/Q295S-s05/`, `results/Q295S-s06/`, `results/Q296R-s05/`, `results/Q296R-s06/`,
   `results/Q296S-s05/`, `results/Q296S-s06/`).
 - docs/experiments.md: closed experiment, lossless packing of the sliding-window KV (bit-exact, but the packed visit
-  was 0.66-0.84x of BF16 at 1 and at 16-48 requests and ~1.0x at 4-8; `results/GK297-s06/`).
+  was 0.66-0.84x of BF16 at 1 and at 16-48 requests and ~1.0x at 4-8; `results/GKSWA-s06/`).
 - Results: `results/CTX296a-on1-s05/`, `results/CTX296a-off1-s05/`, `results/CTX296a-off2-s05/`, `results/CTX296a-on2-s05/`,
   `results/CTX296b-on1-s05/`, `results/CTX296b-off1-s05/`, `results/CTX296b-off2-s05/`, `results/CTX296b-on2-s05/`,
   `results/CTX296c-on1-s06/`, `results/CTX296c-off1-s06/`, `results/CTX296c-off2-s06/`, `results/CTX296c-on2-s06/`,
-  `results/GK297-s06/`.
+  `results/GKSWA-s06/`.
 
 ## v2.9.6 (2026-11-26)
 
