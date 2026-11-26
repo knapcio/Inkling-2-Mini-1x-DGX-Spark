@@ -86,7 +86,10 @@ decode tokens). Decode tok/s, geometric mean per category; 0 failed prompts.
 
 | | prose | code | structured | agentic | multilingual | long context | all 73 prompts |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **v2.9.2** (box B, release defaults) | - | - | - | - | - | - | **73.19** |
+| **v2.9.7** (release defaults, box A / box B) | **65.73 / 65.35** | **82.40 / 82.00** | **77.76 / 77.54** | **82.81 / 82.75** | **58.07 / 57.41** | **75.38 / 74.84** | **73.54 / 73.17** |
+| v2.9.6 = v2.9.7 with `DFLASH_CTX8=1` (box A / box B) | 66.52 / 66.44 | 83.70 / 83.75 | 78.39 / 78.45 | 83.41 / 83.47 | 58.38 / 58.40 | 75.94 / 75.94 | 74.28 / 74.28 |
+| v2.9.3 (box A / box B) | 65.05 / 65.21 | 81.63 / 81.81 | 77.05 / 77.16 | 82.04 / 82.21 | 57.44 / 57.58 | 73.26 / 73.30 | 72.65 / 72.79 |
+| v2.9.2 (box B, release defaults) | 65.56 | 82.24 | 77.52 | 82.69 | 57.92 | 73.75 | 73.19 |
 | v2.9.1 (box B, release defaults) | - | - | - | - | - | - | 73.12 |
 | v2.9 (box B, release defaults) | - | - | - | - | - | - | 73.34 |
 | v2.8.4 (box B, qualification run) | - | - | - | - | - | - | 73.43 |
@@ -104,6 +107,11 @@ decode tokens). Decode tok/s, geometric mean per category; 0 failed prompts.
 | v2.7.2 (two-box median) | 53.6 | 72.1 | 68.0 | 76.7 | 43.7 | 75.1 | 63.8 |
 | stock engine | 32.6 | 48.0 | 44.3 | 49.3 | 25.3 | 51.0 | 40.6 |
 
+v2.9.7 is the v2.9.5 / v2.9.6 two-box qualification runs on its serving path (`results/Q295R-s05/`,
+`results/Q295R-s06/`; v2.9.7's defaults run the same serving code). v2.9.6's row is its qualification
+(`results/Q296R-s05/`, `results/Q296R-s06/`). Its speedbench is higher, but its drafter projections lost 2.3-2.6 % on
+code at 8 requests in flight on box A in two sets, so v2.9.7 makes them opt-in. v2.9.3 is its qualification
+(`results/Q293R-s05/`, `results/Q293R-s06/`).
 v2.9.2 is the release defaults on box B (`results/REL292-s06/`): 73.19 against v2.9.1's 73.12 on the same box (the
 hoist-only tree 73.44, `results/Q292h-s06/`); greedy outputs identical to the hoist-only tree on 73 / 73 prompts, so the
 cache touch changes no output. v2.9.1 is the release defaults on box B (`results/PF291-s06/`): 73.12 against v2.9's 73.34 on the same box, so
