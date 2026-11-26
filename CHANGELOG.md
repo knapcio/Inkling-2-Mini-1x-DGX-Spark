@@ -1,5 +1,38 @@
 # Changelog
 
+## Releases at a glance
+
+speedbench full, all 73 prompts, c1 tok/s: box A / box B where both were run; up to v2.7.2 the two-box median of
+`bench/full.sh`. "-" = not stated in the release notes. Every speedbench row is in
+[docs/benchmarks.md](docs/benchmarks.md#speedbench).
+
+| release | date | speedbench all-73 | headline change |
+|---|---|---:|---|
+| [v2.9.7](#v297-2026-11-26) | 2026-11-26 | **73.54 / 73.17** | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
+| [v2.9.6](#v296-2026-11-26) | 2026-11-26 | 74.28 / 74.28 | MXFP8 copies of the drafter's context projections (code c8 -2.3 to -2.6 % on box A) |
+| [v2.9.5](#v295-2026-11-26) | 2026-11-26 | 73.54 / 73.17 | packed store's verify settle builds page candidates once for all 8 global visits |
+| [v2.9.4](#v294-2026-11-25) | 2026-11-25 | 73.21 (B) | prefix tail defers to a draft-tail snapshot (long context +2.1 %) |
+| [v2.9.3](#v293-2026-11-25) | 2026-11-25 | 72.65 / 72.79 | prompt copy for prompts of 8K tokens or more |
+| [v2.9.2](#v292-2026-11-25) | 2026-11-25 | 72.95 / 73.12 | prefill loop-bank hoist; prompt-end cache touch for agent loops |
+| [v2.9.1](#v291-2026-11-25) | 2026-11-25 | 73.12 (B) | sink gate on the global layers too (prefill) |
+| [v2.9](#v29-2026-11-25) | 2026-11-25 | 73.34 (B) | draft-tail snapshots (agent loops -4.4 / -4.9 % end-to-end time) |
+| [v2.8.4](#v284-2026-11-25) | 2026-11-25 | 73.53 / 73.43 | drafter MXFP8 linears on FlashInfer's MXFP8 GEMM (+1.2 %) |
+| [v2.8.3](#v283-2026-11-25) | 2026-11-25 | 72.90 (B) | no expert work for padding rows; bit-identical prologue |
+| [v2.8.2](#v282-2026-11-24) | 2026-11-24 | 72.78 / 72.82 (B, two runs) | prefill sink gate; verify-cap policy `df-SLDF2x` |
+| [v2.8.1](#v281-2026-11-24) | 2026-11-24 | 72.86 (B) | prefix tail fixes prefix-hit draft starvation |
+| [v2.8](#v28-2026-11-24) | 2026-11-24 | 69.66 / 69.59 | DFlash2 drafter (incoai) becomes the default |
+| [v2.7.2](#v272-2026-11-24) | 2026-11-24 | 63.8 | packed KV store on SGLang's stock pools; dead verify rows get no experts |
+| [v2.7.1](#v271-2026-11-24) | 2026-11-24 | 63.8 | packed global KV store becomes the default (2.26M global-layer KV tokens, +42 %) |
+| [v2.7](#v27-2026-11-23) | 2026-11-23 | - | certified head for wider verify batches, long-prefix prefill fix, 512K / 1M option |
+| [v2.6](#v26-2026-11-23) | 2026-11-23 | - | larger exact KV pools (+40 % global-layer tokens) |
+| [v2.5](#v25-2026-11-23) | 2026-11-23 | 64.2 | one-pass checkpoint load, cheaper draft Markov walk |
+| [v2.4](#v24-2026-11-22) | 2026-11-22 | 64.1 | sampled-path verification, drafter attention window, packed global-layer KV |
+| [v2.3](#v23-2026-11-22) | 2026-11-22 | 64.7 | three exact levers (scale codes among them) |
+| [v2.2](#v22-2026-11-22) | 2026-11-22 | 61.8 | GB10 tile tables for the routed-expert GEMMs |
+| [v2.1](#v21-2026-11-21) | 2026-11-21 | 61.7 | hot-vocabulary draft |
+| [v2](#v2-2026-11-21) | 2026-11-21 | 58.1 | five new overlay packages, a new verify-width rule, a larger KV pool |
+| [v1](#v1-2026-11-21) | 2026-11-21 | 55.8 | first release: the SGLang cookbook cell plus five overlays |
+
 ## v2.9.7 (2026-11-26)
 
 First tagged as v2.9.6.1 (same code, renamed; that tag is withdrawn). The final release of this round.

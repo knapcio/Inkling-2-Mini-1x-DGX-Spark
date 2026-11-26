@@ -797,7 +797,7 @@ layer and 8K chunk (cold L2, box B): 4-warp kernel 70.7 TF/s at 120-256K, 49.2 a
 68.4-68.9 TF/s at every prefix. Splitting the launch at 131,072 keys: 512K 1,082 -> 777 ms, 1M 2,281 -> 1,547 ms,
 bit-identical to the single launch.
 
-512K / 1M option (v2.6 build, default store, box A): see the README table; 1M cold prefill 1,285 s, 512K 358 s.
+512K / 1M option (v2.6 build, default store, box A): see the table in [running.md](running.md#longer-context-512k-and-1m); 1M cold prefill 1,285 s, 512K 358 s.
 
 Memory flags (`results/screen-r2/K1a-s05`): conv-state slots 1,232 -> 512 (peak use 76), one prefill chunk in flight:
 pool 1,559,424 -> 1,593,088 tokens, worst case 5.2 GiB, sbquick 63.56, prefill 1K-128K 2,962 / 5,490 / 5,163 / 3,808.
