@@ -7,7 +7,7 @@
 #   scripts/launch.sh up --some-flag x   # extra engine flags are appended to the command line
 #   scripts/launch.sh status | logs | down
 #
-# Every setting is an environment variable with the measured default (README, "Every flag explained").
+# Every setting is an environment variable with the measured default (docs/running.md, "Every flag explained").
 # The server binds to 127.0.0.1 by default; reach it from another machine with `ssh -L 8000:127.0.0.1:8000 spark`
 # or set HOST=0.0.0.0 on a trusted LAN. Never expose it through the router.
 set -euo pipefail

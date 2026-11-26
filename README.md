@@ -28,14 +28,17 @@ directories and [how the runs were made](docs/benchmarks.md#how-the-runs-were-ma
 All 73 prompts: +81 % (box A) and +80 % (box B) over stock's 40.6.
 
 **Decode by concurrency** (`bench/decode_table.py`, T=0, 256 tokens; c1 is one stream, above c1 the aggregate;
-measured on v2.8, one box; stock is a two-box median):
+v2.9.7 = the v2.9.5 qualification runs on its serving path, `results/Q295R-s05/`, `results/Q295R-s06/`; stock is a
+two-box median; cells hold 3-32 requests, so single cells swing by a few %):
 
 | tok/s | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
-| prose | **65.1** | **140.5** | **203.5** | **288.3** |
+| prose, v2.9.7 (box A / B) | **66.2 / 66.1** | **137.6 / 139.4** | **218.6 / 210.2** | **296.2 / 296.1** |
 | prose, stock | 33.2 | 75.2 | 117.0 | 186.2 |
-| code | **79.0** | **141.6** | **211.3** | **298.2** |
+| code, v2.9.7 (box A / B) | **74.4 / 74.3** | **140.6 / 138.5** | **213.1 / 211.2** | **303.7 / 300.6** |
 | code, stock | 43.6 | 87.2 | 134.8 | 221.3 |
+| structured, v2.9.7 (box A / B) | 75.4 / 75.4 | 142.3 / 144.0 | 211.2 / 208.1 | 327.3 / 305.6 |
+| json, v2.9.7 (box A / B) | 80.4 / 80.3 | 155.7 / 152.5 | 216.9 / 217.9 | 338.6 / 342.4 |
 
 **Agents, memory and context:**
 

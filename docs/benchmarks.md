@@ -26,10 +26,10 @@ Single-request decode on short prompts is unchanged.
 | | stock SGLang cookbook cell (DSpark, mem 0.62) | v2.7.2 | **current (v2.9.7)** |
 |---|---:|---:|---:|
 | speedbench quick, 30 prompts, c1, tok/s (prose) | 41.86 (33.18) | - | **70.61 (65.67)** |
-| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.21** (v2.9.4, box B, mean of 2 runs; the same tree with the deferral off 72.93, v2.9.3 73.08) |
+| speedbench full, 73 prompts, c1, tok/s | 40.6 | 63.8 | **73.54 / 73.17** (box A / B; `results/Q295R-s05/`, `results/Q295R-s06/`) |
 | agent loops (speedbench agent mode, 5-16K-token histories), end-to-end time against prefix tail and snapshots off, 160- / 512-token turns | - | - | **-4.4 % / -4.9 %** (v2.9 screen; decode 73.9 -> 78.3 tok/s) |
-| decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **65.1 / 140.5 / 203.5 / 288.3** |
-| decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **79.0 / 141.6 / 211.3 / 298.2** |
+| decode, prose, tok/s at c1 / c4 / c8 / c16 | 33.2 / 75.2 / 117.0 / 186.2 | 52.6 / 113.3 / 164.6 / 244.1 | **66.2 / 137.6 / 218.6 / 296.2** (box A; v2.8: 65.1 / 140.5 / 203.5 / 288.3) |
+| decode, code, tok/s at c1 / c4 / c8 / c16 | 43.6 / 87.2 / 134.8 / 221.3 | 62.2 / 124.8 / 186.6 / 268.2 | **74.4 / 140.6 / 213.1 / 303.7** (box A; v2.8: 79.0 / 141.6 / 211.3 / 298.2) |
 | thinking c8 / c24, aggregate tok/s (48 x 2,048 tokens, effort high, T=0.8) | - | 235.3 / 438.8 | **277.4 / 515.5** (v2.8) |
 | thinking c9 / c15, aggregate tok/s | - | - | **282.2 / 392.5** (v2.8.3; padx off 269.3 / 373.9) |
 | cold prefill, 8K tokens, tok/s | 3,399 | 5,439 | **5,657** (v2.9.2; v2.9.1: 5,595) |
@@ -152,11 +152,13 @@ aggregate over the level's wall time.
 
 | | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
-| prose, v2.8 | **65.1** | **140.5** | **203.5** | **288.3** |
+| prose, v2.9.7 (box A / B) | **66.2 / 66.1** | **137.6 / 139.4** | **218.6 / 210.2** | **296.2 / 296.1** |
+| prose, v2.8 | 65.1 | 140.5 | 203.5 | 288.3 |
 | prose, v2.8 `DFCAP=off` | 55.4 | 122.8 | 190.6 | 292.3 |
 | prose, v2.7.2 | 52.6 | 113.3 | 164.6 | 244.1 |
 | prose, stock engine | 33.2 | 75.2 | 117.0 | 186.2 |
-| code, v2.8 | **79.0** | **141.6** | **211.3** | **298.2** |
+| code, v2.9.7 (box A / B) | **74.4 / 74.3** | **140.6 / 138.5** | **213.1 / 211.2** | **303.7 / 300.6** |
+| code, v2.8 | 79.0 | 141.6 | 211.3 | 298.2 |
 | code, v2.8 `DFCAP=off` | 67.7 | 119.2 | 187.9 | 297.5 |
 | code, v2.7.2 | 62.2 | 124.8 | 186.6 | 268.2 |
 | code, stock engine | 43.6 | 87.2 | 134.8 | 221.3 |
