@@ -12,7 +12,7 @@ SGLang, plus a set of import-time speed overlays that leave the target model's o
 
 ## Headline numbers
 
-One Spark per run, release defaults (`SPEC=dflash2`, `CTX=262144`); box A and box B are two Sparks. "Stock" is
+One Spark per run, release defaults (`SPEC=dflash2`, `CTX=262144`); v2.9.7 values are the mean of two Sparks. "Stock" is
 SGLang's DGX Spark cookbook cell (DSpark draft), measured with the same harness. All numbers, their `results/`
 directories and [how the runs were made](docs/benchmarks.md#how-the-runs-were-made) are in
 [docs/benchmarks.md](docs/benchmarks.md).
@@ -21,35 +21,34 @@ directories and [how the runs were made](docs/benchmarks.md#how-the-runs-were-ma
 
 | | prose | code | structured | agentic | multilingual | long context | **all 73** |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **v2.9.7**, box A | 65.73 | 82.40 | 77.76 | 82.81 | 58.07 | 75.38 | **73.54** |
-| **v2.9.7**, box B | 65.35 | 82.00 | 77.54 | 82.75 | 57.41 | 74.84 | **73.17** |
+| **v2.9.7** | **65.54** | **82.20** | **77.65** | **82.78** | **57.74** | **75.11** | **73.36** |
 | stock SGLang | 32.6 | 48.0 | 44.3 | 49.3 | 25.3 | 51.0 | 40.6 |
 
-All 73 prompts: +81 % (box A) and +80 % (box B) over stock's 40.6.
+All 73 prompts: **+81 %** over stock's 40.6.
 
 **Decode by concurrency** (`bench/decode_table.py`, T=0, 256 tokens; c1 is one stream, above c1 the aggregate;
-v2.9.7 = the v2.9.5 qualification runs on its serving path, `results/Q295R-s05/`, `results/Q295R-s06/`; stock is a
-two-box median; cells hold 3-32 requests, so single cells swing by a few %):
+v2.9.7 = mean of two Sparks, from the qualification runs on its serving path; stock is a two-box median; cells hold
+3-32 requests, so single cells swing by a few %):
 
 | tok/s | c1 | c4 | c8 | c16 |
 |---|---:|---:|---:|---:|
-| prose, v2.9.7 (box A / B) | **66.2 / 66.1** | **137.6 / 139.4** | **218.6 / 210.2** | **296.2 / 296.1** |
+| prose, v2.9.7 | **66.2** | **138.5** | **214.4** | **296.2** |
 | prose, stock | 33.2 | 75.2 | 117.0 | 186.2 |
-| code, v2.9.7 (box A / B) | **74.4 / 74.3** | **140.6 / 138.5** | **213.1 / 211.2** | **303.7 / 300.6** |
+| code, v2.9.7 | **74.4** | **139.6** | **212.2** | **302.2** |
 | code, stock | 43.6 | 87.2 | 134.8 | 221.3 |
-| structured, v2.9.7 (box A / B) | 75.4 / 75.4 | 142.3 / 144.0 | 211.2 / 208.1 | 327.3 / 305.6 |
-| json, v2.9.7 (box A / B) | 80.4 / 80.3 | 155.7 / 152.5 | 216.9 / 217.9 | 338.6 / 342.4 |
+| structured, v2.9.7 | 75.4 | 143.2 | 209.7 | 316.5 |
+| json, v2.9.7 | 80.4 | 154.1 | 217.4 | 340.5 |
 
 **Agents, memory and context:**
 
 - **Agent loops:** 24 agents with ~72K-token prompts on v2.9.7's defaults, 0 failures; the second turn's first token
-  in 2.8 / 3.1 s against 371 / 369 s cold (box A / B). A 12-turn soak on box B (288 requests, 0 failures) served
+  in ~3 s against ~370 s cold, on both Sparks. A 12-turn soak (288 requests, 0 failures) served
   every later turn from the prefix cache.
-- **Memory:** worst MemAvailable 4.6 / 4.8 GiB (box A / B) over three rounds of thinking c24 with a cold 240K needle
+- **Memory:** worst MemAvailable 4.6 GiB over three rounds of thinking c24 with a cold 240K needle
   after each (v2.9.5 qualification, the serving code v2.9.7 runs); the lowest single sample in the 12-turn soak was
   3.8 GiB. Guard floor 3.5 GiB.
-- **Context:** 262,144 tokens per request by default, from a shared pool of 2,371,200 global-layer KV tokens (v2.9,
-  box B); the model supports 1,048,576 (`CTX=1048576` on v2.8: needle PASS at 999,296 tokens). See
+- **Context:** 262,144 tokens per request by default, from a shared pool of 2,371,200 global-layer KV tokens (v2.9);
+  the model supports 1,048,576 (`CTX=1048576` on v2.8: needle PASS at 999,296 tokens). See
   [Longer context](docs/running.md#longer-context-512k-and-1m).
 - **Prefill:** 5,657 tok/s cold at 8K tokens (v2.9.2; stock 3,399).
 
@@ -111,25 +110,25 @@ What was measured and dropped: [Tried and not adopted](docs/levers.md#tried-and-
 
 ## Version history
 
-speedbench full, all 73 prompts, c1 tok/s (box A / box B where both were run). Every release in detail:
+speedbench full, all 73 prompts, c1 tok/s (mean of the Sparks it was run on). Every release in detail:
 [CHANGELOG.md](CHANGELOG.md); every historical speedbench row: [docs/benchmarks.md](docs/benchmarks.md#speedbench).
 
 | release | speedbench all-73 | headline change |
 |---|---:|---|
-| [v2.9.7](CHANGELOG.md#v297-2026-11-26) | **73.54 / 73.17** | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
-| [v2.9.6](CHANGELOG.md#v296-2026-11-26) | 74.28 / 74.28 | MXFP8 copies of the drafter's context projections (code c8 -2.3 to -2.6 % on box A) |
-| [v2.9.5](CHANGELOG.md#v295-2026-11-26) | 73.54 / 73.17 | packed store's verify settle builds page candidates once for all 8 global visits |
-| [v2.9.4](CHANGELOG.md#v294-2026-11-25) | 73.21 (B) | prefix tail defers to a draft-tail snapshot (long context +2.1 %) |
-| [v2.9.3](CHANGELOG.md#v293-2026-11-25) | 72.65 / 72.79 | prompt copy for prompts of 8K tokens or more |
-| [v2.9.2](CHANGELOG.md#v292-2026-11-25) | 72.95 / 73.12 | prefill loop-bank hoist; prompt-end cache touch for agent loops |
-| [v2.9.1](CHANGELOG.md#v291-2026-11-25) | 73.12 (B) | sink gate on the global layers too (prefill) |
-| [v2.9](CHANGELOG.md#v29-2026-11-25) | 73.34 (B) | draft-tail snapshots (agent loops -4.4 / -4.9 % end-to-end time) |
-| [v2.8.4](CHANGELOG.md#v284-2026-11-25) | 73.53 / 73.43 | drafter MXFP8 linears on FlashInfer's MXFP8 GEMM (+1.2 %) |
-| [v2.8.3](CHANGELOG.md#v283-2026-11-25) | 72.90 (B) | no expert work for padding rows (thinking c9 / c15 +4.8 / +5.0 %); bit-identical prologue |
-| [v2.8.2](CHANGELOG.md#v282-2026-11-24) | 72.78 / 72.82 (B, two runs) | prefill sink gate; verify-cap policy `df-SLDF2x` |
-| [v2.8.1](CHANGELOG.md#v281-2026-11-24) | 72.86 (B) | prefix tail fixes prefix-hit draft starvation |
-| [v2.8](CHANGELOG.md#v28-2026-11-24) | 69.66 / 69.59 | DFlash2 drafter becomes the default |
-| [v2.7.2](CHANGELOG.md#v272-2026-11-24) | 63.8 (two-box median) | DSpark profile: packed KV store on the stock pools; dead verify rows get no experts |
+| [v2.9.7](CHANGELOG.md#v297-2026-11-26) | **73.36** | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
+| [v2.9.6](CHANGELOG.md#v296-2026-11-26) | 74.28 | MXFP8 copies of the drafter's context projections (code c8 -2.3 to -2.6 % on one Spark) |
+| [v2.9.5](CHANGELOG.md#v295-2026-11-26) | 73.36 | packed store's verify settle builds page candidates once for all 8 global visits |
+| [v2.9.4](CHANGELOG.md#v294-2026-11-25) | 73.21 | prefix tail defers to a draft-tail snapshot (long context +2.1 %) |
+| [v2.9.3](CHANGELOG.md#v293-2026-11-25) | 72.72 | prompt copy for prompts of 8K tokens or more |
+| [v2.9.2](CHANGELOG.md#v292-2026-11-25) | 73.04 | prefill loop-bank hoist; prompt-end cache touch for agent loops |
+| [v2.9.1](CHANGELOG.md#v291-2026-11-25) | 73.12 | sink gate on the global layers too (prefill) |
+| [v2.9](CHANGELOG.md#v29-2026-11-25) | 73.34 | draft-tail snapshots (agent loops -4.4 / -4.9 % end-to-end time) |
+| [v2.8.4](CHANGELOG.md#v284-2026-11-25) | 73.48 | drafter MXFP8 linears on FlashInfer's MXFP8 GEMM (+1.2 %) |
+| [v2.8.3](CHANGELOG.md#v283-2026-11-25) | 72.90 | no expert work for padding rows (thinking c9 / c15 +4.8 / +5.0 %); bit-identical prologue |
+| [v2.8.2](CHANGELOG.md#v282-2026-11-24) | 72.80 | prefill sink gate; verify-cap policy `df-SLDF2x` |
+| [v2.8.1](CHANGELOG.md#v281-2026-11-24) | 72.86 | prefix tail fixes prefix-hit draft starvation |
+| [v2.8](CHANGELOG.md#v28-2026-11-24) | 69.63 | DFlash2 drafter becomes the default |
+| [v2.7.2](CHANGELOG.md#v272-2026-11-24) | 63.8 | DSpark profile: packed KV store on the stock pools; dead verify rows get no experts |
 
 ## Reproduce
 
