@@ -404,8 +404,8 @@ stopped the server each time (`results/MM298-W1-s06/`, `-W2-`, `-W3-`). So `MM=1
 
 With the in-flight bound at 32,768 and the fraction 0.02 lower (box A, 2026-11-27), the same worst case ran 16 / 16
 requests with the needle PASS and a lowest MemAvailable of 3.34 GiB in one boot; in a second boot it touched 3.22 GiB
-and the guard stopped the server (`results/MM298-W4-s05/`, `results/MM298-W5-s05/`). The steps line up with image chunks reaching the vision
-tower's activations, which the CUDA caching allocator keeps. The shipped defaults halve the in-flight bound (the
+and the guard stopped the server (`results/MM298-W4-s05/`, `results/MM298-W5-s05/`). The drops line up with image chunks reaching the vision
+tower, whose activations the CUDA caching allocator keeps. The shipped defaults halve the in-flight bound (the
 vision batch and the held patches with it) and lower the fraction by another 0.01 (+1.1 GiB of headroom); this
 combination was not run again, so treat ~4.3 GiB as the expected lowest MemAvailable in that worst case, not a
 measurement. For more headroom lower `MEM_FRACTION` further or `MM_INFLIGHT_TOKENS` / `MM_MAX_IMAGE_TOKENS`.
