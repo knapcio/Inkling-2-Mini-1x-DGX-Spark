@@ -1,0 +1,5 @@
+[inkling_mm pid=1] requests with images above 16384 vision tokens are refused
+refused: the request's 1 image(s) (5200 x 5200 pixels) are 16900 vision tokens; this server accepts at most 16384 per request (INKLING_MM_MAX_IMAGE_TOKENS, MM_MAX_IMAGE_
+refused: the request's 3 image(s) (4032 x 3024, 4032 x 3024, 4032 x 3024 pixels) are 23028 vision tokens; this server accepts at most 16384 per request (INKLING_MM_MAX_I
+inkling_mm real-module check OK
+mmimport rc=0

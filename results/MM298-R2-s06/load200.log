@@ -1,0 +1,5 @@
+{"i": 0, "ok": true, "prompt_tokens": 231289, "seconds": 657.3, "answer": ""}
+{"i": 1, "ok": true, "prompt_tokens": 231524, "seconds": 658.58, "answer": ""}
+{"i": 2, "ok": true, "prompt_tokens": 231781, "seconds": 542.69, "answer": ""}
+{"i": 3, "ok": true, "prompt_tokens": 231318, "seconds": 455.29, "answer": ""}
+load: 4 requests (4 concurrent, ~160000 text tokens + 2 x 8160 image tokens each), 0 failed, 659 s

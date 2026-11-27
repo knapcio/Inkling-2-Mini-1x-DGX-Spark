@@ -1,0 +1,63 @@
+[extension prebuild] start (fresh cache)
+inkling_attn extension built in 40.7 s: /tmp/kv12s-attn-mrbdrjg_/e59a2e18c91935f3
+[extension prebuild] done
+Torch 2.14.1+cu130, Triton 3.8.0, NVIDIA GB10
+[bits] start, device free 94.66/121.69 GiB
+Triton reader                    bitwise (all BF16 patterns, overflow/staging, fixed escapes)
+device writer                    bitwise (all BF16 words and inline escapes)
+[bits] done in 8.3s, peak allocated 0.004 GiB, reserved 0.006 GiB
+[reader guards] start, device free 94.06/121.69 GiB
+compact guarded q=8 Triton resources {'query_tile': 32, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 2, 'key_tile': 32, 'splits': 28, 'query_tiles': 1, 'registers': 250, 'spills': 0, 'shared_bytes': 18452}
+compact and fused metadata guards passed
+[reader guards] done in 1.6s, peak allocated 0.002 GiB, reserved 0.004 GiB
+[compact decode and verify] start, device free 94.06/121.69 GiB
+compact 1K q=1 Triton resources {'query_tile': 16, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 1, 'key_tile': 32, 'splits': 12, 'query_tiles': 1, 'registers': 194, 'spills': 0, 'shared_bytes': 13312}
+compact 1K q=1                   bitwise
+compact 2K q=1 Triton resources {'query_tile': 16, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 1, 'key_tile': 128, 'splits': 12, 'query_tiles': 1, 'registers': 255, 'spills': 54, 'shared_bytes': 40960}
+compact 2K q=1                   bitwise
+compact 2K q=8 Triton resources {'query_tile': 32, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 2, 'key_tile': 32, 'splits': 12, 'query_tiles': 1, 'registers': 250, 'spills': 0, 'shared_bytes': 18452}
+compact 2K q=8                   bitwise
+compact 2K q=64 Triton resources {'query_tile': 16, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 1, 'key_tile': 32, 'splits': 12, 'query_tiles': 12, 'registers': 211, 'spills': 0, 'shared_bytes': 13312}
+compact 2K q=64                  bitwise
+ragged compact q=8/7 Triton resources {'query_tile': 16, 'key_load_tile': 32, 'num_warps': 4, 'num_stages': 1, 'key_tile': 32, 'splits': 4, 'query_tiles': 2, 'registers': 230, 'spills': 0, 'shared_bytes': 13312}
+ragged compact partials         bitwise
+[compact decode and verify] done in 11.2s, peak allocated 0.079 GiB, reserved 0.109 GiB
+[CUDA graph replay and speculative commit] start, device free 93.66/121.69 GiB
+CUDA graph decode replay          bitwise (changed page IDs, lengths and Q/K/V)
+CUDA graph ragged verify replay   bitwise (changed offsets and K lengths)
+/opt/sglang/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/dsl.py:2300: UserWarning: Argument aux_data (position 17) cannot be converted to a JitArgument for function 'cutlass___call___sglangkernelsopsattentionfa4_sm120flash_fwdFlashAttentionForwardSm120_object_at__Tensorgmemoi64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i6'. Its type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>` is not supported. If the value is known at compile time, annotate it: `aux_data: Constexpr`. Otherwise, implement the `JitArgument` or `DynamicExpression` protocol for type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>`, or register a custom argument adapter.
+  exe_args, func_types, adapted_args = self.generate_mlir_function_types(
+DSpark verify and draft replay    bitwise (accept, cross-page reject, reuse)
+raw MTP draft lane                bitwise (writes, sink mask, strided FA4)
+overflow exhaustion fallback      bitwise (direct, staged, promoted, stale refs, rewrite, full staging; no assert, slots returned)
+side-slot exhaustion              bitwise (fallback, kept direct, kept staged; lost rows counted, no assert; slots returned)
+prefill BF16 scratch              bitwise, fixed buffer (reserved +0 MiB over 20 growing gathers incl. comparison temporaries)
+/opt/sglang/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/dsl.py:2300: UserWarning: Argument aux_data (position 17) cannot be converted to a JitArgument for function 'cutlass___call___sglangkernelsopsattentionfa4_sm120flash_fwdFlashAttentionForwardSm120_object_at__Tensorgmemoi64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i641_'. Its type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>` is not supported. If the value is known at compile time, annotate it: `aux_data: Constexpr`. Otherwise, implement the `JitArgument` or `DynamicExpression` protocol for type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>`, or register a custom argument adapter.
+  exe_args, func_types, adapted_args = self.generate_mlir_function_types(
+page-major window band            bitwise (writers, prefix commit, stock and VATTN compact, FA4, rows)
+[CUDA graph replay and speculative commit] done in 23.3s, peak allocated 8.729 GiB, reserved 8.969 GiB
+[stock FA4 gather] start, device free 88.98/121.69 GiB
+/opt/sglang/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/dsl.py:2300: UserWarning: Argument aux_data (position 17) cannot be converted to a JitArgument for function 'cutlass___call___sglangkernelsopsattentionfa4_sm120flash_fwdFlashAttentionForwardSm120_object_at__Tensorgmemoi64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i6'. Its type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>` is not supported. If the value is known at compile time, annotate it: `aux_data: Constexpr`. Otherwise, implement the `JitArgument` or `DynamicExpression` protocol for type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>`, or register a custom argument adapter.
+  exe_args, func_types, adapted_args = self.generate_mlir_function_types(
+stock FA4 generic decode         bitwise via bounded scratch and static workspace (split=1, pack_gqa=False)
+stock FA4 padded decode          bitwise via bounded scratch and static workspace (split=1, pack_gqa=True)
+stock FA4 generic verify         bitwise via bounded scratch and static workspace (split=1, pack_gqa=False)
+/opt/sglang/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/dsl.py:2300: UserWarning: Argument aux_data (position 17) cannot be converted to a JitArgument for function 'cutlass___call___sglangkernelsopsattentionfa4_sm120flash_fwdFlashAttentionForwardSm120_object_at__Tensorgmemoi64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i6'. Its type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>` is not supported. If the value is known at compile time, annotate it: `aux_data: Constexpr`. Otherwise, implement the `JitArgument` or `DynamicExpression` protocol for type `<class 'sglang.kernels.ops.attention.flash_attn.cute.utils.AuxData'>`, or register a custom argument adapter.
+  exe_args, func_types, adapted_args = self.generate_mlir_function_types(
+stock FA4 padded verify          bitwise via bounded scratch and static workspace (split=3, pack_gqa=True)
+stock FA4 generic extend         bitwise via bounded scratch and static workspace (split=1, pack_gqa=False)
+[stock FA4 gather] done in 16.3s, peak allocated 4.292 GiB, reserved 4.307 GiB
+[fused prefill] start, device free 88.96/121.69 GiB
+fused prefill 512+64 vs stock FA4 max abs output=0.00191754, LSE=9.53674e-07
+fused prefill 512+64             bitwise
+fused prefill 576+77 vs stock FA4 max abs output=0.00266182, LSE=9.53674e-07
+fused prefill 576+77             bitwise
+captured packed prefill          bitwise on replay (short bucket: 2 batches, padding slot and rows, W8 split)
+captured packed prefill          bitwise on replay (scratch bucket: 3 batches, padding slot and rows, W8 split)
+[fused prefill] done in 0.7s, peak allocated 4.399 GiB, reserved 4.426 GiB
+[image prefill] start, device free 88.68/121.69 GiB
+image prefill (3 requests, 31 pages)  visit on image batches, bitwise via scratch and packed loader, no gather
+[image prefill] done in 0.5s, peak allocated 4.438 GiB, reserved 4.518 GiB
+Packed KV GPU checks passed. Peak allocated 8.729 GiB, reserved 8.969 GiB.
+WARNING: Packed compact kernels spilled registers: compact 2K q=1 (54 spills)
+gpu_check rc=0

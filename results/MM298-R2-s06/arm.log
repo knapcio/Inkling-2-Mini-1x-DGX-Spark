@@ -1,0 +1,5 @@
+2026-11-27T12:32:30Z R2 mode worst512 start 36.70
+needle 480K                  PASS  {"prompt_tokens": 479930, "seconds": 631.7, "expected": "SIGNAL-MARBLE-3483", "answer": "SIGNAL-MARBLE-3483"}
+1 / 1 passed
+2026-11-27T12:46:00Z R2 mode worst512 end rc=0 34.87
+memavail_min_gib 34.21

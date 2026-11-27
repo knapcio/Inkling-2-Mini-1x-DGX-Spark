@@ -1,0 +1,26 @@
+2026-11-27T10:12:47Z B1 mode warm start 5.06
+B1-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 69.43, "geomean_tok_s": 73.77, "aggregate_tok_s": 71.7, "median_ttft_ms": 154.0, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 37.81, "median_tokens_per_step": 2.581, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.309, "drift_pct_all": 0.309}}
+wrote results/B1/warm.json (1.4 min)
+2026-11-27T10:14:12Z B1 mode warm end rc=0 5.07
+2026-11-27T10:14:12Z B1 mode sbf1 start 5.07
+B1: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 70.97, "geomean_tok_s": 73.56, "aggregate_tok_s": 71.6, "median_ttft_ms": 156.0, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.91, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 2.683, "drift_pct_all": 2.683}}
+wrote results/B1/sbf1.json (4.8 min)
+2026-11-27T10:19:00Z B1 mode sbf1 end rc=0 4.16
+2026-11-27T10:19:00Z B1 mode sbf8 start 4.16
+B1-c8: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 22.97, "geomean_tok_s": 24.16, "aggregate_tok_s": 23.28, "median_ttft_ms": 458.5, "truncated_frac": 0.959, "reasoning_token_frac": 0.695, "reasoning_char_frac": 0.753, "median_step_ms": 129.59, "median_tokens_per_step": 2.931, "steps_source": "response", "median_accept_rate": 0.2807, "median_draft_per_step": 7.0}, "aggregate_throughput_tok_s": 178.06}
+wrote results/B1/sbf8.json (1.8 min)
+2026-11-27T10:20:47Z B1 mode sbf8 end rc=0 4.14
+2026-11-27T10:20:47Z B1 mode think24 start 4.14
+2026-11-27T10:23:40Z B1 mode think24 end rc=0 4.10
+2026-11-27T10:23:40Z B1 mode pf start 4.10
+B1  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+8K       8159.0   1.419      5749.8      0.246        None      -                        -         -
+128K     130920.0 33.909     3860.9      17.1         None      45.9 [33.5, 62.9]        -         -
+wrote results/B1/longctx.json (2.8 min)
+2026-11-27T10:26:25Z B1 mode pf end rc=0 4.05
+2026-11-27T10:26:25Z B1 mode img start 4.05
+2026-11-27T10:26:37Z B1 mode img end rc=0 4.23
+2026-11-27T10:26:37Z B1 mode oversize start 4.23
+2026-11-27T10:26:38Z B1 mode oversize end rc=0 4.15
+memavail_min_gib 3.89

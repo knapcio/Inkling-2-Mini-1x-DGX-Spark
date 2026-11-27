@@ -1,0 +1,17 @@
+{"i": 0, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 1, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 2, "ok": true, "prompt_tokens": 97131, "seconds": 156.15, "answer": ""}
+{"i": 3, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 4, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 5, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 6, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 7, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 8, "ok": false, "error": "RemoteDisconnected('Remote end closed connection without response')"}
+{"i": 9, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 10, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 11, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 12, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 13, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 14, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+{"i": 15, "ok": false, "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))"}
+load: 16 requests (8 concurrent, ~60000 text tokens + 2 x 8160 image tokens each), 15 failed, 166 s

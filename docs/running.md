@@ -52,6 +52,20 @@ curl -s http://127.0.0.1:8000/v1/chat/completions -H 'Content-Type: application/
   "reasoning_effort": "low", "max_tokens": 1024}'
 ```
 
+Image input needs `MM=1 scripts/launch.sh up` (v2.9.8). Images go in as `image_url` parts (a `data:` URI or an
+http(s) URL), as in the OpenAI API; each 40 x 40-pixel cell of an image becomes one prompt token at the image's
+native size, and one request may carry up to 16,384 image tokens in all (`MM_MAX_IMAGE_TOKENS`; two 12 MP photos are
+15,352). `bench/image_check.py run` sends eight image questions with known answers.
+
+```bash
+img=$(base64 -w0 photo.png)
+curl -s http://127.0.0.1:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{
+  "model": "inkling-2-mini", "reasoning_effort": "low", "max_tokens": 1024,
+  "messages": [{"role": "user", "content": [
+    {"type": "image_url", "image_url": {"url": "data:image/png;base64,'"$img"'"}},
+    {"type": "text", "text": "What is in this picture?"}]}]}'
+```
+
 The checkpoint's `generation_config.json` sets temperature 1.0; pass `temperature` per request if you want
 something else. Reasoning tokens count toward `max_tokens`: at effort high, leave several thousand.
 
@@ -127,7 +141,7 @@ With `SPEC=dspark` the container starts with `--entrypoint python3` (no drafter 
 take their own defaults (table below) and the speculative flags are the cookbook's
 `--speculative-algorithm DSPARK --speculative-num-draft-tokens 8 --speculative-use-block-verification`.
 
-Engine flags (the SGLang cookbook's DGX Spark cell, text only, with the DFlash2 drafter):
+Engine flags (the SGLang cookbook's DGX Spark cell with the DFlash2 drafter):
 
 | flag / variable | why |
 |---|---|
@@ -161,6 +175,7 @@ Engine flags (the SGLang cookbook's DGX Spark cell, text only, with the DFlash2 
 | `--grammar-backend xgrammar` | JSON-schema / regex constrained output |
 | `--reasoning-parser inkling`, `--tool-call-parser inkling2` | thinking to `reasoning_content`, answer to `content`, tool calls to `tool_calls` |
 | `--enable-metrics` | Prometheus `/metrics` (speedbench reads them) |
+| `--enable-multimodal --mm-io-worker-num 1` (`MM=1` only) | image input: loads the vision tower (0.59 GiB) and the image processor, one request's images preprocessed at a time. Inkling2's stock default is text only. With the overlays the launcher also passes `INKLING_MM_MAX_IMAGE_TOKENS` and `INKLING_MM_INFLIGHT_TOKENS` ([Image input](levers.md#image-input-mm1)) |
 
 Profile and drafter switches:
 
@@ -218,6 +233,9 @@ Overlay switches (`OVERLAY=0` turns all of them off; each is described in `overl
 | `DFLASH_CTX8` (`INKLING_DFLASH_CTX8`) | `0` (opt-in since v2.9.7) | `SPEC=dflash2` with the overlays: the drafter's two context projections, which write the committed rows into the draft window after every verify (the context `fc` 9216 -> 2304 and the five layers' stacked K/V 2304 -> 10240), read MXFP8 copies on FlashInfer's b12x GEMM for 1-256 rows (larger calls keep BF16; +48 MB of copies, every b12x tile plan compiled at start-up); draft proposals only; online weight updates are refused while it is on (the copies are derived weights); not armed when SGLang's `SGLANG_OPT_DFLASH_AUX_GRAPH` is set; `0` = BF16 (v2.9.5 behaviour). Set by the launcher only |
 | `DFLASH_CTX8_MAX_M` (`INKLING_DFLASH_CTX8_MAX_M`) | empty (= 256) | largest context append (rows) that `DFLASH_CTX8` runs on MXFP8, 1-4096 |
 | `PROMPT_TOUCH` (`INKLING_PROMPT_TOUCH`) | `1` | after a request finishes, re-touch its prompt path in the prefix cache (`inkling_ptouch`; eviction order only, nothing computed changes); `0` = off (v2.9.1 behaviour) |
+| `MM` | `0` | `1`: image input (v2.9.8), SGLang's `--enable-multimodal` (the vision tower, 0.59 GiB, and the image processor) with `--mm-io-worker-num 1`, the two image bounds below and `MEM_FRACTION` defaults 0.03 lower (0.85 for the default profile; an explicit `MEM_FRACTION` is kept). Text is served bit-identically and as fast ([Image input](levers.md#image-input-mm1)). The launcher refuses a raw `--enable-multimodal` / `--disable-multimodal`, so the flag and its bounds always agree |
+| `MM_MAX_IMAGE_TOKENS` (`INKLING_MM_MAX_IMAGE_TOKENS`) | `16384` | `MM=1` with the overlays (`inkling_mm`): the most image tokens one request may carry, all its images together (one token per 40 x 40-pixel cell at the image's native size). A request above it gets an error naming the sizes, read from the image headers before any pixel is decoded; the server keeps running. Images within it are processed exactly as stock (no resize). `0` = no bound (Inkling2's processor has none: preprocessing keeps all of a request's images in memory and the vision tower encodes every image a prefill chunk touches at once) |
+| `MM_INFLIGHT_TOKENS` (`INKLING_MM_INFLIGHT_TOKENS`) | `16384` | `MM=1` with the overlays: image requests are admitted (before their images are decoded) while the image tokens of all requests in flight stay within this; a later image request waits until an earlier one finishes. A lone request is always admitted; text-only requests never wait. At least `MM_MAX_IMAGE_TOKENS`; `0` = no bound |
 | `ATTN_GATE` (`INKLING_ATTN_GATE`) | `all` | sink gate in the prefill attention epilogue on the sliding-window and global layers (`inkling_attn`; bit-identical to `gate_sink`); `1` = sliding-window layers only; off by itself while `SGLANG_KERNEL_API_LOGLEVEL` is non-zero (that logging reads the output buffer the gate leaves unwritten); `0` = off |
 | `PROLOGUE` (`INKLING_PROLOGUE`) | `1` | sliding-window prefill K conv + L2 clip and V conv + value norm, one kernel each (`inkling_prologue`; bit-identical, stock row-sum order); `0` = off |
 | `CERT_WIDE` (`INKLING_CERT_WIDE`), `CERT_WIDE_MAX_ROWS` | `SPEC=dspark`: `1`, overlay default | certified greedy head for 17-192-row verify batches (needs `CERT_HEAD`, `PICO12` and `WIDE` with `lmhead`) |
@@ -264,7 +282,7 @@ To leave more RAM for other work, lower `MEM_FRACTION`. Each 0.01 frees ~1.09 Gi
 | draft | DSpark (bundled) | DSpark (bundled) | **DFlash2** (incoai, pinned revision, sha256-checked); DSpark with `SPEC=dspark` or `ENGINE=vllm` |
 | memory | `--mem-fraction-static 0.45` (518K KV tokens) | `--gpu-memory-utilization` unset (vLLM's own suggestion would leave the host 0-2 GiB) | `MEM_FRACTION=0.88`, `SWA_RATIO=0.037` and the packed global KV store give 2,371,200 global-layer KV tokens, 4.6 GiB MemAvailable under stress and a 3.5 GiB guard floor (v2.9, box B) |
 | context | not set (model default) | 262,144 | 262,144 (the model supports 1M; see [Longer context](#longer-context-512k-and-1m)) |
-| multimodal | `--enable-multimodal` | on | off (text only; add `--enable-multimodal` for images) |
+| multimodal | `--enable-multimodal` | on | off; `MM=1` (v2.9.8) turns it on with per-request and in-flight image bounds and a 0.03 lower fraction |
 | images, weights | pulled by tag, weights from the Hub at start | same | pinned image digest, weights and drafter at pinned revisions, sha256-checked, offline at start |
 | bind address | 0.0.0.0 | 0.0.0.0 | 127.0.0.1 |
 | speed overlays | - | - | twenty-four packages (`overlay/`), on by default; `OVERLAY=0` disables them |

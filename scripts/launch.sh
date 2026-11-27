@@ -72,6 +72,9 @@ DFLASH_PCOPY=${DFLASH_PCOPY:-12}                               # SPEC=dflash2: p
 DFLASH_CTX8=${DFLASH_CTX8:-0}                                  # SPEC=dflash2 + OVERLAY=1: 1 = the drafter's context projections (fc + stacked K/V, eager after verify) on b12x MXFP8 (draft-only; opt-in since v2.9.7: c1 -0.2 ms per step, but code c8 lost 2.3 % on box A); 0 = BF16 (default)
 DFLASH_CTX8_MAX_M=${DFLASH_CTX8_MAX_M:-}                       # ... largest append (rows) on MXFP8; larger calls keep BF16 (empty = 256)
 DFLASH_PCOPY_MIN_CTX=${DFLASH_PCOPY_MIN_CTX:-8192}             # ... only for requests whose prompt has at least this many tokens (shorter prompts: no copy)
+MM=${MM:-0}                                                  # SGLang: 1 = image input (--enable-multimodal, v2.9.8; MEM_FRACTION default -0.03); 0 = text only
+MM_MAX_IMAGE_TOKENS=${MM_MAX_IMAGE_TOKENS:-16384}            # MM=1 + OVERLAY=1: a request whose images have more vision tokens together (40 x 40 px each) is refused (0 = no bound)
+MM_INFLIGHT_TOKENS=${MM_INFLIGHT_TOKENS:-16384}              # MM=1 + OVERLAY=1: image requests in flight hold at most this many vision tokens together; later ones wait (0 = no bound)
 PROMPT_TOUCH=${PROMPT_TOUCH:-1}                              # OVERLAY=1: after a request finishes, refresh its prompt-end cache checkpoint so the next turn of a long conversation keeps its prefix hit (cache LRU order only; 0 = off)
 [[ $ENGINE == vllm && -z ${SPEC:-} ]] && SPEC=dspark   # the vLLM profile keeps the DSpark draft
 SPEC=${SPEC:-dflash2}                  # dflash2 (default: third-party DFlash2 drafter) | dspark (the model's own draft, v2.7.2 profile) | none
@@ -162,6 +165,19 @@ case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # the prompt-end 
     echo "set PROMPT_TOUCH instead of passing INKLING_PROMPT_TOUCH in SGLANG_ENV" >&2; exit 2 ;;
 esac
 case $PROMPT_TOUCH in 0|1) ;; *) echo "PROMPT_TOUCH must be 0 or 1 (got '$PROMPT_TOUCH')" >&2; exit 2 ;; esac
+case $MM in 0|1) ;; *) echo "MM must be 0 or 1 (got '$MM')" >&2; exit 2 ;; esac
+[[ $MM_MAX_IMAGE_TOKENS =~ ^[0-9]{1,7}$ ]] && (( 10#$MM_MAX_IMAGE_TOKENS <= 1048576 )) || {
+  echo "MM_MAX_IMAGE_TOKENS must be a whole number of tokens, 0-1048576 (got '$MM_MAX_IMAGE_TOKENS')" >&2; exit 2; }
+MM_MAX_IMAGE_TOKENS=$(( 10#$MM_MAX_IMAGE_TOKENS ))
+[[ $MM_INFLIGHT_TOKENS =~ ^[0-9]{1,8}$ ]] && (( 10#$MM_INFLIGHT_TOKENS <= 16777216 )) || {
+  echo "MM_INFLIGHT_TOKENS must be a whole number of tokens, 0-16777216 (got '$MM_INFLIGHT_TOKENS')" >&2; exit 2; }
+MM_INFLIGHT_TOKENS=$(( 10#$MM_INFLIGHT_TOKENS ))
+(( MM_INFLIGHT_TOKENS == 0 || MM_MAX_IMAGE_TOKENS == 0 || MM_INFLIGHT_TOKENS >= MM_MAX_IMAGE_TOKENS )) || {
+  echo "MM_INFLIGHT_TOKENS ($MM_INFLIGHT_TOKENS) must be at least MM_MAX_IMAGE_TOKENS ($MM_MAX_IMAGE_TOKENS)" >&2; exit 2; }
+case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in                # image input is switched here, so the flag and its bound agree
+  *-multimodal*|*INKLING_MM_*)
+    echo "set MM=1 (image input) / MM=0 (text only) / MM_MAX_IMAGE_TOKENS instead of passing --enable-multimodal / --disable-multimodal / INKLING_MM_*" >&2; exit 2 ;;
+esac
 [[ $KV12S == 1 ]] && case " ${SGLANG_ENV:-} ${SGLANG_ARGS:-} $* " in
   *enable-unified-memory*|*cuda-graph-backend-prefill*)
     echo "with KV12S=1, choose the pool with KV12S_POOL instead of passing its engine flags" >&2; exit 2 ;;
@@ -250,6 +266,14 @@ if [[ $KV12S == 1 ]]; then
              -e INKLING_KV12S_DFLASH_SETTLE="$KV12S_SETTLE")
 fi
 
+# MM=1: image requests hold their preprocessed patches in host memory until they finish (~19-24 KB per image token)
+# and the vision tower's activations come on top of the KV budget. MM_INFLIGHT_TOKENS bounds both, the fraction
+# defaults drop by 0.03 (~3.3 GiB, ~120K global-layer KV tokens), and images are preprocessed one request at a time
+# (--mm-io-worker-num 1). Measured at -0.02 with 32,768 tokens in flight (thinking c24 + a cold 240K needle + 16
+# requests of ~80K text and 16,320 image tokens, 8 at a time): lowest MemAvailable 3.34 / 3.22 GiB, under the floor.
+if [[ $MM == 1 && $ENGINE == sglang && -z $MEM_FRACTION_USER ]]; then
+  MEM_FRACTION=$(awk -v f="$MEM_FRACTION" 'BEGIN { printf "%.2f", f - 0.03 }')
+fi
 [[ -f $MODEL_DIR/config.json && -f $MODEL_DIR/mtp.safetensors ]] || {
   echo "no model in $MODEL_DIR (run scripts/download.sh first; mtp.safetensors is the DSpark draft)" >&2; exit 1; }
 if [[ -f $MODEL_DIR/.revision && $(cat "$MODEL_DIR/.revision") != "$MODEL_REVISION" ]]; then
@@ -346,7 +370,9 @@ if [[ $ENGINE == sglang ]]; then
         -e INKLING_DRAFT_RNNHOIST_MAX_BS="$RNNHOIST_MAX_BS"
         -e INKLING_KV12S="$KV12S" -e INKLING_KV12S_OVERFLOW_HEADS="$KV12S_OVERFLOW_HEADS"
         -e INKLING_KV12S_FALLBACK_PAGES="$KV12S_FALLBACK_PAGES" ${kv12s_env[@]+"${kv12s_env[@]}"})
+    [[ $MM == 1 ]] && ov+=(-e INKLING_MM_MAX_IMAGE_TOKENS="$MM_MAX_IMAGE_TOKENS" -e INKLING_MM_INFLIGHT_TOKENS="$MM_INFLIGHT_TOKENS")
   fi
+  mm_args=(); [[ $MM == 1 ]] && mm_args=(--enable-multimodal --mm-io-worker-num 1)   # Inkling2's stock default is text only
   run=("${common[@]}" ${ov[@]+"${ov[@]}"}
        -e MAX_JOBS=4
        -e SGLANG_OPT_INKLING2_VERIFY_REL_BIAS_KERNEL=1
@@ -358,7 +384,7 @@ if [[ $ENGINE == sglang ]]; then
        "${entry[@]}"
        -m sglang.launch_server --model-path /model --served-model-name "$SERVED"
        --tp 1 --ep 1 --attention-backend fa4 --dtype bfloat16 --page-size 128
-       ${spec[@]+"${spec[@]}"} ${kv12s_args[@]+"${kv12s_args[@]}"}
+       ${spec[@]+"${spec[@]}"} ${kv12s_args[@]+"${kv12s_args[@]}"} ${mm_args[@]+"${mm_args[@]}"}
        --mem-fraction-static "$MEM_FRACTION" --context-length "$CTX"
        --grammar-backend xgrammar --reasoning-parser inkling --tool-call-parser inkling2
        --enable-metrics --host "$HOST" --port "$PORT" ${nommap_arg[@]+"${nommap_arg[@]}"} --swa-full-tokens-ratio "$SWA_RATIO"

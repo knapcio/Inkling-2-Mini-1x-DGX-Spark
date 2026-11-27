@@ -1,0 +1,5 @@
+2026-11-27T12:28:16Z W3 mode worst start 6.84
+<lambda>                     FAIL  {"error": "RemoteDisconnected('Remote end closed connection without response')"}
+0 / 1 passed
+2026-11-27T12:30:19Z W3 mode worst end rc=0 11.50
+memavail_min_gib 2.68

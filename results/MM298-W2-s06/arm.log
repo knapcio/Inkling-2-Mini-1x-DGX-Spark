@@ -1,0 +1,7 @@
+2026-11-27T12:22:32Z W2 mode img start 7.35
+2026-11-27T12:22:44Z W2 mode img end rc=0 7.95
+2026-11-27T12:22:44Z W2 mode worst start 7.95
+<lambda>                     FAIL  {"error": "RemoteDisconnected('Remote end closed connection without response')"}
+0 / 1 passed
+2026-11-27T12:26:04Z W2 mode worst end rc=0 9.87
+memavail_min_gib 3.37

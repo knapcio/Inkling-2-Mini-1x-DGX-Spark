@@ -1,0 +1,13 @@
+{
+ "url": "http://127.0.0.1:8000",
+ "results": [
+  {
+   "check": "needle 480K",
+   "pass": true,
+   "prompt_tokens": 479930,
+   "seconds": 631.7,
+   "expected": "SIGNAL-MARBLE-3483",
+   "answer": "SIGNAL-MARBLE-3483"
+  }
+ ]
+}

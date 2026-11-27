@@ -67,6 +67,29 @@ class CountTests(unittest.TestCase):
                         with self.assertRaises(IncompatibleImage, msg=value):
                             hooks._check_serving_args(spec)
 
+    def test_image_input_is_accepted(self):
+        # v2.9.8: --enable-multimodal with the packed store (image prefill takes the packed readers); streaming
+        # sessions and parallelism stay refused.
+        name = "SGLANG_OPT_INKLING2_VERIFY_REL_BIAS_KERNEL"
+        spec = SimpleNamespace(speculative_algorithm="DFLASH")
+        for streaming, accepted in ((False, True), (True, False)):
+            args = SimpleNamespace(enable_streaming_session=streaming, enable_multimodal=True)
+            modules = {
+                "sglang.srt.runtime_context": SimpleNamespace(get_server_args=lambda args=args: args),
+                "sglang.srt.environ": SimpleNamespace(envs=SimpleNamespace(**{name: EnvBool(name, False)})),
+            }
+            with patch.dict(sys.modules, modules), patch.object(hooks, "_FA4_WORKSPACE", False), \
+                    patch.dict(os.environ, {name: "1"}):
+                if accepted:
+                    hooks._check_serving_args(spec)
+                else:
+                    with self.assertRaises(IncompatibleImage):
+                        hooks._check_serving_args(spec)
+        args = SimpleNamespace(enable_streaming_session=False, enable_multimodal=True, tp_size=2)
+        modules = {"sglang.srt.runtime_context": SimpleNamespace(get_server_args=lambda: args)}
+        with patch.dict(sys.modules, modules), self.assertRaises(IncompatibleImage):
+            hooks._check_serving_args(spec)
+
 
 def lanes(count=2, live=6, fallback=2, overflow=16, heads=2):
     locks = torch.zeros((count, live + fallback + overflow), dtype=torch.int32)

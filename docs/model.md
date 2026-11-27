@@ -11,7 +11,7 @@ Read from the checkpoint's `config.json` at revision `ed40e7da`:
 | Context | up to 1,048,576 tokens |
 | Precision | routed experts NVFP4 in layers 0-19 and MXFP8 in layers 20-23 (`quant_method: inkling2`, ModelOpt); attention, embeddings and LM head BF16 |
 | Bundled draft model | DSpark, 3 layers, block size 8 (`mtp.safetensors`, 0.64 GB); used with `SPEC=dspark` and `ENGINE=vllm` |
-| Inputs | text and images (23-layer vision tower); text out. This recipe serves text only |
+| Inputs | text and images (23-layer vision tower, one token per 40 x 40-pixel cell); text out. The recipe serves both since v2.9.8 (`MM=1`; `MM=0` = text only) |
 | Reasoning | always thinks; `reasoning_effort` none / minimal / low / medium / high / xhigh / max or 0.0-0.99 (default high = 0.9) |
 | On disk | 20.2 GB |
 | Licence | Apache-2.0 |

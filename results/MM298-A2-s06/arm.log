@@ -1,0 +1,22 @@
+2026-11-27T10:44:59Z A2 mode warm start 5.02
+A2-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.6, "geomean_tok_s": 74.95, "aggregate_tok_s": 72.88, "median_ttft_ms": 159.5, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 37.33, "median_tokens_per_step": 2.581, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.177, "drift_pct_all": 0.177}}
+wrote results/A2/warm.json (1.4 min)
+2026-11-27T10:46:21Z A2 mode warm end rc=0 5.11
+2026-11-27T10:46:21Z A2 mode sbf1 start 5.11
+A2: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.4, "geomean_tok_s": 73.95, "aggregate_tok_s": 71.95, "median_ttft_ms": 160.3, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.81, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.21, "drift_pct_all": -0.21}}
+wrote results/A2/sbf1.json (4.8 min)
+2026-11-27T10:51:08Z A2 mode sbf1 end rc=0 4.02
+2026-11-27T10:51:08Z A2 mode sbf8 start 4.02
+A2-c8: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 22.99, "geomean_tok_s": 24.2, "aggregate_tok_s": 23.17, "median_ttft_ms": 470.6, "truncated_frac": 0.959, "reasoning_token_frac": 0.661, "reasoning_char_frac": 0.723, "median_step_ms": 129.9, "median_tokens_per_step": 2.965, "steps_source": "response", "median_accept_rate": 0.2807, "median_draft_per_step": 7.0}, "aggregate_throughput_tok_s": 177.2}
+wrote results/A2/sbf8.json (1.8 min)
+2026-11-27T10:52:56Z A2 mode sbf8 end rc=0 4.01
+2026-11-27T10:52:56Z A2 mode think24 start 4.01
+2026-11-27T10:55:46Z A2 mode think24 end rc=0 3.98
+2026-11-27T10:55:46Z A2 mode pf start 3.98
+A2  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+8K       8160.0   1.425      5726.3      0.25         None      -                        -         -
+128K     130922.0 33.896     3862.5      17.092       None      46.3 [34.4, 62.3]        -         -
+wrote results/A2/longctx.json (2.7 min)
+2026-11-27T10:58:31Z A2 mode pf end rc=0 3.93
+memavail_min_gib 3.92

@@ -8,6 +8,7 @@ speedbench full, all 73 prompts, c1 tok/s: box A / box B where both were run; up
 
 | release | date | speedbench all-73 | headline change |
 |---|---|---:|---|
+| [v2.9.8](#v298-2026-11-27) | 2026-11-27 | 73.75 (B) | image input, also with the packed KV store (`MM=1`, opt-in); text unchanged |
 | [v2.9.7](#v297-2026-11-26) | 2026-11-26 | **73.54 / 73.17** | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
 | [v2.9.6](#v296-2026-11-26) | 2026-11-26 | 74.28 / 74.28 | MXFP8 copies of the drafter's context projections (code c8 -2.3 to -2.6 % on box A) |
 | [v2.9.5](#v295-2026-11-26) | 2026-11-26 | 73.54 / 73.17 | packed store's verify settle builds page candidates once for all 8 global visits |
@@ -32,6 +33,51 @@ speedbench full, all 73 prompts, c1 tok/s: box A / box B where both were run; up
 | [v2.1](#v21-2026-11-21) | 2026-11-21 | 61.7 | hot-vocabulary draft |
 | [v2](#v2-2026-11-21) | 2026-11-21 | 58.1 | five new overlay packages, a new verify-width rule, a larger KV pool |
 | [v1](#v1-2026-11-21) | 2026-11-21 | 55.8 | first release: the SGLang cookbook cell plus five overlays |
+
+## v2.9.8 (2026-11-27)
+
+Image input, also with the packed global KV store (GitHub issue #1). Text serving code is v2.9.7's.
+
+- **Image input, `MM=1` (opt-in).** The launcher adds SGLang's `--enable-multimodal` with `--mm-io-worker-num 1`,
+  two image bounds and `MEM_FRACTION` defaults 0.03 lower (0.85 for the default profile). `MM=0` (default) serves text
+  exactly as v2.9.7. A raw `--enable-multimodal` / `--disable-multimodal` is refused in favour of `MM`.
+- **The packed store takes images.** v2.9.7's `KV12S=1` refused `--enable-multimodal` at startup. Inkling2's image
+  tokens are ordinary causal positions (the vision tower only supplies their input embeddings; no attention mask
+  changes), so image prefill reads the packed store through the same fused readers as text: eager image chunks use
+  the pool-charged BF16 prefix scratch or the kernel's packed loader, never a BF16 gather. The refusal is gone; the
+  prefill visit checks in `inkling_attn` and `inkling_prefill` now admit image batches explicitly (SGLang already
+  cleared the multimodal inputs before attention, so this changes nothing that ran) and still exclude FA4 image
+  masks. `tools/gpu_check_kv12s.py` adds an image batch (three long-prefix requests) checked bitwise on both readers
+  with the gather refused.
+- **Image bounds (`inkling_mm`, new).** Inkling2's image processor has no size or count limit, and every image
+  request keeps its patches in host memory (19.2 KB per image token) until it finishes. `MM_MAX_IMAGE_TOKENS=16384`
+  refuses a request whose images are larger together (HTTP 400 with the sizes, read from the headers before any pixel
+  is decoded; no resizing). `MM_INFLIGHT_TOKENS=16384` admits image requests in the tokenizer, before decoding, while
+  the image tokens of all requests in flight fit; a later image request waits for an earlier one to finish. Without
+  it, 8 concurrent requests with 16,320 image tokens each, next to thinking c24 and a cold 240K needle, took
+  MemAvailable to 2.4 GiB at 0.88 and to 3.4 / 2.7 GiB at 0.86 and the memory guard stopped the server.
+- **Text, ABBA on box B** (`MM=0` A1 / A2 against `MM=1` B1 / B2, both at 0.88): speedbench full c1 73.54 / 73.95 vs
+  73.56 / 73.81, c8 per-request 24.46 / 24.20 vs 24.16 / 24.31, thinking c24 530.2 / 531.1 vs 535.8 / 522.1, prefill
+  8K 5,718 / 5,726 vs 5,750 / 5,710 and 128K 3,859 / 3,862 vs 3,861 / 3,848 tok/s; greedy texts 73 / 73 identical
+  across all four runs. Global-layer KV tokens 2,299,904 / 2,317,056 vs 2,287,104 / 2,298,752 (tower and embedding
+  cache ~-15K, -0.7 %). On box A, `MM=1` at 0.02 lower: c1 73.26 / c8 23.29 against 73.54 / 23.03 for `MM=0`
+  (single runs), KV 2,231,552 / 2,212,736 against 2,305,792 (-3.2 / -4.0 %); expect about -5 % at the shipped 0.03.
+- **Worst case with images** (thinking c24 + a cold 240K needle + 16 requests of ~80K text and 16,320 image tokens, 8
+  at a time): with the in-flight bound at 32,768 and the fraction 0.02 lower, 16 / 16 requests and lowest
+  MemAvailable 3.34 GiB in one boot, 3.22 GiB and a guard stop in another. The shipped defaults (16,384 in flight,
+  0.03 lower) add ~1.1 GiB and halve the vision batch; that combination was not run again (expected lowest ~4.3 GiB).
+- **Images:** eight greedy questions with known answers (`bench/image_check.py`, new) gave identical texts with
+  `KV12S=1` and `KV12S=0` (8 / 8), also at 0.60 / `CTX=524288`; 7 answers right, the eighth correctly said the test
+  note was cut at the image edge (fixed in the script since). Oversized request: HTTP 400, server kept answering.
+- **The issue's setup** (`KV12S=0`, `MEM_FRACTION=0.60`, `CTX=524288`, images on) measured speedbench full c1 74.08
+  on box B (2.742 tokens per step, 38.7 ms), against 73.7 for the default profile with `KV12S=1` and 74.24 for `KV12S=0`
+  at its default sizing the same day: on this box neither the store nor the fraction moves c1. At 0.60 / 524288 with
+  `KV12S=1` and images: thinking c24 + a cold 480K needle (PASS) + 4 concurrent requests of ~230K tokens with two
+  8,160-token images each, 0 failures, lowest MemAvailable 34.2 GiB.
+- Results: `results/MM298-A1-s06/`, `results/MM298-A2-s06/`, `results/MM298-B1-s06/`, `results/MM298-B2-s06/`,
+  `results/MM298-K0-s06/`, `results/MM298-R0-s06/`, `results/MM298-R1-s06/`, `results/MM298-R2-s06/`,
+  `results/MM298-W1-s06/`, `results/MM298-W2-s06/`, `results/MM298-W3-s06/`, `results/MM298-A3-s05/`,
+  `results/MM298-W4-s05/`, `results/MM298-W5-s05/`, `results/MM298-GPUCHK-s06/`, `results/MM298-GPUCHK-s05/`.
 
 ## v2.9.7 (2026-11-26)
 

@@ -1,0 +1,2 @@
+oversize: HTTP 400 (the size refusal): '{"object":"error","message":"the request\'s 1 image(s) (5200 x 5200 pixels) are 16900 vision tokens; this server accepts at most 16384 per request (INKLING_MM_MAX_IMAGE_TOKENS, MM_MAX_IMAGE_TOKENS in scripts/launch.sh); downscale or split them","type":"BadRequestError","param":null,"code":400}'
+oversize: server answers afterwards: True ('4')

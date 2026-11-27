@@ -1,0 +1,5 @@
+{"i": 0, "ok": false, "error": "<HTTPError 400: 'Bad Request'>"}
+{"i": 1, "ok": false, "error": "<HTTPError 400: 'Bad Request'>"}
+{"i": 2, "ok": false, "error": "<HTTPError 400: 'Bad Request'>"}
+{"i": 3, "ok": false, "error": "<HTTPError 400: 'Bad Request'>"}
+load: 4 requests (4 concurrent, ~200000 text tokens + 3 x 8160 image tokens each), 4 failed, 1 s

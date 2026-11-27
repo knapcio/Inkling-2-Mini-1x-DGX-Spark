@@ -1,0 +1,22 @@
+2026-11-27T09:56:59Z A1 mode warm start 5.32
+A1-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.08, "geomean_tok_s": 74.56, "aggregate_tok_s": 72.49, "median_ttft_ms": 159.1, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 37.54, "median_tokens_per_step": 2.581, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.037, "drift_pct_all": -0.037}}
+wrote results/A1/warm.json (1.4 min)
+2026-11-27T09:58:22Z A1 mode warm end rc=0 5.59
+2026-11-27T09:58:22Z A1 mode sbf1 start 5.59
+A1: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.01, "geomean_tok_s": 73.54, "aggregate_tok_s": 71.54, "median_ttft_ms": 160.0, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.95, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.073, "drift_pct_all": -0.073}}
+wrote results/A1/sbf1.json (4.8 min)
+2026-11-27T10:03:11Z A1 mode sbf1 end rc=0 5.28
+2026-11-27T10:03:11Z A1 mode sbf8 start 5.28
+A1-c8: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 23.39, "geomean_tok_s": 24.46, "aggregate_tok_s": 23.34, "median_ttft_ms": 456.0, "truncated_frac": 0.932, "reasoning_token_frac": 0.654, "reasoning_char_frac": 0.715, "median_step_ms": 129.62, "median_tokens_per_step": 2.965, "steps_source": "response", "median_accept_rate": 0.2874, "median_draft_per_step": 7.0}, "aggregate_throughput_tok_s": 178.89}
+wrote results/A1/sbf8.json (1.8 min)
+2026-11-27T10:04:57Z A1 mode sbf8 end rc=0 5.27
+2026-11-27T10:04:57Z A1 mode think24 start 5.27
+2026-11-27T10:07:44Z A1 mode think24 end rc=0 5.25
+2026-11-27T10:07:44Z A1 mode pf start 5.25
+A1  longctx: 3.275 chars/token (tokenize)
+context  tokens   TTFT cold  prefill t/s TTFT cached  cached    decode tok/s [CI]        step ms   tok/step
+8K       8160.0   1.427      5718.3      0.253        None      -                        -         -
+128K     130922.0 33.925     3859.2      17.119       None      48.0 [34.3, 67.0]        -         -
+wrote results/A1/longctx.json (2.7 min)
+2026-11-27T10:10:28Z A1 mode pf end rc=0 5.19
+memavail_min_gib 5.14

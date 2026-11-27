@@ -414,6 +414,76 @@ def check_prefill(prefix, chunk, device, generator, flush, reps, warps):
             begin = end
 
 
+def check_image_prefill(device, generator, warps):
+    """Image input (v2.9.8): Inkling2 image tokens are causal positions with vision-tower embeddings, so a prefill
+    batch that carries images must get the fused prefill visit (the packed reader) on this GPU, never the stock
+    FA4 call on a BF16 gather; an FA4 image mask (another model's bidirectional spans) keeps the stock path. Then a
+    concurrent image-chunk batch (three requests, long prefixes, 1,600 new rows, eager as image chunks are) runs
+    bitwise against the BF16 kernel on the raw cache: once through the pool-charged scratch and once with more
+    referenced pages than the scratch holds (the in-kernel packed loader), with the gather fallback refused."""
+    from types import SimpleNamespace
+
+    from inkling_attn import patch as attn_patch
+    from inkling_attn.ops import prefill_attention
+    from inkling_attn.patch import use_visit
+    from inkling_kv12s.patch import dispatch_packed_fa4
+
+    proj = (normal((16, EXTENT), device, generator) * 0.1).contiguous()
+    mode = SimpleNamespace(is_extend=lambda: True, is_decode=lambda: False, is_target_verify=lambda: False,
+                           is_draft_extend=lambda: False)
+    meta = SimpleNamespace()
+    owner = SimpleNamespace(is_local=False, head_dim=DIM, d_rel=16, num_tp_heads=HEADS_Q, num_tp_kv_heads=HEADS_K,
+                            rel_logits_proj=SimpleNamespace(proj=proj), rel_extent=EXTENT)
+
+    def visit(images):
+        batch = SimpleNamespace(forward_mode=mode, contains_mm_inputs=lambda: images)
+        return attn_patch._visit_for(owner, batch, SimpleNamespace(pack_gqa=False, sliding_window_size=-1),
+                                     lambda: SimpleNamespace(forward_metadata=meta),
+                                     lambda: SimpleNamespace(kv_cache_dtype="auto"), None, ("global",))
+
+    if visit(False) is None or visit(True) is None:
+        raise AssertionError("image prefill: a batch with images did not get the fused global prefill visit")
+    meta.image_token_ranges = torch.zeros((1, 2), dtype=torch.int32, device=device)
+    if visit(True) is not None:
+        raise AssertionError("image prefill: an FA4 image mask must keep the stock path")
+
+    prefixes, chunks = (5 * PAGE + 17, 9 * PAGE, 2 * PAGE + 101), (600, 700, 300)
+    bases, rows = [], 0
+    for prefix, chunk in zip(prefixes, chunks):
+        bases.append(rows)
+        rows += -(-(prefix + chunk) // PAGE) * PAGE
+    k, v = raw_cache(rows, device, generator)
+    kc, vc = (t.view(-1, PAGE, HEADS_K, DIM) for t in (k, v))
+    layer = Layer.standalone(kc.shape[0], HEADS_K, device=device)
+    width = max(-(-(p + c) // PAGE) for p, c in zip(prefixes, chunks))
+    table = torch.zeros((len(prefixes), width), dtype=torch.int32, device=device)
+    for i, (base, prefix, chunk) in enumerate(zip(bases, prefixes, chunks)):
+        append(layer, k, v, base, base + prefix + chunk)  # the chunk's K/V is written before its attention
+        pages = -(-(prefix + chunk) // PAGE)
+        table[i, :pages] = torch.arange(1 + base // PAGE, 1 + base // PAGE + pages, dtype=torch.int32, device=device)
+    seq = lengths(device, [p + c for p, c in zip(prefixes, chunks)])
+    cu_q = lengths(device, list(accumulate(chunks, initial=0)))
+    q = normal((sum(chunks), HEADS_Q, DIM), device, generator)
+    r = normal((sum(chunks), HEADS_Q, 16), device, generator)
+    expected = prefill_attention(q, kc, vc, table, cu_q, seq, r, proj, SCALE, None, warps=warps)
+    referenced = int(sum(-(-(p + c) // PAGE) for p, c in zip(prefixes, chunks)))
+
+    def unexpected_fallback(**call):
+        raise AssertionError("image prefill reached the BF16 gather fallback")
+
+    for label, scratch_pages, served in (("scratch", referenced + 1, 1), ("packed loader", 4, 0)):
+        with bounded_scratch(scratch_pages, device, min_rows=0) as scratch:
+            kwargs = fa4_kwargs(q, layer, table, cu_q, seq, max(chunks), r, mode="extend")
+            with use_visit(r, proj):
+                actual = dispatch_packed_fa4(unexpected_fallback, layer, kwargs, warps=warps)
+        if scratch.served != served:
+            raise AssertionError(f"image prefill {label}: expected {served} scratch gathers, got {scratch.served}")
+        for part, a, b in zip(("output", "LSE"), actual, expected):
+            equal_bits(f"image prefill {label} {part}", a, b)
+    print(f"image prefill (3 requests, {referenced} pages)  visit on image batches, bitwise via scratch and "
+          "packed loader, no gather", flush=True)
+
+
 def check_prefill_capture(device, generator, warps):
     """Static pools keep prefill CUDA graphs. A captured packed prefill must replay bitwise
     against the BF16 kernel on BF16 KV for batches it was not captured with. One graph per
@@ -1203,6 +1273,8 @@ def run_checks(args):
             with phase("fused prefill", device, peaks):
                 check_prefill(4 * PAGE, 64, device, generator, flush, args.prefill_reps, args.warps)
                 check_prefill_capture(device, generator, args.warps)
+            with phase("image prefill", device, peaks):
+                check_image_prefill(device, generator, args.warps)
             if args.large:
                 for rows in (32 * 1024, 128 * 1024):
                     with phase(f"compact {rows // 1024}K", device, peaks, min_free=3 * GIB):

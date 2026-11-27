@@ -1,0 +1,17 @@
+{"i": 0, "ok": true, "prompt_tokens": 96857, "seconds": 307.76, "answer": ""}
+{"i": 1, "ok": true, "prompt_tokens": 96939, "seconds": 231.36, "answer": ""}
+{"i": 2, "ok": true, "prompt_tokens": 97131, "seconds": 156.81, "answer": ""}
+{"i": 3, "ok": true, "prompt_tokens": 96945, "seconds": 403.96, "answer": ""}
+{"i": 4, "ok": true, "prompt_tokens": 97147, "seconds": 402.24, "answer": ""}
+{"i": 5, "ok": true, "prompt_tokens": 96966, "seconds": 158.67, "answer": ""}
+{"i": 6, "ok": true, "prompt_tokens": 97231, "seconds": 310.72, "answer": "The two images are dense fields of small multicolored squares scattered across a white background, with a large black al"}
+{"i": 7, "ok": true, "prompt_tokens": 97059, "seconds": 259.87, "answer": ""}
+{"i": 8, "ok": true, "prompt_tokens": 96912, "seconds": 368.46, "answer": "Both images are dense scatter plots of many small multicolored squares on a pale cream background, with a"}
+{"i": 9, "ok": true, "prompt_tokens": 97003, "seconds": 367.42, "answer": ""}
+{"i": 10, "ok": true, "prompt_tokens": 96996, "seconds": 415.47, "answer": ""}
+{"i": 11, "ok": true, "prompt_tokens": 97050, "seconds": 387.91, "answer": ""}
+{"i": 12, "ok": true, "prompt_tokens": 97065, "seconds": 457.52, "answer": "Both images"}
+{"i": 13, "ok": true, "prompt_tokens": 97058, "seconds": 453.6, "answer": ""}
+{"i": 14, "ok": true, "prompt_tokens": 96899, "seconds": 422.21, "answer": ""}
+{"i": 15, "ok": true, "prompt_tokens": 96919, "seconds": 420.48, "answer": ""}
+load: 16 requests (8 concurrent, ~60000 text tokens + 2 x 8160 image tokens each), 0 failed, 826 s

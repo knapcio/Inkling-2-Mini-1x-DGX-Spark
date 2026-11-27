@@ -1,0 +1,15 @@
+2026-11-27T11:19:39Z R1 mode warm start 36.90
+R1-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.41, "geomean_tok_s": 74.82, "aggregate_tok_s": 72.75, "median_ttft_ms": 153.8, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 37.36, "median_tokens_per_step": 2.581, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": 0.374, "drift_pct_all": 0.374}}
+wrote results/R1/warm.json (1.3 min)
+2026-11-27T11:21:00Z R1 mode warm end rc=0 37.36
+2026-11-27T11:21:00Z R1 mode sbf1 start 37.36
+R1: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.18, "geomean_tok_s": 73.83, "aggregate_tok_s": 71.83, "median_ttft_ms": 154.5, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.83, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": -0.095, "drift_pct_all": -0.095}}
+wrote results/R1/sbf1.json (4.8 min)
+2026-11-27T11:25:48Z R1 mode sbf1 end rc=0 37.37
+2026-11-27T11:25:48Z R1 mode img start 37.37
+2026-11-27T11:25:59Z R1 mode img end rc=0 36.73
+2026-11-27T11:25:59Z R1 mode worst512 start 36.73
+needle 480K                  PASS  {"prompt_tokens": 479930, "seconds": 266.7, "expected": "SIGNAL-MARBLE-3483", "answer": "SIGNAL-MARBLE-3483"}
+1 / 1 passed
+2026-11-27T11:33:18Z R1 mode worst512 end rc=0 36.44
+memavail_min_gib 36.21

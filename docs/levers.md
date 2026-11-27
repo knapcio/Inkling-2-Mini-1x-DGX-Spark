@@ -12,6 +12,7 @@ How the default profile is built, what every overlay changes and what it was mea
 - [Prompt copy for long documents](#prompt-copy-for-long-documents)
 - [Prefill levers](#prefill-levers)
 - [Packed global KV store (default, `KV12S=1`)](#packed-global-kv-store-default-kv12s1)
+- [Image input (`MM=1`)](#image-input-mm1)
 - [FP8 KV](#fp8-kv)
 - [Tried and not adopted](#tried-and-not-adopted)
 - [Open ideas, not pursued](#open-ideas-not-pursued)
@@ -360,7 +361,7 @@ Limits and refusals:
   all qualification runs: 0 overflow heads, 0 fallback pages.
 - The prefill scratch is sized for `CTX`: 1.03 GiB at 256K, 2.03 GiB at 512K, 4.03 GiB at 1M.
 - Startup refuses combinations it does not support: tensor / pipeline / data / expert parallelism above 1, context
-  parallelism, streaming sessions, multimodal input, hierarchical / external KV caches and disaggregation,
+  parallelism, streaming sessions, hierarchical / external KV caches and disaggregation,
   speculation other than a linear DSpark draft or a DFLASH draft (the latter only on the static pools and with its
   draft KV ring), breakable prefill graphs, ragged verify modes other than `static`, captured verify shapes above the
   compact attention cutoff (48 requests x 8 rows), quantised global KV, and `--enable-unified-memory` without
@@ -368,6 +369,75 @@ Limits and refusals:
   together; when starting the container by hand, keep them consistent with the command above.
 - Prompt-logprob requests over thousands of tokens make SGLang hold FP32 logits for every scored row (2.5 GB for
   3,073 rows in one request, on either store); request them in windows of a few hundred rows on this box.
+
+## Image input (`MM=1`)
+
+`MM=1` (opt-in since v2.9.8; the default `MM=0` is text only) serves images: SGLang's `--enable-multimodal` loads the 23-layer
+vision tower (0.59 GiB) and the image processor. Images go in as `image_url` parts; each 40 x 40-pixel cell becomes
+one prompt token at the image's native size.
+
+Image tokens are ordinary causal positions for the language model: the vision tower only supplies their input
+embeddings, and no attention mask changes (FA4's image masks, `image_token_ranges`, belong to other models). So image
+prefill reads the packed store through the same fused prefill readers as text: image chunks run eagerly (SGLang
+never replays prefill graphs for them), on the pool-charged BF16 prefix scratch or, when a batch references more
+pages than it holds, the kernel's packed loader. No image path reaches a BF16 gather of the store
+(`tools/gpu_check_kv12s.py` checks an image batch of three long-prefix requests bitwise on both readers with the
+gather refused; the servers logged no gather). Up to v2.9.7, `KV12S=1` refused `--enable-multimodal` at startup;
+nothing else in the store had to change.
+
+The vision side has no limit in Inkling2's processor: each request's preprocessed patches (19.2 KB per image token,
+held in host memory until the request finishes) and the vision tower's activations come on top of the KV budget.
+With images at 16,320 tokens per request arriving 8 at a time next to thinking c24 and a cold 240K needle,
+MemAvailable fell to 2.4 GiB at 0.88 and to 3.4 / 2.7 GiB at 0.86 with one preprocessing thread; the memory guard
+stopped the server each time (`results/MM298-W1-s06/`, `-W2-`, `-W3-`). So `MM=1` adds:
+
+- `MM_MAX_IMAGE_TOKENS=16384` (`inkling_mm`): a request whose images hold more vision tokens together gets HTTP 400
+  naming the sizes, decided from the image headers before any pixel is decoded; the server keeps running. Images
+  within it are processed exactly as stock (no resize). Two 12 MP photos (4032 x 3024) are 15,352 tokens.
+- `MM_INFLIGHT_TOKENS=16384` (`inkling_mm`): image requests are admitted in the tokenizer, before their images are
+  decoded, while the image tokens of all requests in flight stay within 16,384; a later image request waits until an
+  earlier one finishes (a lone request is always admitted, text-only requests never wait). This bounds the host
+  memory the patches hold to ~0.4 GB and the vision tower's batch to 16,384 tokens; with large images, image requests
+  run about one at a time (small ones still run together).
+- `--mm-io-worker-num 1`: one request's images are preprocessed at a time.
+- `MEM_FRACTION` defaults 0.03 lower (0.85 for the default profile, ~3.3 GiB).
+
+With the in-flight bound at 32,768 and the fraction 0.02 lower (box A, 2026-11-27), the same worst case ran 16 / 16
+requests with the needle PASS and a lowest MemAvailable of 3.34 GiB in one boot; in a second boot it touched 3.22 GiB
+and the guard stopped the server (`results/MM298-W4-s05/`, `results/MM298-W5-s05/`). The steps line up with image chunks reaching the vision
+tower's activations, which the CUDA caching allocator keeps. The shipped defaults halve the in-flight bound (the
+vision batch and the held patches with it) and lower the fraction by another 0.01 (+1.1 GiB of headroom); this
+combination was not run again, so treat ~4.3 GiB as the expected lowest MemAvailable in that worst case, not a
+measurement. For more headroom lower `MEM_FRACTION` further or `MM_INFLIGHT_TOKENS` / `MM_MAX_IMAGE_TOKENS`.
+
+Measured on box B (2026-11-27, ABBA, `MM=0` / `MM=1` at the same fraction 0.88, so the only differences are the
+vision tower, the multimodal embedding cache and the prefill graphs' embedding slot):
+
+| | `MM=0` (A1 / A2) | `MM=1` (B1 / B2) |
+|---|---:|---:|
+| speedbench full c1, all 73 | 73.54 / 73.95 | 73.56 / 73.81 |
+| speedbench full c8, per-request geomean | 24.46 / 24.20 | 24.16 / 24.31 |
+| thinking c24, aggregate | 530.2 / 531.1 | 535.8 / 522.1 |
+| prefill 8K / 128K, tok/s | 5,718 / 5,726, 3,859 / 3,862 | 5,750 / 5,710, 3,861 / 3,848 |
+| greedy texts, speedbench full c1 | 73 / 73 identical across all four runs | |
+| global-layer KV tokens | 2,299,904 / 2,317,056 | 2,287,104 / 2,298,752 |
+
+Text is bit-identical and as fast; at the same fraction the tower and cache cost ~15K KV tokens (-0.7 %, within the
+boot-to-boot spread of 17K). The lower fraction costs more: at 0.02 lower `MM=1` sized 2,231,552 / 2,212,736 tokens
+against 2,305,792 for `MM=0` on box A (-3.2 / -4.0 %); at 0.03 lower expect about -5 %. Text speed with `MM=1` there:
+speedbench full c1 73.26 against 73.54, c8 per-request 23.29 against 23.03 (single runs). That KV cost is why images
+stay opt-in.
+
+Images: eight greedy questions with known answers (`bench/image_check.py run`; numbers, shapes, a bar chart, a
+note, a 4,950-token image, two images in one request, a text-only control) gave identical texts with `KV12S=1`
+and `KV12S=0`, at 0.88 / 262,144 and at 0.60 / 524,288 (8 / 8 in every pair; `results/MM298-B1-s06/`,
+`-B2-`, `-K0-`, `-R0-`, `-R1-`). Seven answers were right; the eighth correctly said the note's text was cut at the
+image edge (a drawing error in that run's test image, fixed since). At the
+reporter's sizing (0.60, `CTX=524288`), thinking c24, a cold 480K needle and 4 concurrent requests of ~230K tokens
+with two 8,160-token images each ran with 0 failures, needle PASS, lowest MemAvailable 34.2 GiB
+(`results/MM298-R2-s06/`).
+
+Results: `results/MM298-*` (box B: `-s06`, box A: `-s05`).
 
 ## FP8 KV
 

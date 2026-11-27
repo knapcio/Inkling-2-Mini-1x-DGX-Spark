@@ -1,0 +1,1 @@
+{"label": "W5-kv-c24", "started": "2026-11-27T16:04:13+01:00", "concurrency": 24, "requests": 48, "failed": 48, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 180.68, "completion_tokens": 0, "aggregate_tok_s": 0.0, "per_request_decode_tok_s_median": null, "ttft_median_s": null, "length_finishes": 0}

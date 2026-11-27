@@ -1,0 +1,1 @@
+{"label": "R2-kv-c24", "started": "2026-11-27T13:32:30+01:00", "concurrency": 24, "requests": 48, "failed": 0, "max_tokens": 2048, "temperature": 0.8, "effort": "high", "wall_s": 809.55, "completion_tokens": 93014, "aggregate_tok_s": 114.9, "per_request_decode_tok_s_median": 10.1, "ttft_median_s": 1.58, "length_finishes": 43}

@@ -71,6 +71,7 @@ scripts/download.sh                       # weights -> ~/models/Inkling-2-Mini, 
 docker pull lmsysorg/sglang@sha256:efac853b46811ccb760545b7b29e7119bdf907537ccf6e863fac3011fe8b98de
 scripts/launch.sh up                      # SGLang + DFlash2 + overlays on 127.0.0.1:8000, packed KV store, mem 0.88
 #   or: SPEC=dspark scripts/launch.sh up   # the model's own DSpark draft (v2.7.2 profile)
+#   or: MM=1 scripts/launch.sh up          # also image input (v2.9.8; mem 0.85, images bounded per request and in flight)
 scripts/launch.sh status                  # container, API, MemAvailable
 python3 bench/sanity.py all               # chat, effort ladder, tool call, JSON schema, 120K needle
 scripts/launch.sh down
@@ -118,7 +119,8 @@ speedbench full, all 73 prompts, c1 tok/s (mean of the Sparks it was run on). Ev
 
 | release | speedbench all-73 | headline change |
 |---|---:|---|
-| [v2.9.7](CHANGELOG.md#v297-2026-11-26) | **73.36** | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
+| [v2.9.8](CHANGELOG.md#v298-2026-11-27) | **73.75** | image input, also with the packed KV store (`MM=1`, opt-in); text unchanged |
+| [v2.9.7](CHANGELOG.md#v297-2026-11-26) | 73.36 | MXFP8 drafter context projections opt-in (`DFLASH_CTX8=1`); serving code = v2.9.5 |
 | [v2.9.6](CHANGELOG.md#v296-2026-11-26) | 74.28 | MXFP8 copies of the drafter's context projections (code c8 -2.3 to -2.6 % on one Spark) |
 | [v2.9.5](CHANGELOG.md#v295-2026-11-26) | 73.36 | packed store's verify settle builds page candidates once for all 8 global visits |
 | [v2.9.4](CHANGELOG.md#v294-2026-11-25) | 73.21 | prefix tail defers to a draft-tail snapshot (long context +2.1 %) |

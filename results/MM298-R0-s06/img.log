@@ -1,0 +1,9 @@
+number      PASS prompt    160 tok,   0.60 s: '4729'
+shapes      PASS prompt    262 tok,   0.67 s: 'Red circle, blue square, green triangle'
+chart_max   PASS prompt    487 tok,   0.87 s: 'Thursday has the highest bar, with a value of 9.'
+chart_sum   PASS prompt    483 tok,   0.94 s: '26'
+ocr         FAIL prompt    636 tok,   3.34 s: 'The note says the meeting moves to **Thursday at 15:…** (the time is cut off at the right edge), in **Room Aur'
+large       PASS prompt   4977 tok,   3.09 s: 'The large red letters spell **ORBIT 58**.'
+two_images  PASS prompt    402 tok,   1.24 s: 'The number is **4729**, and there are **3 shapes**.'
+text_only   PASS prompt     29 tok,   0.53 s: '391'
+7/8 answers contain the expected content

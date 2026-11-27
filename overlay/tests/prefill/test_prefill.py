@@ -366,7 +366,7 @@ class BiasLayoutLogicTests(unittest.TestCase):
             is_target_verify=lambda: verify, is_draft_extend=lambda: draft,
         )
 
-    def _setup(self, **kw):
+    def _setup(self, images=False, **kw):
         class FakeCuda(torch.Tensor):
             @property
             def is_cuda(self):
@@ -376,7 +376,7 @@ class BiasLayoutLogicTests(unittest.TestCase):
         sk = torch.tensor([10], dtype=torch.int32).as_subclass(FakeCuda)
         meta = types.SimpleNamespace(cu_seqlens_q=cu, cache_seqlens_int32=sk)
         backend = types.SimpleNamespace(forward_metadata=meta)
-        fb = types.SimpleNamespace(forward_mode=self._mode(**kw), contains_mm_inputs=lambda: False)
+        fb = types.SimpleNamespace(forward_mode=self._mode(**kw), contains_mm_inputs=lambda: images)
         owner = types.SimpleNamespace(is_local=True, rel_extent=1024, rel_logits_proj=object())
         attn = types.SimpleNamespace(pack_gqa=False, sliding_window_size=1023)
         model = types.SimpleNamespace(kv_cache_dtype="auto")
@@ -401,6 +401,18 @@ class BiasLayoutLogicTests(unittest.TestCase):
         o, f, a, g1, g2, _ = self._setup()
         o.is_local, a.sliding_window_size = False, -1
         self.assertEqual(bias_layout._visit_for(o, f, a, g1, g2).local, False)
+
+    def test_image_batches_stay_eligible(self):
+        # Inkling2 image tokens are causal positions with vision-tower embeddings (v2.9.8): an image chunk takes
+        # the same sheared-bias path as text; only an FA4 image mask (bidirectional spans) keeps the stock path.
+        for local, window in ((True, 1023), (False, -1)):
+            o, f, a, g1, g2, m = self._setup(images=True)
+            o.is_local, a.sliding_window_size = local, window
+            v = bias_layout._visit_for(o, f, a, g1, g2)
+            self.assertIsNotNone(v, local)
+            self.assertEqual(v.local, local)
+            m.image_token_ranges = object()
+            self.assertIsNone(bias_layout._visit_for(o, f, a, g1, g2), local)
 
     def test_rel_forward_and_varlen(self):
         made = []

@@ -1,0 +1,5 @@
+2026-11-27T11:11:21Z W1 mode worst start 5.29
+needle 240K                  PASS  {"prompt_tokens": 240104, "seconds": 327.6, "expected": "WILLOW-FALCON-3624", "answer": "WILLOW-FALCON-3624"}
+1 / 1 passed
+2026-11-27T11:17:22Z W1 mode worst end rc=0 6.52
+memavail_min_gib 2.42

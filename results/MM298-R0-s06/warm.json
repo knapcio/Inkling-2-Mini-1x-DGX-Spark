@@ -1,0 +1,13407 @@
+{
+ "schema": "speedbench-result/1",
+ "tool_version": "0.3.0",
+ "label": "R0-warm",
+ "block": null,
+ "run_id": "6a9e6eff5e7c47b0b27e1a639c20f7d2-R0-warm",
+ "session_id": "6a9e6eff5e7c47b0b27e1a639c20f7d2",
+ "arms_in_session": [
+  "R0-warm"
+ ],
+ "started": "2026-11-27T12:35:14+01:00",
+ "elapsed_s": 80.3,
+ "prompt_set": {
+  "version": "speedbench-v1",
+  "sha256": "07dc37be5a53d2681d462412fc5f94c69540e7c20233eee84df8f6b7118b73e2",
+  "n_selected": 30
+ },
+ "settings": {
+  "mode": "quick",
+  "max_tokens": 160,
+  "temperature": 0.0,
+  "top_p": null,
+  "effort": "low",
+  "effort_field": "template",
+  "conc": 1,
+  "repeats": 1,
+  "variants": 1,
+  "prime": true,
+  "skip_tools": false,
+  "categories": null,
+  "sentinels": 2,
+  "seeds": null,
+  "extra_body": {},
+  "expected_jobs": 30,
+  "metrics": false,
+  "preregister": "tok",
+  "tps_margin": 2.0,
+  "warmup_prefill": 8192,
+  "isolate": null
+ },
+ "arm": {
+  "url": "http://127.0.0.1:8000",
+  "model": "inkling-2-mini",
+  "extra_body": {},
+  "continuous_usage": true,
+  "engine": "sglang",
+  "stats_field": null
+ },
+ "meta": {
+  "date": "2026-11-27T12:36:34+01:00",
+  "mode": "quick",
+  "model": "inkling-2-mini",
+  "quant": "unknown",
+  "engine": "sglang",
+  "engine_version": "0.0.0.dev1+inkling2",
+  "engine_commit": "unknown",
+  "config": "",
+  "hardware": "unknown",
+  "thinking": "unknown",
+  "effort": "low",
+  "host_compacted": "unknown",
+  "fresh_boot": "unknown",
+  "clock_policy": "unknown",
+  "notes": "",
+  "tool_version": "0.3.0",
+  "client": {
+   "host": "box-b",
+   "python": "3.12.3",
+   "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
+  }
+ },
+ "request_template": {
+  "model": "inkling-2-mini",
+  "stream": true,
+  "max_tokens": 160,
+  "temperature": 0.0,
+  "stream_options": {
+   "include_usage": true,
+   "continuous_usage_stats": true
+  },
+  "chat_template_kwargs": {
+   "reasoning_effort": "low"
+  }
+ },
+ "server": {
+  "url": "http://127.0.0.1:8000",
+  "models": {
+   "object": "list",
+   "data": [
+    {
+     "id": "inkling-2-mini",
+     "object": "model",
+     "created": 1795779314,
+     "owned_by": "sglang",
+     "root": "inkling-2-mini",
+     "parent": null,
+     "max_model_len": 524288
+    }
+   ]
+  },
+  "server_header": "uvicorn",
+  "/get_model_info": {
+   "model_path": "/model",
+   "served_model_name": "inkling-2-mini",
+   "tokenizer_path": "/model",
+   "is_generation": true,
+   "preferred_sampling_params": null,
+   "weight_version": "default",
+   "load_format": "auto",
+   "reasoning_parser": "inkling",
+   "tool_call_parser": "inkling2",
+   "disaggregation_mode": "null",
+   "has_image_understanding": true,
+   "has_audio_understanding": false,
+   "model_type": "inkling2_loop",
+   "architectures": [
+    "Inkling2LoopForConditionalGeneration"
+   ],
+   "embedding": {
+    "family": "none",
+    "task": "none",
+    "execution": "none",
+    "attention": "none",
+    "pooling": "model_defined",
+    "normalize": false,
+    "postprocessor": "none",
+    "tokenizer_special_tokens": "model_default",
+    "supports_dimensions": false,
+    "supports_token_embeddings": false,
+    "supports_multimodal": false,
+    "requires_embedding_flag": false,
+    "auto_enable_embedding": false,
+    "bcg_eligibility": "disabled",
+    "safe_disable_kv_cache": false,
+    "safe_disable_radix_cache": false,
+    "safe_disable_chunked_prefill": false,
+    "encoder_only_attention": false,
+    "enabled": false,
+    "matryoshka_dimensions": [],
+    "bcg": {
+     "prefill_backend": "full",
+     "enabled": false,
+     "capture_token_budget": 8192,
+     "capture_batch_sizes": [
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28,
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128,
+      144,
+      160,
+      176,
+      192,
+      208,
+      224,
+      240,
+      256,
+      288,
+      320,
+      352,
+      384,
+      416,
+      448,
+      480,
+      512,
+      576,
+      640,
+      704,
+      768,
+      832,
+      896,
+      960,
+      1024,
+      1280,
+      1536,
+      1792,
+      2048,
+      2304,
+      2560,
+      2816,
+      3072,
+      3328,
+      3584,
+      3840,
+      4096,
+      4608,
+      5120,
+      5632,
+      6144,
+      6656,
+      7168,
+      7680,
+      8192
+     ]
+    },
+    "cache": {
+     "kv_cache_disabled": false,
+     "radix_cache_disabled": false,
+     "chunked_prefill_disabled": false
+    }
+   }
+  },
+  "/server_info": {
+   "model_path": "/model",
+   "tokenizer_path": "/model",
+   "tokenizer_mode": "auto",
+   "tokenizer_backend": "huggingface",
+   "tokenizer_worker_num": 1,
+   "detokenizer_worker_num": 1,
+   "skip_tokenizer_init": false,
+   "load_format": "auto",
+   "model_loader_extra_config": "{}",
+   "trust_remote_code": false,
+   "context_length": 524288,
+   "is_embedding": false,
+   "enable_multimodal": true,
+   "revision": null,
+   "model_impl": "auto",
+   "model_config_parser": "auto",
+   "json_model_override_args": "{}",
+   "dtype": "bfloat16",
+   "quantization": null,
+   "quantization_param_path": null,
+   "kv_cache_dtype": "auto",
+   "enable_fp32_lm_head": false,
+   "modelopt_quant": null,
+   "modelopt_checkpoint_restore_path": null,
+   "modelopt_checkpoint_save_path": null,
+   "modelopt_export_path": null,
+   "quantize_and_serve": false,
+   "rl_quant_profile": null,
+   "enable_tf32_matmul": false,
+   "mem_fraction_static": 0.6,
+   "max_running_requests": 48,
+   "max_queued_requests": null,
+   "max_total_tokens": null,
+   "chunked_prefill_size": 8192,
+   "prefill_decode_interval": 0,
+   "enable_dynamic_chunking": false,
+   "max_prefill_tokens": 8192,
+   "prefill_max_requests": null,
+   "schedule_policy": "fcfs",
+   "enable_priority_scheduling": false,
+   "disable_priority_preemption": false,
+   "default_priority_value": null,
+   "abort_on_priority_when_disabled": false,
+   "schedule_low_priority_values_first": false,
+   "priority_scheduling_preemption_threshold": 10,
+   "retraction_policy": "length",
+   "schedule_conservativeness": 1.0,
+   "page_size": 128,
+   "c128_page_size": 16,
+   "swa_full_tokens_ratio": 0.05,
+   "disable_hybrid_swa_memory": false,
+   "radix_eviction_policy": "lru",
+   "radix_eviction_policy_config": null,
+   "prefill_only_disable_kv_cache": false,
+   "disable_radix_cache": false,
+   "enable_page_major_kv_layout": false,
+   "enable_unified_memory": false,
+   "disable_chunked_prefix_cache": false,
+   "disable_overlap_schedule": false,
+   "num_continuous_decode_steps": 1,
+   "scheduler_recv_interval": 1,
+   "enable_mixed_chunk": false,
+   "nccl_port": null,
+   "dist_timeout": null,
+   "dist_init_addr": null,
+   "gated_launch_port": null,
+   "nnodes": 1,
+   "node_rank": 0,
+   "tp_size": 1,
+   "dcp_size": 1,
+   "pp_size": 1,
+   "pp_max_micro_batch_size": null,
+   "pp_async_batch_depth": 0,
+   "dp_size": 1,
+   "attn_dp_size": 1,
+   "load_balance_method": "round_robin",
+   "attn_cp_size": 1,
+   "moe_dp_size": 1,
+   "dwdp_size": 1,
+   "dcp_comm_backend": "ag_rs",
+   "dcp_replicate_q_proj": null,
+   "enable_prefill_cp": false,
+   "cp_strategy": null,
+   "enable_dsa_cache_layer_split": false,
+   "enable_cp_decode_attn_tp": false,
+   "enable_kv_cache_sharding": false,
+   "enable_dp_attention_local_control_broadcast": false,
+   "enable_dp_lm_head": false,
+   "enable_tp_lm_head_all_to_all": false,
+   "enable_attn_tp_input_scattered": false,
+   "enable_shared_experts_attn_tp": false,
+   "shared_experts_tp_size": null,
+   "enable_dense_mlp_attn_tp": false,
+   "enable_layernorm_sp": false,
+   "disable_attn_tp_gather": false,
+   "enable_p2p_check": true,
+   "device": "cuda",
+   "base_gpu_id": 0,
+   "gpu_id_step": 1,
+   "random_seed": 238977098,
+   "mlx_enable_sampling": false,
+   "watchdog_timeout": 300,
+   "soft_watchdog_timeout": null,
+   "sleep_on_idle": false,
+   "use_ray": false,
+   "custom_sigquit_handler": null,
+   "numa_node": null,
+   "gc_threshold": null,
+   "host": "127.0.0.1",
+   "port": 8000,
+   "fastapi_root_path": "",
+   "grpc_mode": false,
+   "grpc_port": null,
+   "grpc_worker_threads": 4,
+   "sidecar": null,
+   "sidecar_args": null,
+   "skip_server_warmup": false,
+   "warmups": null,
+   "enable_http2": false,
+   "http2_max_concurrent_streams": 200,
+   "http2_initial_connection_window_size": 1048576,
+   "ssl_keyfile": null,
+   "ssl_certfile": null,
+   "ssl_ca_certs": null,
+   "ssl_keyfile_password": null,
+   "enable_ssl_refresh": false,
+   "api_key": null,
+   "admin_api_key": null,
+   "served_model_name": "inkling-2-mini",
+   "weight_version": "default",
+   "chat_template": null,
+   "trust_request_chat_template": false,
+   "hf_chat_template_name": null,
+   "completion_template": null,
+   "file_storage_path": null,
+   "enable_cache_report": false,
+   "return_input_ids": false,
+   "return_output_ids": false,
+   "reasoning_parser": "inkling",
+   "default_chat_template_kwargs": null,
+   "strip_thinking_cache": false,
+   "enable_strict_thinking": false,
+   "tool_call_parser": "inkling2",
+   "tool_server": null,
+   "sampling_defaults": "model",
+   "asr_max_buffer_seconds": 60,
+   "asr_max_concurrent_sessions": 32,
+   "preferred_sampling_params": null,
+   "allow_auto_truncate": false,
+   "stream_interval": 1,
+   "batch_notify_size": 16,
+   "stream_response_default_include_usage": false,
+   "incremental_streaming_output": false,
+   "enable_streaming_session": false,
+   "enable_session_radix_cache": false,
+   "log_level": "info",
+   "log_level_http": null,
+   "log_requests": false,
+   "log_requests_level": 2,
+   "log_requests_format": "text",
+   "log_requests_target": null,
+   "uvicorn_access_log_exclude_prefixes": [],
+   "crash_dump_folder": null,
+   "enable_metrics": true,
+   "enable_mfu_metrics": false,
+   "enable_metrics_for_all_schedulers": false,
+   "load_snapshot_publish_interval": 15,
+   "tokenizer_metrics_custom_labels_header": "x-custom-labels",
+   "tokenizer_metrics_allowed_custom_labels": null,
+   "extra_metric_labels": null,
+   "bucket_time_to_first_token": null,
+   "bucket_inter_token_latency": null,
+   "bucket_e2e_request_latency": null,
+   "prompt_tokens_buckets": null,
+   "generation_tokens_buckets": null,
+   "gc_warning_threshold_secs": 0.0,
+   "decode_log_interval": 40,
+   "enable_request_time_stats_logging": false,
+   "kv_events_config": null,
+   "load_publish_endpoint": null,
+   "enable_forward_pass_metrics": false,
+   "forward_pass_metrics_worker_id": "",
+   "forward_pass_metrics_ipc_name": null,
+   "enable_trace": false,
+   "trace_modules": "request",
+   "otlp_traces_endpoint": "localhost:4317",
+   "export_metrics_to_file": false,
+   "export_metrics_to_file_dir": null,
+   "stat_loggers": null,
+   "constrained_json_whitespace_pattern": null,
+   "constrained_json_disable_any_whitespace": false,
+   "constrained_json_max_whitespace_cnt": null,
+   "attention_backend": "fa4",
+   "decode_attention_backend": null,
+   "enable_lean_attention": null,
+   "prefill_attention_backend": null,
+   "sampling_backend": "flashinfer",
+   "grammar_backend": "xgrammar",
+   "radix_cache_backend": null,
+   "mm_attention_backend": null,
+   "fp8_gemm_runner_backend": "auto",
+   "fp4_gemm_runner_backend": "auto",
+   "bf16_gemm_backend": "auto",
+   "dsa_prefill_backend": null,
+   "dsv4_prefill_backend": "auto",
+   "dsa_decode_backend": null,
+   "dsa_paged_mqa_logits_backend": "auto",
+   "dsa_topk_backend": "sgl-kernel",
+   "disable_flashinfer_autotune": false,
+   "flashinfer_autotune_skip_ops": null,
+   "mamba_backend": "triton",
+   "cuda_graph_config": {
+    "decode": {
+     "backend": "full",
+     "max_bs": 256,
+     "bs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60,
+      64,
+      72,
+      80,
+      88,
+      96,
+      104,
+      112,
+      120,
+      128,
+      136,
+      144,
+      152,
+      160,
+      168,
+      176,
+      184,
+      192,
+      200,
+      208,
+      216,
+      224,
+      232,
+      240,
+      248,
+      256
+     ],
+     "tc_compiler": "eager",
+     "max_context_size": null,
+     "full_prefill_max_req": null,
+     "full_prefill_prefix_chunk_tokens": null,
+     "max_seq_len": null
+    },
+    "prefill": {
+     "backend": "full",
+     "max_bs": 8192,
+     "bs": [
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28,
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128,
+      144,
+      160,
+      176,
+      192,
+      208,
+      224,
+      240,
+      256,
+      288,
+      320,
+      352,
+      384,
+      416,
+      448,
+      480,
+      512,
+      576,
+      640,
+      704,
+      768,
+      832,
+      896,
+      960,
+      1024,
+      1280,
+      1536,
+      1792,
+      2048,
+      2304,
+      2560,
+      2816,
+      3072,
+      3328,
+      3584,
+      3840,
+      4096,
+      4608,
+      5120,
+      5632,
+      6144,
+      6656,
+      7168,
+      7680,
+      8192
+     ],
+     "tc_compiler": "eager",
+     "max_context_size": null,
+     "full_prefill_max_req": null,
+     "full_prefill_prefix_chunk_tokens": null,
+     "max_seq_len": null
+    }
+   },
+   "cuda_graph_backend_decode": null,
+   "cuda_graph_backend_prefill": "full",
+   "cuda_graph_max_bs_decode": null,
+   "cuda_graph_max_bs_prefill": null,
+   "cuda_graph_bs_decode": null,
+   "cuda_graph_bs_prefill": null,
+   "cuda_graph_prefill_max_context": null,
+   "disable_prefill_cuda_graph": false,
+   "disable_decode_cuda_graph": false,
+   "disable_cuda_graph": false,
+   "disable_cuda_graph_padding": false,
+   "enable_profile_cuda_graph": false,
+   "enable_cudagraph_gc": false,
+   "debug_cuda_graph": false,
+   "enable_layerwise_nvtx_marker": false,
+   "enable_nccl_nvls": false,
+   "enable_symm_mem": false,
+   "triton_attention_num_kv_splits": 8,
+   "triton_attention_split_tile_size": null,
+   "flashinfer_mla_disable_ragged": false,
+   "enable_fused_qk_norm_rope": null,
+   "enable_precise_embedding_interpolation": false,
+   "enable_fused_moe_sum_all_reduce": false,
+   "enable_deepseek_v4_fp4_indexer": false,
+   "disable_custom_all_reduce": false,
+   "enable_mscclpp": false,
+   "enable_torch_symm_mem": false,
+   "enable_scattered_sconv": false,
+   "pre_warm_nccl": false,
+   "boundary_reduction": "rs+rsv",
+   "enable_quant_communications": false,
+   "enforce_disable_flashinfer_allreduce_fusion": false,
+   "flashinfer_allreduce_fusion_backend": null,
+   "enable_aiter_allreduce_fusion": false,
+   "enable_torch_compile": false,
+   "enable_torch_compile_debug_mode": false,
+   "torch_compile_max_bs": 32,
+   "speculative_algorithm": "DFLASH",
+   "uno_lora_path": null,
+   "speculative_draft_model_path": "/draft",
+   "speculative_draft_model_revision": "main",
+   "speculative_draft_load_format": null,
+   "speculative_num_steps": 1,
+   "speculative_eagle_topk": 1,
+   "speculative_num_draft_tokens": 8,
+   "speculative_dflash_block_size": null,
+   "speculative_dspark_block_size": null,
+   "speculative_dspark_sps_table_path": null,
+   "speculative_dspark_confidence_sts_path": null,
+   "speculative_dspark_align_verify_tokens_to_graph_tier": false,
+   "speculative_accept_threshold_single": 1.0,
+   "speculative_accept_threshold_acc": 1.0,
+   "speculative_use_rejection_sampling": false,
+   "speculative_token_map": null,
+   "speculative_attention_mode": "prefill",
+   "speculative_draft_attention_backend": "fa4",
+   "speculative_dsa_topk_backend": "sgl-kernel",
+   "speculative_draft_kv_cache_dtype": null,
+   "speculative_draft_window_size": null,
+   "speculative_moe_runner_backend": "auto",
+   "speculative_moe_a2a_backend": null,
+   "speculative_enable_w4a4_mxfp4_megamoe": null,
+   "speculative_draft_model_quantization": null,
+   "_speculative_draft_quantization_explicitly_set": false,
+   "enable_multi_layer_eagle": false,
+   "speculative_adaptive": false,
+   "speculative_adaptive_config": null,
+   "decoupled_spec_bind_endpoint": null,
+   "decoupled_spec_connect_endpoints": null,
+   "decoupled_spec_rank": null,
+   "decoupled_spec_role": "null",
+   "spec_trace_dir": null,
+   "speculative_ngram_min_bfs_breadth": 1,
+   "speculative_ngram_max_bfs_breadth": 10,
+   "speculative_ngram_match_type": "BFS",
+   "speculative_ngram_max_trie_depth": 18,
+   "speculative_ngram_capacity": 10000000,
+   "speculative_ngram_external_corpus_path": null,
+   "speculative_ngram_external_sam_budget": 0,
+   "speculative_ngram_external_corpus_max_tokens": 10000000,
+   "ep_size": 1,
+   "moe_a2a_backend": "none",
+   "enable_w4a4_mxfp4_megamoe": false,
+   "deepep_v2_mode": "direct",
+   "moe_runner_backend": "auto",
+   "flashinfer_mxfp4_moe_precision": "default",
+   "deepep_mode": "auto",
+   "fuseep_mode": 2,
+   "deepep_dispatcher_output_dtype": "auto",
+   "ep_num_redundant_experts": 0,
+   "ep_dispatch_algorithm": null,
+   "init_expert_location": "trivial",
+   "enable_eplb": false,
+   "eplb_algorithm": "auto",
+   "eplb_rebalance_num_iterations": 1000,
+   "eplb_rebalance_layers_per_chunk": null,
+   "eplb_min_rebalancing_utilization_threshold": 1.0,
+   "expert_distribution_recorder_mode": null,
+   "expert_distribution_recorder_buffer_size": 1000,
+   "expert_balancedness_report_mode": "off",
+   "deepep_config": null,
+   "moe_dense_tp_size": null,
+   "elastic_ep_backend": null,
+   "enable_elastic_expert_backup": false,
+   "mooncake_ib_device": null,
+   "enable_waterfill": false,
+   "ep_join_mode": null,
+   "ep_join_rank_offset": 0,
+   "elastic_ep_initial_size": null,
+   "max_ep_size": null,
+   "elastic_ep_scale_timeout": 600,
+   "disable_flashinfer_cutlass_moe_fp4_allgather": false,
+   "disable_shared_experts_fusion": false,
+   "enforce_shared_experts_fusion": false,
+   "max_mamba_cache_size": 512,
+   "mamba_ssm_dtype": null,
+   "mamba_max_states_per_path": null,
+   "enable_mamba_cache_stochastic_rounding": false,
+   "mamba_cache_philox_rounds": 0,
+   "mamba_full_memory_ratio": 0.1,
+   "mamba_radix_cache_strategy": "extra_buffer",
+   "uses_mamba_radix_cache": true,
+   "mamba_track_interval": 256,
+   "enable_int8_mamba_checkpoint": false,
+   "int8_mamba_ckpt_size": null,
+   "linear_attn_backend": "triton",
+   "linear_attn_decode_backend": null,
+   "linear_attn_prefill_backend": null,
+   "linear_attn_verify_backend": null,
+   "enable_linear_replayssm": false,
+   "linear_replayssm_cache_len": 16,
+   "enable_linear_replayssm_spec": false,
+   "enable_hierarchical_cache": false,
+   "hicache_host_memory_mode": "cache",
+   "hicache_ratio": 2.0,
+   "hicache_size": 0,
+   "hicache_write_policy": "write_through",
+   "hicache_io_backend": "kernel",
+   "hicache_mem_layout": "page_first",
+   "hicache_storage_backend": null,
+   "hicache_storage_prefetch_policy": "timeout",
+   "hicache_storage_backend_extra_config": null,
+   "hicache_storage_prefetch_retry_poll_interval": 8,
+   "hicache_storage_prefetch_retry_max_attempts": 8,
+   "enable_unified_cache_external_linker": false,
+   "unified_cache_external_linker_backend": "mooncake",
+   "enable_hisparse": false,
+   "hisparse_config": null,
+   "enable_broadcast_mm_inputs_process": false,
+   "enable_prefix_mm_cache": false,
+   "mm_enable_dp_encoder": false,
+   "mm_process_config": {},
+   "mm_processor_worker_num": 0,
+   "mm_io_worker_num": 0,
+   "allowed_media_domains": [],
+   "media_url_max_file_size_mb": 64,
+   "mm_preprocess_cache_size_mb": null,
+   "trust_mm_content_hashes": false,
+   "limit_mm_data_per_request": null,
+   "enable_mm_global_cache": false,
+   "image_processor_backend": "auto",
+   "mm_global_cache_backend": "mooncake",
+   "mm_feature_transport": "cpu",
+   "enable_lora": null,
+   "enable_lora_overlap_loading": null,
+   "max_lora_rank": null,
+   "lora_target_modules": null,
+   "lora_paths": null,
+   "max_loaded_loras": null,
+   "max_loras_per_batch": 8,
+   "lora_eviction_policy": "lru",
+   "lora_backend": "csgmv",
+   "max_lora_chunk_size": 16,
+   "experts_shared_outer_loras": null,
+   "lora_use_virtual_experts": false,
+   "lora_strict_loading": false,
+   "lora_drain_wait_threshold": 0.0,
+   "enable_two_batch_overlap": false,
+   "enable_single_batch_overlap": false,
+   "tbo_token_distribution_threshold": 0.48,
+   "cpu_offload_gb": 0,
+   "offload_group_size": -1,
+   "offload_num_in_group": 1,
+   "offload_prefetch_step": 1,
+   "offload_mode": "cpu",
+   "enable_lmcache": false,
+   "lmcache_config_file": null,
+   "enable_flexkv": false,
+   "flexkv_config_file": null,
+   "kt_weight_path": null,
+   "kt_method": "AMXINT4",
+   "kt_cpuinfer": null,
+   "kt_threadpool_count": 2,
+   "kt_num_gpu_experts": null,
+   "kt_max_deferred_experts_per_token": null,
+   "dllm_algorithm": null,
+   "dllm_algorithm_config": null,
+   "dllm_fdfo": true,
+   "disaggregation_mode": "null",
+   "disaggregation_transfer_backend": "mooncake",
+   "disaggregation_bootstrap_port": 8998,
+   "disaggregation_ib_device": null,
+   "disaggregation_decode_enable_radix_cache": false,
+   "disaggregation_decode_enable_offload_kvcache": false,
+   "disaggregation_decode_retraction_backup": null,
+   "num_reserved_decode_tokens": 512,
+   "disaggregation_decode_extra_slots": null,
+   "disaggregation_decode_polling_interval": 1,
+   "optimistic_prefill_attempts": 0,
+   "encoder_only": false,
+   "language_only": false,
+   "language_model_only": false,
+   "encoder_transfer_backend": "zmq_to_scheduler",
+   "encoder_urls": [],
+   "encoder_bootstrap_port": 8997,
+   "encoder_register_urls": [],
+   "enable_adaptive_dispatch_to_encoder": false,
+   "startup_weight_load_mode": "serial",
+   "custom_weight_loader": [],
+   "weight_loader_disable_mmap": true,
+   "weight_loader_prefetch_checkpoints": false,
+   "weight_loader_prefetch_num_threads": 4,
+   "weight_loader_drop_cache_after_load": false,
+   "remote_instance_weight_loader_seed_instance_ip": null,
+   "remote_instance_weight_loader_seed_instance_service_port": null,
+   "remote_instance_weight_loader_send_weights_group_ports": null,
+   "remote_instance_weight_loader_backend": "nccl",
+   "remote_instance_weight_loader_start_seed_via_transfer_engine": false,
+   "engine_info_bootstrap_port": 6789,
+   "modelexpress_config": null,
+   "download_dir": null,
+   "model_checksum": null,
+   "delete_ckpt_after_loading": false,
+   "decrypted_config_file": null,
+   "decrypted_draft_config_file": null,
+   "checkpoint_engine_wait_weights_before_ready": false,
+   "enable_prefill_delayer": false,
+   "prefill_delayer_max_delay_passes": 30,
+   "prefill_delayer_token_usage_low_watermark": null,
+   "prefill_delayer_forward_passes_buckets": null,
+   "prefill_delayer_wait_seconds_buckets": null,
+   "prefill_delayer_queue_min_ratio": null,
+   "prefill_delayer_max_delay_ms": null,
+   "min_free_slots_delay": null,
+   "enable_deterministic_inference": false,
+   "rl_on_policy_target": null,
+   "kv_canary": "none",
+   "kv_canary_real_data": "none",
+   "kv_canary_sweep_interval": 0,
+   "enable_dynamic_batch_tokenizer": false,
+   "dynamic_batch_tokenizer_batch_size": 32,
+   "dynamic_batch_tokenizer_batch_timeout": 0.002,
+   "enable_tokenizer_batch_encode": false,
+   "disable_tokenizer_batch_decode": false,
+   "debug_tensor_dump_output_folder": null,
+   "debug_tensor_dump_layers": null,
+   "debug_tensor_dump_input_file": null,
+   "enable_memory_saver": false,
+   "enable_weights_cpu_backup": false,
+   "enable_draft_weights_cpu_backup": false,
+   "enable_custom_logit_processor": false,
+   "enable_return_hidden_states": false,
+   "return_hidden_states_mode": null,
+   "enable_return_routed_experts": false,
+   "enable_return_indexer_topk": false,
+   "sampling_mask_max_tokens": 4096,
+   "enable_mis": false,
+   "weight_cache_mode": "off",
+   "weight_cache_socket": null,
+   "weight_cache_timeout": 1800,
+   "forward_hooks": null,
+   "msprobe_dump_config": null,
+   "ple_offload_embedding": null,
+   "ple_offload_backend": "pinned",
+   "ple_offload_dir": null,
+   "disaggregation_enable_kv_checksum": false,
+   "enable_pd_role_switch": false,
+   "speculative_domino_candidate_pool_size": 2048,
+   "flashinfer_a2a_dispatch_type": null,
+   "cuda_graph_max_seq_len_prefill": null,
+   "prefill_kv_cache_dequant_dtype": "auto",
+   "dsv4_attn_backend": "auto",
+   "otlp_service_name": null,
+   "_radix_eviction_policy_explicitly_set": false,
+   "hicache_host_memory_fraction": 0.8,
+   "enable_linker_mla_dedup": false,
+   "_swa_full_tokens_ratio_explicitly_set": true,
+   "swa_prefix_tails": null,
+   "enable_encoder_swa_bounded_replay": false,
+   "enable_decoder_swa_bounded_replay": null,
+   "enable_response_store": false,
+   "disaggregation_decode_host_receive_threshold": 1.0,
+   "qsa_indexer_dtype": "auto",
+   "disaggregation_decode_allocation_policy": "early",
+   "speculative_boundary_reduction": "ar",
+   "speculative_use_block_verification": true,
+   "speculative_draft_sink_size": null,
+   "disable_aiter_allreduce_fusion_in_prefill": false,
+   "disable_aiter_allreduce_fusion_in_decode": false,
+   "enable_amd_monokernel": false,
+   "dsa_triton_union": 0,
+   "enable_dsa_fused_indexer": null,
+   "enable_cp_tp_group_sharing": false,
+   "enable_watermark": false,
+   "watermark_config": "<redacted>",
+   "watermark_key": "<redacted>",
+   "watermark_key_b": "<redacted>",
+   "watermark_context_window": 4,
+   "watermark_mixing_probability": 0.5,
+   "watermark_max_probability": 1.0,
+   "watermark_default_enabled": false,
+   "watermark_enforce_all": false,
+   "grpc_response_timeout_secs": 300,
+   "enable_paged_experts": false,
+   "paged_experts_num_resident": null,
+   "enable_nvidia_megakernel": false,
+   "enable_megamoe_for_layernorm_sp": null,
+   "enable_http_worker_reuseport": false,
+   "prefill_decode_interval_min_bs": 0,
+   "unified_cache_external_linker_config": null,
+   "enable_return_aux_hidden_states": false,
+   "aux_hidden_state_capture": null,
+   "return_aux_hidden_state_layer_ids": null,
+   "hicache_storage_key_scheme": "rank-suffix",
+   "hicache_storage_head_partition": null,
+   "hicache_storage_layer_partition": null,
+   "engram_config": null,
+   "moe_ascend_ops_config": null,
+   "cp_kv_layout": null,
+   "enable_prefill_weight_versions": false,
+   "uocr_doc_split": false,
+   "uocr_doc_page_window": 1,
+   "uocr_max_page_tokens": 0,
+   "enable_fp4_indexer": false,
+   "paged_experts_enable_disk": false,
+   "disable_normalize_embedding": false,
+   "log_schedule_decisions": false,
+   "speculative_dspark_lm_head_dtype": null,
+   "speculative_dflash_draft_kv_ring": true,
+   "media_url_timeout": null,
+   "allow_local_media_files": true,
+   "layernorm_sp_min_tokens": 0,
+   "paged_experts_host_memory_gb": null,
+   "_max_running_requests_explicitly_set": false,
+   "hybrid_cache_checkpoints_level": 2,
+   "disaggregation_max_top_logprobs_num": 128,
+   "shortest_prefill_aging_factor": 0.0,
+   "enable_token_space_processor": false,
+   "indexer_kv_cache_dtype": null,
+   "enable_flashmla_prefill_token_packing": null,
+   "decode_state_free_radix_default": false,
+   "disable_multimodal": false,
+   "gc_freeze_on_idle_secs": 0.0,
+   "enable_dsa_fp4_indexer": false,
+   "kda_dwdp_size": null,
+   "weight_cache_transport": "auto",
+   "inkling2_loop_num_passes": null,
+   "inkling2_loop_share_cache": false,
+   "enable_dp_attention": false,
+   "launch_command": "--model-path /model --served-model-name inkling-2-mini --tp 1 --ep 1 --attention-backend fa4 --dtype bfloat16 --page-size 128 --speculative-algorithm DFLASH --speculative-draft-model-path /draft --speculative-num-draft-tokens 8 --speculative-draft-attention-backend fa4 --speculative-use-block-verification --enable-multimodal --mem-fraction-static 0.60 --context-length 524288 --grammar-backend xgrammar --reasoning-parser inkling --tool-call-parser inkling2 --enable-metrics --host 127.0.0.1 --port 8000 --weight-loader-disable-mmap --swa-full-tokens-ratio 0.05 --max-mamba-cache-size 512 --max-prefill-tokens 8192",
+   "status": "ready",
+   "max_total_num_tokens": 974976,
+   "max_req_input_len": 524282,
+   "startup_time": {
+    "load_weight": 19.530890465015545,
+    "kv_cache_allocation": 1.961413606069982,
+    "scheduler_e2e": 85.17291828303132,
+    "cuda_graph": {
+     "prefill": 40.67075215606019,
+     "decode": 0.0,
+     "target_verify": 6.316720437956974,
+     "draft_prefill": 0.0,
+     "draft_decode": 3.599964097025804,
+     "draft_extend": 0.0
+    },
+    "tokenizer_e2e": 91.00863338599447
+   },
+   "hicache_object_layout": {
+    "enabled": false,
+    "backend": null,
+    "page_size": 128,
+    "hicache_object_layout": {
+     "pools": []
+    },
+    "reason": "Hierarchical cache is disabled"
+   },
+   "kv_events": null,
+   "internal_states": [
+    {
+     "model_path": "/model",
+     "tokenizer_path": "/model",
+     "tokenizer_mode": "auto",
+     "tokenizer_backend": "huggingface",
+     "tokenizer_worker_num": 1,
+     "detokenizer_worker_num": 1,
+     "skip_tokenizer_init": false,
+     "load_format": "auto",
+     "model_loader_extra_config": "{}",
+     "trust_remote_code": false,
+     "context_length": 524288,
+     "is_embedding": false,
+     "enable_multimodal": true,
+     "revision": null,
+     "model_impl": "auto",
+     "model_config_parser": "auto",
+     "json_model_override_args": "{}",
+     "dtype": "bfloat16",
+     "quantization": null,
+     "quantization_param_path": null,
+     "kv_cache_dtype": "auto",
+     "enable_fp32_lm_head": false,
+     "modelopt_quant": null,
+     "modelopt_checkpoint_restore_path": null,
+     "modelopt_checkpoint_save_path": null,
+     "modelopt_export_path": null,
+     "quantize_and_serve": false,
+     "rl_quant_profile": null,
+     "enable_tf32_matmul": false,
+     "mem_fraction_static": 0.6,
+     "max_running_requests": 48,
+     "max_queued_requests": null,
+     "max_total_tokens": null,
+     "chunked_prefill_size": 8192,
+     "prefill_decode_interval": 0,
+     "enable_dynamic_chunking": false,
+     "max_prefill_tokens": 8192,
+     "prefill_max_requests": null,
+     "schedule_policy": "fcfs",
+     "enable_priority_scheduling": false,
+     "disable_priority_preemption": false,
+     "default_priority_value": null,
+     "abort_on_priority_when_disabled": false,
+     "schedule_low_priority_values_first": false,
+     "priority_scheduling_preemption_threshold": 10,
+     "retraction_policy": "length",
+     "schedule_conservativeness": 1.0,
+     "page_size": 128,
+     "c128_page_size": 16,
+     "swa_full_tokens_ratio": 0.05,
+     "disable_hybrid_swa_memory": false,
+     "radix_eviction_policy": "lru",
+     "radix_eviction_policy_config": null,
+     "prefill_only_disable_kv_cache": false,
+     "disable_radix_cache": false,
+     "enable_page_major_kv_layout": false,
+     "enable_unified_memory": false,
+     "disable_chunked_prefix_cache": true,
+     "disable_overlap_schedule": false,
+     "num_continuous_decode_steps": 1,
+     "scheduler_recv_interval": 1,
+     "enable_mixed_chunk": false,
+     "nccl_port": null,
+     "dist_timeout": null,
+     "dist_init_addr": null,
+     "gated_launch_port": null,
+     "nnodes": 1,
+     "node_rank": 0,
+     "tp_size": 1,
+     "dcp_size": 1,
+     "pp_size": 1,
+     "pp_max_micro_batch_size": 48,
+     "pp_async_batch_depth": 0,
+     "dp_size": 1,
+     "attn_dp_size": 1,
+     "load_balance_method": "round_robin",
+     "attn_cp_size": 1,
+     "moe_dp_size": 1,
+     "dwdp_size": 1,
+     "dcp_comm_backend": "ag_rs",
+     "dcp_replicate_q_proj": null,
+     "enable_prefill_cp": false,
+     "cp_strategy": null,
+     "enable_dsa_cache_layer_split": false,
+     "enable_cp_decode_attn_tp": false,
+     "enable_kv_cache_sharding": false,
+     "enable_dp_attention_local_control_broadcast": false,
+     "enable_dp_lm_head": false,
+     "enable_tp_lm_head_all_to_all": false,
+     "enable_attn_tp_input_scattered": false,
+     "enable_shared_experts_attn_tp": false,
+     "shared_experts_tp_size": null,
+     "enable_dense_mlp_attn_tp": false,
+     "enable_layernorm_sp": false,
+     "disable_attn_tp_gather": false,
+     "enable_p2p_check": true,
+     "device": "cuda",
+     "base_gpu_id": 0,
+     "gpu_id_step": 1,
+     "random_seed": 238977098,
+     "mlx_enable_sampling": false,
+     "watchdog_timeout": 300,
+     "soft_watchdog_timeout": null,
+     "sleep_on_idle": false,
+     "use_ray": false,
+     "numa_node": null,
+     "gc_threshold": null,
+     "host": "127.0.0.1",
+     "port": 8000,
+     "fastapi_root_path": "",
+     "grpc_mode": false,
+     "grpc_port": null,
+     "grpc_worker_threads": 4,
+     "sidecar": null,
+     "sidecar_args": null,
+     "skip_server_warmup": false,
+     "warmups": null,
+     "enable_http2": false,
+     "http2_max_concurrent_streams": 200,
+     "http2_initial_connection_window_size": 1048576,
+     "ssl_keyfile": null,
+     "ssl_certfile": null,
+     "ssl_ca_certs": null,
+     "ssl_keyfile_password": null,
+     "enable_ssl_refresh": false,
+     "api_key": null,
+     "admin_api_key": null,
+     "served_model_name": "inkling-2-mini",
+     "weight_version": "default",
+     "chat_template": null,
+     "trust_request_chat_template": false,
+     "hf_chat_template_name": null,
+     "completion_template": null,
+     "file_storage_path": null,
+     "enable_cache_report": false,
+     "return_input_ids": false,
+     "return_output_ids": false,
+     "reasoning_parser": "inkling",
+     "default_chat_template_kwargs": null,
+     "strip_thinking_cache": false,
+     "enable_strict_thinking": false,
+     "tool_call_parser": "inkling2",
+     "tool_server": null,
+     "sampling_defaults": "model",
+     "asr_max_buffer_seconds": 60,
+     "asr_max_concurrent_sessions": 32,
+     "preferred_sampling_params": null,
+     "allow_auto_truncate": false,
+     "stream_interval": 1,
+     "batch_notify_size": 16,
+     "stream_response_default_include_usage": false,
+     "incremental_streaming_output": false,
+     "enable_streaming_session": false,
+     "enable_session_radix_cache": false,
+     "log_level": "info",
+     "log_level_http": null,
+     "log_requests": false,
+     "log_requests_level": 2,
+     "log_requests_format": "text",
+     "log_requests_target": null,
+     "uvicorn_access_log_exclude_prefixes": [],
+     "crash_dump_folder": null,
+     "enable_metrics": true,
+     "enable_mfu_metrics": false,
+     "enable_metrics_for_all_schedulers": false,
+     "load_snapshot_publish_interval": 15,
+     "tokenizer_metrics_custom_labels_header": "x-custom-labels",
+     "tokenizer_metrics_allowed_custom_labels": null,
+     "extra_metric_labels": null,
+     "bucket_time_to_first_token": null,
+     "bucket_inter_token_latency": null,
+     "bucket_e2e_request_latency": null,
+     "prompt_tokens_buckets": null,
+     "generation_tokens_buckets": null,
+     "gc_warning_threshold_secs": 0.0,
+     "decode_log_interval": 40,
+     "enable_request_time_stats_logging": false,
+     "kv_events_config": null,
+     "load_publish_endpoint": null,
+     "enable_forward_pass_metrics": false,
+     "forward_pass_metrics_worker_id": "",
+     "forward_pass_metrics_ipc_name": null,
+     "enable_trace": false,
+     "trace_modules": "request",
+     "otlp_traces_endpoint": "localhost:4317",
+     "export_metrics_to_file": false,
+     "export_metrics_to_file_dir": null,
+     "stat_loggers": null,
+     "constrained_json_whitespace_pattern": null,
+     "constrained_json_disable_any_whitespace": false,
+     "constrained_json_max_whitespace_cnt": null,
+     "attention_backend": "fa4",
+     "decode_attention_backend": null,
+     "enable_lean_attention": null,
+     "prefill_attention_backend": null,
+     "sampling_backend": "flashinfer",
+     "grammar_backend": "xgrammar",
+     "radix_cache_backend": null,
+     "mm_attention_backend": null,
+     "fp8_gemm_runner_backend": "auto",
+     "fp4_gemm_runner_backend": "auto",
+     "bf16_gemm_backend": "auto",
+     "dsa_prefill_backend": null,
+     "dsv4_prefill_backend": "auto",
+     "dsa_decode_backend": null,
+     "dsa_paged_mqa_logits_backend": "auto",
+     "dsa_topk_backend": "sgl-kernel",
+     "disable_flashinfer_autotune": false,
+     "flashinfer_autotune_skip_ops": null,
+     "mamba_backend": "triton",
+     "cuda_graph_config": {
+      "decode": {
+       "backend": "full",
+       "max_bs": 256,
+       "bs": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        40,
+        44,
+        48,
+        52,
+        56,
+        60,
+        64,
+        72,
+        80,
+        88,
+        96,
+        104,
+        112,
+        120,
+        128,
+        136,
+        144,
+        152,
+        160,
+        168,
+        176,
+        184,
+        192,
+        200,
+        208,
+        216,
+        224,
+        232,
+        240,
+        248,
+        256
+       ],
+       "tc_compiler": "eager",
+       "max_context_size": null,
+       "full_prefill_max_req": null,
+       "full_prefill_prefix_chunk_tokens": null,
+       "max_seq_len": null
+      },
+      "prefill": {
+       "backend": "full",
+       "max_bs": 8192,
+       "bs": [
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        192,
+        208,
+        224,
+        240,
+        256,
+        288,
+        320,
+        352,
+        384,
+        416,
+        448,
+        480,
+        512,
+        576,
+        640,
+        704,
+        768,
+        832,
+        896,
+        960,
+        1024,
+        1280,
+        1536,
+        1792,
+        2048,
+        2304,
+        2560,
+        2816,
+        3072,
+        3328,
+        3584,
+        3840,
+        4096,
+        4608,
+        5120,
+        5632,
+        6144,
+        6656,
+        7168,
+        7680,
+        8192
+       ],
+       "tc_compiler": "eager",
+       "max_context_size": null,
+       "full_prefill_max_req": 16,
+       "full_prefill_prefix_chunk_tokens": null,
+       "max_seq_len": null
+      }
+     },
+     "cuda_graph_backend_decode": null,
+     "cuda_graph_backend_prefill": "full",
+     "cuda_graph_max_bs_decode": null,
+     "cuda_graph_max_bs_prefill": null,
+     "cuda_graph_bs_decode": null,
+     "cuda_graph_bs_prefill": null,
+     "cuda_graph_prefill_max_context": null,
+     "disable_prefill_cuda_graph": false,
+     "disable_decode_cuda_graph": false,
+     "disable_cuda_graph": false,
+     "disable_cuda_graph_padding": false,
+     "enable_profile_cuda_graph": false,
+     "enable_cudagraph_gc": false,
+     "debug_cuda_graph": false,
+     "enable_layerwise_nvtx_marker": false,
+     "enable_nccl_nvls": false,
+     "enable_symm_mem": false,
+     "triton_attention_num_kv_splits": 8,
+     "triton_attention_split_tile_size": null,
+     "flashinfer_mla_disable_ragged": false,
+     "enable_fused_qk_norm_rope": null,
+     "enable_precise_embedding_interpolation": false,
+     "enable_fused_moe_sum_all_reduce": false,
+     "enable_deepseek_v4_fp4_indexer": false,
+     "disable_custom_all_reduce": false,
+     "enable_mscclpp": false,
+     "enable_torch_symm_mem": false,
+     "enable_scattered_sconv": false,
+     "pre_warm_nccl": false,
+     "boundary_reduction": "rs+rsv",
+     "enable_quant_communications": false,
+     "enforce_disable_flashinfer_allreduce_fusion": false,
+     "flashinfer_allreduce_fusion_backend": null,
+     "enable_aiter_allreduce_fusion": false,
+     "enable_torch_compile": false,
+     "enable_torch_compile_debug_mode": false,
+     "torch_compile_max_bs": 32,
+     "speculative_algorithm": "DFLASH",
+     "uno_lora_path": null,
+     "speculative_draft_model_path": "/draft",
+     "speculative_draft_model_revision": "main",
+     "speculative_draft_load_format": null,
+     "speculative_num_steps": 1,
+     "speculative_eagle_topk": 1,
+     "speculative_num_draft_tokens": 8,
+     "speculative_dflash_block_size": null,
+     "speculative_dspark_block_size": null,
+     "speculative_dspark_sps_table_path": null,
+     "speculative_dspark_confidence_sts_path": null,
+     "speculative_dspark_align_verify_tokens_to_graph_tier": false,
+     "speculative_accept_threshold_single": 1.0,
+     "speculative_accept_threshold_acc": 1.0,
+     "speculative_use_rejection_sampling": false,
+     "speculative_token_map": null,
+     "speculative_attention_mode": "prefill",
+     "speculative_draft_attention_backend": "fa4",
+     "speculative_dsa_topk_backend": "sgl-kernel",
+     "speculative_draft_kv_cache_dtype": null,
+     "speculative_draft_window_size": null,
+     "speculative_moe_runner_backend": "auto",
+     "speculative_moe_a2a_backend": null,
+     "speculative_enable_w4a4_mxfp4_megamoe": null,
+     "speculative_draft_model_quantization": null,
+     "_speculative_draft_quantization_explicitly_set": false,
+     "enable_multi_layer_eagle": false,
+     "speculative_adaptive": false,
+     "speculative_adaptive_config": null,
+     "decoupled_spec_bind_endpoint": null,
+     "decoupled_spec_connect_endpoints": null,
+     "decoupled_spec_rank": null,
+     "decoupled_spec_role": "null",
+     "spec_trace_dir": null,
+     "speculative_ngram_min_bfs_breadth": 1,
+     "speculative_ngram_max_bfs_breadth": 10,
+     "speculative_ngram_match_type": "BFS",
+     "speculative_ngram_max_trie_depth": 18,
+     "speculative_ngram_capacity": 10000000,
+     "speculative_ngram_external_corpus_path": null,
+     "speculative_ngram_external_sam_budget": 0,
+     "speculative_ngram_external_corpus_max_tokens": 10000000,
+     "ep_size": 1,
+     "moe_a2a_backend": "none",
+     "enable_w4a4_mxfp4_megamoe": false,
+     "deepep_v2_mode": "direct",
+     "moe_runner_backend": "auto",
+     "flashinfer_mxfp4_moe_precision": "default",
+     "deepep_mode": "auto",
+     "fuseep_mode": 2,
+     "deepep_dispatcher_output_dtype": "auto",
+     "ep_num_redundant_experts": 0,
+     "ep_dispatch_algorithm": null,
+     "init_expert_location": "trivial",
+     "enable_eplb": false,
+     "eplb_algorithm": "auto",
+     "eplb_rebalance_num_iterations": 1000,
+     "eplb_rebalance_layers_per_chunk": null,
+     "eplb_min_rebalancing_utilization_threshold": 1.0,
+     "expert_distribution_recorder_mode": null,
+     "expert_distribution_recorder_buffer_size": 1000,
+     "expert_balancedness_report_mode": "off",
+     "deepep_config": null,
+     "moe_dense_tp_size": null,
+     "elastic_ep_backend": null,
+     "enable_elastic_expert_backup": false,
+     "mooncake_ib_device": null,
+     "enable_waterfill": false,
+     "ep_join_mode": null,
+     "ep_join_rank_offset": 0,
+     "elastic_ep_initial_size": null,
+     "max_ep_size": null,
+     "elastic_ep_scale_timeout": 600,
+     "disable_flashinfer_cutlass_moe_fp4_allgather": false,
+     "disable_shared_experts_fusion": false,
+     "enforce_shared_experts_fusion": false,
+     "max_mamba_cache_size": 512,
+     "mamba_ssm_dtype": null,
+     "mamba_max_states_per_path": null,
+     "enable_mamba_cache_stochastic_rounding": false,
+     "mamba_cache_philox_rounds": 0,
+     "mamba_full_memory_ratio": 0.1,
+     "mamba_radix_cache_strategy": "extra_buffer",
+     "uses_mamba_radix_cache": true,
+     "mamba_track_interval": 256,
+     "enable_int8_mamba_checkpoint": false,
+     "int8_mamba_ckpt_size": null,
+     "linear_attn_backend": "triton",
+     "linear_attn_decode_backend": null,
+     "linear_attn_prefill_backend": null,
+     "linear_attn_verify_backend": null,
+     "enable_linear_replayssm": false,
+     "linear_replayssm_cache_len": 16,
+     "enable_linear_replayssm_spec": false,
+     "enable_hierarchical_cache": false,
+     "hicache_host_memory_mode": "cache",
+     "hicache_ratio": 2.0,
+     "hicache_size": 0,
+     "hicache_write_policy": "write_through",
+     "hicache_io_backend": "kernel",
+     "hicache_mem_layout": "page_first",
+     "hicache_storage_backend": null,
+     "hicache_storage_prefetch_policy": "timeout",
+     "hicache_storage_backend_extra_config": null,
+     "hicache_storage_prefetch_retry_poll_interval": 8,
+     "hicache_storage_prefetch_retry_max_attempts": 8,
+     "enable_unified_cache_external_linker": false,
+     "unified_cache_external_linker_backend": "mooncake",
+     "enable_hisparse": false,
+     "hisparse_config": null,
+     "enable_broadcast_mm_inputs_process": false,
+     "enable_prefix_mm_cache": false,
+     "mm_enable_dp_encoder": false,
+     "mm_process_config": {},
+     "mm_processor_worker_num": 0,
+     "mm_io_worker_num": 0,
+     "allowed_media_domains": [],
+     "media_url_max_file_size_mb": 64,
+     "mm_preprocess_cache_size_mb": null,
+     "trust_mm_content_hashes": false,
+     "limit_mm_data_per_request": null,
+     "enable_mm_global_cache": false,
+     "image_processor_backend": "auto",
+     "mm_global_cache_backend": "mooncake",
+     "mm_feature_transport": "cpu",
+     "enable_lora": null,
+     "enable_lora_overlap_loading": null,
+     "max_lora_rank": null,
+     "lora_target_modules": null,
+     "lora_paths": null,
+     "max_loaded_loras": null,
+     "max_loras_per_batch": 8,
+     "lora_eviction_policy": "lru",
+     "lora_backend": "csgmv",
+     "max_lora_chunk_size": 16,
+     "experts_shared_outer_loras": null,
+     "lora_use_virtual_experts": false,
+     "lora_strict_loading": false,
+     "lora_drain_wait_threshold": 0.0,
+     "enable_two_batch_overlap": false,
+     "enable_single_batch_overlap": false,
+     "tbo_token_distribution_threshold": 0.48,
+     "cpu_offload_gb": 0,
+     "offload_group_size": -1,
+     "offload_num_in_group": 1,
+     "offload_prefetch_step": 1,
+     "offload_mode": "cpu",
+     "enable_lmcache": false,
+     "lmcache_config_file": null,
+     "enable_flexkv": false,
+     "flexkv_config_file": null,
+     "kt_weight_path": null,
+     "kt_method": "AMXINT4",
+     "kt_cpuinfer": null,
+     "kt_threadpool_count": 2,
+     "kt_num_gpu_experts": null,
+     "kt_max_deferred_experts_per_token": null,
+     "dllm_algorithm": null,
+     "dllm_algorithm_config": null,
+     "dllm_fdfo": true,
+     "disaggregation_mode": "null",
+     "disaggregation_transfer_backend": "mooncake",
+     "disaggregation_bootstrap_port": 8998,
+     "disaggregation_ib_device": null,
+     "disaggregation_decode_enable_radix_cache": false,
+     "disaggregation_decode_enable_offload_kvcache": false,
+     "disaggregation_decode_retraction_backup": "cpu_tensor",
+     "num_reserved_decode_tokens": 512,
+     "disaggregation_decode_extra_slots": null,
+     "disaggregation_decode_polling_interval": 1,
+     "optimistic_prefill_attempts": 0,
+     "encoder_only": false,
+     "language_only": false,
+     "language_model_only": false,
+     "encoder_transfer_backend": "zmq_to_scheduler",
+     "encoder_urls": [],
+     "encoder_bootstrap_port": 8997,
+     "encoder_register_urls": [],
+     "enable_adaptive_dispatch_to_encoder": false,
+     "startup_weight_load_mode": "serial",
+     "custom_weight_loader": [],
+     "weight_loader_disable_mmap": true,
+     "weight_loader_prefetch_checkpoints": false,
+     "weight_loader_prefetch_num_threads": 4,
+     "weight_loader_drop_cache_after_load": false,
+     "remote_instance_weight_loader_seed_instance_ip": null,
+     "remote_instance_weight_loader_seed_instance_service_port": null,
+     "remote_instance_weight_loader_send_weights_group_ports": null,
+     "remote_instance_weight_loader_backend": "nccl",
+     "remote_instance_weight_loader_start_seed_via_transfer_engine": false,
+     "engine_info_bootstrap_port": 6789,
+     "modelexpress_config": null,
+     "download_dir": null,
+     "model_checksum": null,
+     "delete_ckpt_after_loading": false,
+     "decrypted_config_file": null,
+     "decrypted_draft_config_file": null,
+     "checkpoint_engine_wait_weights_before_ready": false,
+     "enable_prefill_delayer": false,
+     "prefill_delayer_max_delay_passes": 30,
+     "prefill_delayer_token_usage_low_watermark": null,
+     "prefill_delayer_forward_passes_buckets": null,
+     "prefill_delayer_wait_seconds_buckets": null,
+     "prefill_delayer_queue_min_ratio": null,
+     "prefill_delayer_max_delay_ms": null,
+     "min_free_slots_delay": null,
+     "enable_deterministic_inference": false,
+     "rl_on_policy_target": null,
+     "kv_canary": "none",
+     "kv_canary_real_data": "none",
+     "kv_canary_sweep_interval": 0,
+     "enable_dynamic_batch_tokenizer": false,
+     "dynamic_batch_tokenizer_batch_size": 32,
+     "dynamic_batch_tokenizer_batch_timeout": 0.002,
+     "enable_tokenizer_batch_encode": false,
+     "disable_tokenizer_batch_decode": false,
+     "debug_tensor_dump_output_folder": null,
+     "debug_tensor_dump_layers": null,
+     "debug_tensor_dump_input_file": null,
+     "enable_memory_saver": false,
+     "enable_weights_cpu_backup": false,
+     "enable_draft_weights_cpu_backup": false,
+     "enable_custom_logit_processor": false,
+     "enable_return_hidden_states": false,
+     "return_hidden_states_mode": null,
+     "enable_return_routed_experts": false,
+     "enable_return_indexer_topk": false,
+     "sampling_mask_max_tokens": 4096,
+     "enable_mis": false,
+     "weight_cache_mode": "off",
+     "weight_cache_socket": null,
+     "weight_cache_timeout": 1800,
+     "forward_hooks": null,
+     "msprobe_dump_config": null,
+     "ple_offload_embedding": null,
+     "ple_offload_backend": "pinned",
+     "ple_offload_dir": null,
+     "disaggregation_enable_kv_checksum": false,
+     "enable_pd_role_switch": false,
+     "speculative_domino_candidate_pool_size": 2048,
+     "flashinfer_a2a_dispatch_type": null,
+     "cuda_graph_max_seq_len_prefill": null,
+     "prefill_kv_cache_dequant_dtype": "auto",
+     "dsv4_attn_backend": "auto",
+     "otlp_service_name": null,
+     "_radix_eviction_policy_explicitly_set": false,
+     "hicache_host_memory_fraction": 0.8,
+     "enable_linker_mla_dedup": false,
+     "_swa_full_tokens_ratio_explicitly_set": true,
+     "swa_prefix_tails": null,
+     "enable_encoder_swa_bounded_replay": false,
+     "enable_decoder_swa_bounded_replay": null,
+     "enable_response_store": false,
+     "disaggregation_decode_host_receive_threshold": 1.0,
+     "qsa_indexer_dtype": "auto",
+     "disaggregation_decode_allocation_policy": "early",
+     "speculative_boundary_reduction": "ar",
+     "speculative_use_block_verification": true,
+     "speculative_draft_sink_size": null,
+     "disable_aiter_allreduce_fusion_in_prefill": false,
+     "disable_aiter_allreduce_fusion_in_decode": false,
+     "enable_amd_monokernel": false,
+     "dsa_triton_union": 0,
+     "enable_dsa_fused_indexer": null,
+     "enable_cp_tp_group_sharing": false,
+     "enable_watermark": false,
+     "watermark_config": "<redacted>",
+     "watermark_key": "<redacted>",
+     "watermark_key_b": "<redacted>",
+     "watermark_context_window": 4,
+     "watermark_mixing_probability": 0.5,
+     "watermark_max_probability": 1.0,
+     "watermark_default_enabled": false,
+     "watermark_enforce_all": false,
+     "grpc_response_timeout_secs": 300,
+     "enable_paged_experts": false,
+     "paged_experts_num_resident": null,
+     "enable_nvidia_megakernel": false,
+     "enable_megamoe_for_layernorm_sp": null,
+     "enable_http_worker_reuseport": false,
+     "prefill_decode_interval_min_bs": 0,
+     "unified_cache_external_linker_config": null,
+     "enable_return_aux_hidden_states": false,
+     "aux_hidden_state_capture": null,
+     "return_aux_hidden_state_layer_ids": null,
+     "hicache_storage_key_scheme": "rank-suffix",
+     "hicache_storage_head_partition": null,
+     "hicache_storage_layer_partition": null,
+     "engram_config": null,
+     "moe_ascend_ops_config": null,
+     "cp_kv_layout": null,
+     "enable_prefill_weight_versions": false,
+     "uocr_doc_split": false,
+     "uocr_doc_page_window": 1,
+     "uocr_max_page_tokens": 0,
+     "enable_fp4_indexer": false,
+     "paged_experts_enable_disk": false,
+     "disable_normalize_embedding": false,
+     "log_schedule_decisions": false,
+     "speculative_dspark_lm_head_dtype": null,
+     "speculative_dflash_draft_kv_ring": true,
+     "media_url_timeout": null,
+     "allow_local_media_files": true,
+     "layernorm_sp_min_tokens": 0,
+     "paged_experts_host_memory_gb": null,
+     "_max_running_requests_explicitly_set": false,
+     "hybrid_cache_checkpoints_level": 2,
+     "disaggregation_max_top_logprobs_num": 128,
+     "shortest_prefill_aging_factor": 0.0,
+     "enable_token_space_processor": false,
+     "indexer_kv_cache_dtype": null,
+     "enable_flashmla_prefill_token_packing": null,
+     "decode_state_free_radix_default": false,
+     "disable_multimodal": false,
+     "gc_freeze_on_idle_secs": 0.0,
+     "enable_dsa_fp4_indexer": false,
+     "kda_dwdp_size": null,
+     "weight_cache_transport": "auto",
+     "inkling2_loop_num_passes": null,
+     "inkling2_loop_share_cache": false,
+     "enable_dp_attention": false,
+     "world_size": 1,
+     "startup_time": {
+      "load_weight": 19.530890465015545,
+      "kv_cache_allocation": 1.961413606069982,
+      "scheduler_e2e": 85.17291828303132,
+      "cuda_graph": {
+       "prefill": 40.67075215606019,
+       "decode": 0.0,
+       "target_verify": 6.316720437956974,
+       "draft_prefill": 0.0,
+       "draft_decode": 3.599964097025804,
+       "draft_extend": 0.0
+      }
+     },
+     "effective_max_running_requests_per_dp": 48,
+     "last_gen_throughput": 0.0,
+     "memory_usage": {
+      "weight": 23.04,
+      "kvcache": 37.199,
+      "startup_available": 36.808,
+      "token_capacity": 974976,
+      "token_capacity_swa": 48640,
+      "token_capacity_window": {
+       "window_1023": 48640
+      },
+      "graph": {
+       "prefill": 5.244,
+       "decode": 0.0,
+       "target_verify": 0.383,
+       "draft_prefill": 0.0,
+       "draft_decode": 0.857,
+       "draft_extend": 0.0
+      }
+     },
+     "decode_cuda_graph_bs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32,
+      40,
+      44,
+      48
+     ],
+     "decode_cuda_graph_memory_gb": 1.24
+    }
+   ],
+   "version": "0.0.0.dev1+inkling2",
+   "frontend": "python",
+   "supports_inline_system": false
+  },
+  "model": "inkling-2-mini",
+  "engine": "sglang",
+  "metrics_families": []
+ },
+ "client": {
+  "host": "box-b",
+  "python": "3.12.3",
+  "platform": "Linux-6.17.0-1032-nvidia-aarch64-with-glibc2.39"
+ },
+ "summary": {
+  "requests": 30,
+  "failed": 0,
+  "valid_decode": 30,
+  "exact_boundary": 30,
+  "errors": [],
+  "agentic": {
+   "n": 4,
+   "median_tok_s": 80.58,
+   "geomean_tok_s": 88.67,
+   "aggregate_tok_s": 80.55,
+   "median_ttft_ms": 224.6,
+   "truncated_frac": 0.75,
+   "reasoning_token_frac": 0.606,
+   "reasoning_char_frac": 0.807,
+   "median_step_ms": 37.72,
+   "median_tokens_per_step": 3.039,
+   "steps_source": "stream"
+  },
+  "code": {
+   "n": 6,
+   "median_tok_s": 82.66,
+   "geomean_tok_s": 81.67,
+   "aggregate_tok_s": 79.94,
+   "median_ttft_ms": 153.3,
+   "truncated_frac": 1.0,
+   "reasoning_token_frac": 0.752,
+   "reasoning_char_frac": 0.789,
+   "median_step_ms": 40.88,
+   "median_tokens_per_step": 3.455,
+   "steps_source": "stream"
+  },
+  "longctx": {
+   "n": 4,
+   "median_tok_s": 89.37,
+   "geomean_tok_s": 84.01,
+   "aggregate_tok_s": 83.05,
+   "median_ttft_ms": 179.9,
+   "truncated_frac": 1.0,
+   "reasoning_token_frac": 1.0,
+   "reasoning_char_frac": 1.0,
+   "median_step_ms": 45.55,
+   "median_tokens_per_step": 4.072,
+   "steps_source": "stream"
+  },
+  "multilingual": {
+   "n": 4,
+   "median_tok_s": 64.42,
+   "geomean_tok_s": 64.43,
+   "aggregate_tok_s": 64.32,
+   "median_ttft_ms": 150.4,
+   "truncated_frac": 1.0,
+   "reasoning_token_frac": 0.78,
+   "reasoning_char_frac": 0.831,
+   "median_step_ms": 36.1,
+   "median_tokens_per_step": 2.323,
+   "steps_source": "stream"
+  },
+  "prose": {
+   "n": 8,
+   "median_tok_s": 67.93,
+   "geomean_tok_s": 66.27,
+   "aggregate_tok_s": 66.03,
+   "median_ttft_ms": 149.2,
+   "truncated_frac": 1.0,
+   "reasoning_token_frac": 0.736,
+   "reasoning_char_frac": 0.744,
+   "median_step_ms": 36.44,
+   "median_tokens_per_step": 2.415,
+   "steps_source": "stream"
+  },
+  "structured": {
+   "n": 4,
+   "median_tok_s": 76.18,
+   "geomean_tok_s": 74.91,
+   "aggregate_tok_s": 74.15,
+   "median_ttft_ms": 152.8,
+   "truncated_frac": 1.0,
+   "reasoning_token_frac": 0.886,
+   "reasoning_char_frac": 0.906,
+   "median_step_ms": 39.09,
+   "median_tokens_per_step": 2.98,
+   "steps_source": "stream"
+  },
+  "ALL": {
+   "n": 30,
+   "median_tok_s": 70.7,
+   "geomean_tok_s": 75.08,
+   "aggregate_tok_s": 73.01,
+   "median_ttft_ms": 152.3,
+   "truncated_frac": 0.967,
+   "reasoning_token_frac": 0.783,
+   "reasoning_char_frac": 0.829,
+   "median_step_ms": 37.3,
+   "median_tokens_per_step": 2.581,
+   "steps_source": "stream"
+  },
+  "sentinel": {
+   "n": 2,
+   "identical_text": 2,
+   "drift_pct_identical": -0.083,
+   "drift_pct_all": -0.083
+  }
+ },
+ "requests": [
+  {
+   "key": "agentic-01",
+   "id": "agentic-01",
+   "category": "agentic",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 0,
+   "t_wall": 5.19,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 699,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.28605733590666205,
+   "decode_s": 0.3630869910120964,
+   "total_s": 0.6494100209092721,
+   "prompt_tokens": 699,
+   "completion_tokens": 51,
+   "cached_tokens": null,
+   "reasoning_tokens": 12,
+   "boundary": "exact",
+   "first_chunk_tokens": 3,
+   "last_chunk_tokens": 51,
+   "finish_reason": "tool_calls",
+   "done_marker": true,
+   "n_chunks": 4,
+   "n_events": 7,
+   "n_steps": 3,
+   "reasoning_chars": 33,
+   "content_chars": 0,
+   "tool_calls": 1,
+   "sha256": "a91d29de54528cd0710cd306e5595fe0d88afbba956431d200b1102751b1e1c8",
+   "chunks": [
+    [
+     286.06,
+     3,
+     3,
+     "r"
+    ],
+    [
+     330.81,
+     20,
+     8,
+     "r"
+    ],
+    [
+     381.75,
+     10,
+     15,
+     "r"
+    ],
+    [
+     649.14,
+     33,
+     51,
+     "t"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 48,
+   "tok_s": 132.1997240005794,
+   "steps_stream": 3,
+   "steps_source": "stream",
+   "step_ms": 121.02899700403214,
+   "tokens_per_step": 16.0,
+   "valid_decode": true
+  },
+  {
+   "key": "longctx-07",
+   "id": "longctx-07",
+   "category": "longctx",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 1,
+   "t_wall": 6.08,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 1626,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1818947489373386,
+   "decode_s": 1.5984933730214834,
+   "total_s": 1.7806131119141355,
+   "prompt_tokens": 1626,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 34,
+   "n_events": 37,
+   "n_steps": 33,
+   "reasoning_chars": 587,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "8ac06610715c3651ed17372a06901e30368fb67ff83c76d30d1b10e7757c527d",
+   "chunks": [
+    [
+     181.89,
+     31,
+     9,
+     "r"
+    ],
+    [
+     223.78,
+     20,
+     13,
+     "r"
+    ],
+    [
+     258.21,
+     3,
+     14,
+     "r"
+    ],
+    [
+     300.72,
+     19,
+     18,
+     "r"
+    ],
+    [
+     350.0,
+     4,
+     19,
+     "r"
+    ],
+    [
+     389.13,
+     12,
+     22,
+     "r"
+    ],
+    [
+     437.25,
+     3,
+     23,
+     "r"
+    ],
+    [
+     489.38,
+     3,
+     25,
+     "r"
+    ],
+    [
+     540.46,
+     3,
+     27,
+     "r"
+    ],
+    [
+     592.56,
+     2,
+     29,
+     "r"
+    ],
+    [
+     641.19,
+     32,
+     37,
+     "r"
+    ],
+    [
+     692.21,
+     28,
+     45,
+     "r"
+    ],
+    [
+     742.8,
+     3,
+     46,
+     "r"
+    ],
+    [
+     786.48,
+     12,
+     51,
+     "r"
+    ],
+    [
+     837.5,
+     27,
+     58,
+     "r"
+    ],
+    [
+     885.41,
+     17,
+     63,
+     "r"
+    ],
+    [
+     921.2,
+     7,
+     65,
+     "r"
+    ],
+    [
+     972.93,
+     8,
+     70,
+     "r"
+    ],
+    [
+     1025.03,
+     21,
+     76,
+     "r"
+    ],
+    [
+     1073.37,
+     20,
+     81,
+     "r"
+    ],
+    [
+     1126.08,
+     16,
+     86,
+     "r"
+    ],
+    [
+     1173.86,
+     20,
+     91,
+     "r"
+    ],
+    [
+     1221.77,
+     31,
+     98,
+     "r"
+    ],
+    [
+     1277.37,
+     23,
+     104,
+     "r"
+    ],
+    [
+     1325.87,
+     35,
+     112,
+     "r"
+    ],
+    [
+     1379.83,
+     27,
+     120,
+     "r"
+    ],
+    [
+     1435.67,
+     16,
+     124,
+     "r"
+    ],
+    [
+     1487.9,
+     26,
+     132,
+     "r"
+    ],
+    [
+     1522.5,
+     7,
+     133,
+     "r"
+    ],
+    [
+     1573.05,
+     40,
+     141,
+     "r"
+    ],
+    [
+     1623.42,
+     28,
+     149,
+     "r"
+    ],
+    [
+     1674.85,
+     6,
+     150,
+     "r"
+    ],
+    [
+     1725.88,
+     29,
+     158,
+     "r"
+    ],
+    [
+     1780.39,
+     8,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 94.46395121086974,
+   "steps_stream": 33,
+   "steps_source": "stream",
+   "step_ms": 48.439193121863134,
+   "tokens_per_step": 4.575757575757576,
+   "valid_decode": true
+  },
+  {
+   "key": "multilingual-03",
+   "id": "multilingual-03",
+   "category": "multilingual",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 2,
+   "t_wall": 8.28,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 38,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14955805195495486,
+   "decode_s": 2.5017801850335672,
+   "total_s": 2.651497339946218,
+   "prompt_tokens": 38,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 100,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 69,
+   "n_events": 72,
+   "n_steps": 68,
+   "reasoning_chars": 481,
+   "content_chars": 269,
+   "tool_calls": 0,
+   "sha256": "45bbeb907dadee2c7dbff8842dd748de9c8083e2479a99290caf1d280e244d95",
+   "chunks": [
+    [
+     149.56,
+     32,
+     9,
+     "r"
+    ],
+    [
+     199.33,
+     18,
+     13,
+     "r"
+    ],
+    [
+     249.2,
+     47,
+     21,
+     "r"
+    ],
+    [
+     300.44,
+     7,
+     23,
+     "r"
+    ],
+    [
+     351.09,
+     34,
+     31,
+     "r"
+    ],
+    [
+     381.46,
+     14,
+     33,
+     "r"
+    ],
+    [
+     412.55,
+     5,
+     34,
+     "r"
+    ],
+    [
+     445.32,
+     6,
+     36,
+     "r"
+    ],
+    [
+     476.14,
+     15,
+     38,
+     "r"
+    ],
+    [
+     511.72,
+     10,
+     41,
+     "r"
+    ],
+    [
+     550.25,
+     18,
+     43,
+     "r"
+    ],
+    [
+     586.35,
+     10,
+     45,
+     "r"
+    ],
+    [
+     624.38,
+     8,
+     47,
+     "r"
+    ],
+    [
+     656.21,
+     6,
+     49,
+     "r"
+    ],
+    [
+     686.85,
+     13,
+     51,
+     "r"
+    ],
+    [
+     720.41,
+     6,
+     53,
+     "r"
+    ],
+    [
+     761.8,
+     9,
+     55,
+     "r"
+    ],
+    [
+     793.04,
+     15,
+     57,
+     "r"
+    ],
+    [
+     837.71,
+     23,
+     62,
+     "r"
+    ],
+    [
+     868.46,
+     6,
+     64,
+     "r"
+    ],
+    [
+     904.11,
+     9,
+     66,
+     "r"
+    ],
+    [
+     935.96,
+     13,
+     68,
+     "r"
+    ],
+    [
+     970.18,
+     8,
+     70,
+     "r"
+    ],
+    [
+     1001.29,
+     1,
+     71,
+     "r"
+    ],
+    [
+     1029.34,
+     7,
+     72,
+     "r"
+    ],
+    [
+     1062.36,
+     10,
+     74,
+     "r"
+    ],
+    [
+     1093.7,
+     7,
+     76,
+     "r"
+    ],
+    [
+     1125.5,
+     7,
+     78,
+     "r"
+    ],
+    [
+     1162.84,
+     15,
+     79,
+     "r"
+    ],
+    [
+     1202.52,
+     9,
+     81,
+     "r"
+    ],
+    [
+     1233.72,
+     11,
+     82,
+     "r"
+    ],
+    [
+     1268.62,
+     6,
+     84,
+     "r"
+    ],
+    [
+     1313.69,
+     9,
+     85,
+     "r"
+    ],
+    [
+     1353.94,
+     21,
+     90,
+     "r"
+    ],
+    [
+     1390.6,
+     20,
+     93,
+     "r"
+    ],
+    [
+     1429.62,
+     19,
+     97,
+     "r"
+    ],
+    [
+     1476.0,
+     7,
+     103,
+     "r"
+    ],
+    [
+     1476.1,
+     1,
+     103,
+     "c"
+    ],
+    [
+     1526.78,
+     2,
+     104,
+     "c"
+    ],
+    [
+     1566.81,
+     3,
+     105,
+     "c"
+    ],
+    [
+     1616.09,
+     28,
+     110,
+     "c"
+    ],
+    [
+     1652.74,
+     8,
+     111,
+     "c"
+    ],
+    [
+     1685.78,
+     6,
+     112,
+     "c"
+    ],
+    [
+     1725.07,
+     2,
+     113,
+     "c"
+    ],
+    [
+     1765.62,
+     13,
+     116,
+     "c"
+    ],
+    [
+     1812.63,
+     2,
+     117,
+     "c"
+    ],
+    [
+     1838.95,
+     10,
+     118,
+     "c"
+    ],
+    [
+     1881.55,
+     9,
+     122,
+     "c"
+    ],
+    [
+     1917.69,
+     13,
+     124,
+     "c"
+    ],
+    [
+     1951.83,
+     7,
+     126,
+     "c"
+    ],
+    [
+     1981.68,
+     9,
+     127,
+     "c"
+    ],
+    [
+     2020.74,
+     13,
+     129,
+     "c"
+    ],
+    [
+     2059.07,
+     4,
+     130,
+     "c"
+    ],
+    [
+     2092.43,
+     18,
+     133,
+     "c"
+    ],
+    [
+     2127.47,
+     6,
+     135,
+     "c"
+    ],
+    [
+     2170.76,
+     17,
+     140,
+     "c"
+    ],
+    [
+     2203.36,
+     4,
+     141,
+     "c"
+    ],
+    [
+     2234.78,
+     13,
+     143,
+     "c"
+    ],
+    [
+     2275.33,
+     5,
+     145,
+     "c"
+    ],
+    [
+     2303.93,
+     10,
+     146,
+     "c"
+    ],
+    [
+     2336.38,
+     3,
+     147,
+     "c"
+    ],
+    [
+     2372.57,
+     13,
+     150,
+     "c"
+    ],
+    [
+     2417.38,
+     12,
+     154,
+     "c"
+    ],
+    [
+     2456.75,
+     11,
+     155,
+     "c"
+    ],
+    [
+     2495.58,
+     1,
+     156,
+     "c"
+    ],
+    [
+     2535.66,
+     5,
+     157,
+     "c"
+    ],
+    [
+     2567.6,
+     6,
+     158,
+     "c"
+    ],
+    [
+     2613.78,
+     6,
+     159,
+     "c"
+    ],
+    [
+     2651.34,
+     9,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 60.357021333580505,
+   "steps_stream": 68,
+   "steps_source": "stream",
+   "step_ms": 36.790885074023045,
+   "tokens_per_step": 2.2205882352941178,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-04",
+   "id": "prose-04",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 3,
+   "t_wall": 11.08,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 38,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14893804502207786,
+   "decode_s": 2.3119143339572474,
+   "total_s": 2.4609545699786395,
+   "prompt_tokens": 38,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 81,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 68,
+   "n_events": 71,
+   "n_steps": 67,
+   "reasoning_chars": 342,
+   "content_chars": 305,
+   "tool_calls": 0,
+   "sha256": "c256a08bdf6939d9847d176b40c37bfa7979b429ae8ebe2ccc204e19a8aa0ec0",
+   "chunks": [
+    [
+     148.94,
+     14,
+     5,
+     "r"
+    ],
+    [
+     198.97,
+     3,
+     7,
+     "r"
+    ],
+    [
+     247.57,
+     42,
+     15,
+     "r"
+    ],
+    [
+     294.54,
+     33,
+     22,
+     "r"
+    ],
+    [
+     342.78,
+     31,
+     29,
+     "r"
+    ],
+    [
+     373.89,
+     12,
+     31,
+     "r"
+    ],
+    [
+     405.49,
+     6,
+     33,
+     "r"
+    ],
+    [
+     452.48,
+     14,
+     35,
+     "r"
+    ],
+    [
+     481.73,
+     10,
+     37,
+     "r"
+    ],
+    [
+     523.25,
+     7,
+     39,
+     "r"
+    ],
+    [
+     550.56,
+     10,
+     40,
+     "r"
+    ],
+    [
+     583.38,
+     2,
+     42,
+     "r"
+    ],
+    [
+     626.37,
+     18,
+     46,
+     "r"
+    ],
+    [
+     661.54,
+     7,
+     48,
+     "r"
+    ],
+    [
+     692.58,
+     1,
+     49,
+     "r"
+    ],
+    [
+     719.64,
+     6,
+     50,
+     "r"
+    ],
+    [
+     751.29,
+     6,
+     52,
+     "r"
+    ],
+    [
+     783.52,
+     6,
+     54,
+     "r"
+    ],
+    [
+     814.67,
+     8,
+     56,
+     "r"
+    ],
+    [
+     847.64,
+     7,
+     58,
+     "r"
+    ],
+    [
+     879.49,
+     6,
+     59,
+     "r"
+    ],
+    [
+     912.39,
+     5,
+     60,
+     "r"
+    ],
+    [
+     945.13,
+     1,
+     61,
+     "r"
+    ],
+    [
+     977.6,
+     9,
+     63,
+     "r"
+    ],
+    [
+     1027.49,
+     29,
+     71,
+     "r"
+    ],
+    [
+     1057.62,
+     13,
+     73,
+     "r"
+    ],
+    [
+     1090.67,
+     7,
+     75,
+     "r"
+    ],
+    [
+     1125.17,
+     22,
+     78,
+     "r"
+    ],
+    [
+     1176.25,
+     7,
+     86,
+     "r"
+    ],
+    [
+     1176.34,
+     16,
+     86,
+     "c"
+    ],
+    [
+     1206.26,
+     4,
+     87,
+     "c"
+    ],
+    [
+     1238.28,
+     11,
+     89,
+     "c"
+    ],
+    [
+     1269.92,
+     6,
+     91,
+     "c"
+    ],
+    [
+     1300.14,
+     5,
+     93,
+     "c"
+    ],
+    [
+     1334.19,
+     10,
+     95,
+     "c"
+    ],
+    [
+     1367.62,
+     3,
+     96,
+     "c"
+    ],
+    [
+     1397.15,
+     4,
+     97,
+     "c"
+    ],
+    [
+     1434.4,
+     15,
+     101,
+     "c"
+    ],
+    [
+     1467.01,
+     8,
+     103,
+     "c"
+    ],
+    [
+     1496.61,
+     5,
+     104,
+     "c"
+    ],
+    [
+     1530.61,
+     8,
+     105,
+     "c"
+    ],
+    [
+     1566.04,
+     7,
+     107,
+     "c"
+    ],
+    [
+     1599.98,
+     11,
+     110,
+     "c"
+    ],
+    [
+     1634.35,
+     15,
+     113,
+     "c"
+    ],
+    [
+     1680.24,
+     28,
+     120,
+     "c"
+    ],
+    [
+     1712.66,
+     9,
+     123,
+     "c"
+    ],
+    [
+     1742.21,
+     7,
+     125,
+     "c"
+    ],
+    [
+     1776.54,
+     6,
+     128,
+     "c"
+    ],
+    [
+     1810.54,
+     6,
+     129,
+     "c"
+    ],
+    [
+     1841.18,
+     6,
+     130,
+     "c"
+    ],
+    [
+     1873.55,
+     4,
+     131,
+     "c"
+    ],
+    [
+     1903.87,
+     9,
+     133,
+     "c"
+    ],
+    [
+     1932.52,
+     11,
+     135,
+     "c"
+    ],
+    [
+     1966.64,
+     11,
+     138,
+     "c"
+    ],
+    [
+     2002.07,
+     7,
+     141,
+     "c"
+    ],
+    [
+     2036.95,
+     1,
+     142,
+     "c"
+    ],
+    [
+     2074.91,
+     6,
+     143,
+     "c"
+    ],
+    [
+     2109.83,
+     7,
+     144,
+     "c"
+    ],
+    [
+     2140.75,
+     4,
+     145,
+     "c"
+    ],
+    [
+     2170.6,
+     5,
+     147,
+     "c"
+    ],
+    [
+     2214.21,
+     11,
+     149,
+     "c"
+    ],
+    [
+     2252.97,
+     2,
+     151,
+     "c"
+    ],
+    [
+     2286.54,
+     14,
+     154,
+     "c"
+    ],
+    [
+     2317.0,
+     12,
+     156,
+     "c"
+    ],
+    [
+     2348.52,
+     3,
+     157,
+     "c"
+    ],
+    [
+     2382.26,
+     1,
+     158,
+     "c"
+    ],
+    [
+     2420.93,
+     6,
+     159,
+     "c"
+    ],
+    [
+     2460.85,
+     1,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 67.04400665862488,
+   "steps_stream": 67,
+   "steps_source": "stream",
+   "step_ms": 34.50618408891414,
+   "tokens_per_step": 2.3134328358208953,
+   "valid_decode": true
+  },
+  {
+   "key": "longctx-09",
+   "id": "longctx-09",
+   "category": "longctx",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 4,
+   "t_wall": 13.65,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 3013,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.18128258897922933,
+   "decode_s": 2.331940864911303,
+   "total_s": 2.513411339954473,
+   "prompt_tokens": 3013,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 6,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 63,
+   "n_events": 66,
+   "n_steps": 62,
+   "reasoning_chars": 637,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "edbb0023ee8b0a2081b4d87fdcdd0f9f2813796cd7f95df0136aee43c419e59e",
+   "chunks": [
+    [
+     181.28,
+     21,
+     6,
+     "r"
+    ],
+    [
+     224.79,
+     5,
+     8,
+     "r"
+    ],
+    [
+     265.93,
+     19,
+     12,
+     "r"
+    ],
+    [
+     315.15,
+     32,
+     20,
+     "r"
+    ],
+    [
+     344.1,
+     8,
+     21,
+     "r"
+    ],
+    [
+     371.44,
+     5,
+     22,
+     "r"
+    ],
+    [
+     405.02,
+     10,
+     23,
+     "r"
+    ],
+    [
+     442.34,
+     7,
+     26,
+     "r"
+    ],
+    [
+     475.24,
+     6,
+     27,
+     "r"
+    ],
+    [
+     502.33,
+     5,
+     28,
+     "r"
+    ],
+    [
+     533.99,
+     6,
+     29,
+     "r"
+    ],
+    [
+     570.87,
+     14,
+     32,
+     "r"
+    ],
+    [
+     604.58,
+     8,
+     33,
+     "r"
+    ],
+    [
+     643.67,
+     3,
+     34,
+     "r"
+    ],
+    [
+     680.0,
+     4,
+     35,
+     "r"
+    ],
+    [
+     718.25,
+     11,
+     37,
+     "r"
+    ],
+    [
+     749.83,
+     12,
+     39,
+     "r"
+    ],
+    [
+     779.88,
+     2,
+     40,
+     "r"
+    ],
+    [
+     833.54,
+     22,
+     48,
+     "r"
+    ],
+    [
+     884.92,
+     19,
+     56,
+     "r"
+    ],
+    [
+     936.85,
+     26,
+     64,
+     "r"
+    ],
+    [
+     979.92,
+     5,
+     69,
+     "r"
+    ],
+    [
+     1019.82,
+     17,
+     72,
+     "r"
+    ],
+    [
+     1059.44,
+     12,
+     75,
+     "r"
+    ],
+    [
+     1096.02,
+     15,
+     78,
+     "r"
+    ],
+    [
+     1127.7,
+     8,
+     79,
+     "r"
+    ],
+    [
+     1162.32,
+     7,
+     81,
+     "r"
+    ],
+    [
+     1197.56,
+     8,
+     83,
+     "r"
+    ],
+    [
+     1230.49,
+     13,
+     85,
+     "r"
+    ],
+    [
+     1259.44,
+     11,
+     86,
+     "r"
+    ],
+    [
+     1294.81,
+     18,
+     89,
+     "r"
+    ],
+    [
+     1329.39,
+     5,
+     91,
+     "r"
+    ],
+    [
+     1364.64,
+     5,
+     92,
+     "r"
+    ],
+    [
+     1406.91,
+     3,
+     95,
+     "r"
+    ],
+    [
+     1436.32,
+     6,
+     96,
+     "r"
+    ],
+    [
+     1469.06,
+     10,
+     98,
+     "r"
+    ],
+    [
+     1505.95,
+     8,
+     99,
+     "r"
+    ],
+    [
+     1551.22,
+     15,
+     104,
+     "r"
+    ],
+    [
+     1584.36,
+     8,
+     106,
+     "r"
+    ],
+    [
+     1618.89,
+     7,
+     108,
+     "r"
+    ],
+    [
+     1649.86,
+     14,
+     110,
+     "r"
+    ],
+    [
+     1701.4,
+     21,
+     118,
+     "r"
+    ],
+    [
+     1753.83,
+     18,
+     125,
+     "r"
+    ],
+    [
+     1791.63,
+     8,
+     128,
+     "r"
+    ],
+    [
+     1824.3,
+     11,
+     130,
+     "r"
+    ],
+    [
+     1860.01,
+     4,
+     131,
+     "r"
+    ],
+    [
+     1895.89,
+     7,
+     133,
+     "r"
+    ],
+    [
+     1924.61,
+     3,
+     134,
+     "r"
+    ],
+    [
+     1957.6,
+     4,
+     135,
+     "r"
+    ],
+    [
+     1993.99,
+     4,
+     136,
+     "r"
+    ],
+    [
+     2031.6,
+     13,
+     138,
+     "r"
+    ],
+    [
+     2068.35,
+     23,
+     141,
+     "r"
+    ],
+    [
+     2108.96,
+     11,
+     144,
+     "r"
+    ],
+    [
+     2141.81,
+     8,
+     145,
+     "r"
+    ],
+    [
+     2170.06,
+     7,
+     146,
+     "r"
+    ],
+    [
+     2221.48,
+     15,
+     147,
+     "r"
+    ],
+    [
+     2274.87,
+     6,
+     148,
+     "r"
+    ],
+    [
+     2328.37,
+     10,
+     152,
+     "r"
+    ],
+    [
+     2362.79,
+     7,
+     154,
+     "r"
+    ],
+    [
+     2401.37,
+     8,
+     157,
+     "r"
+    ],
+    [
+     2443.72,
+     2,
+     158,
+     "r"
+    ],
+    [
+     2480.7,
+     6,
+     159,
+     "r"
+    ],
+    [
+     2513.22,
+     1,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 154,
+   "tok_s": 66.03941048301733,
+   "steps_stream": 62,
+   "steps_source": "stream",
+   "step_ms": 37.61194943405327,
+   "tokens_per_step": 2.4838709677419355,
+   "valid_decode": true
+  },
+  {
+   "key": "multilingual-07",
+   "id": "multilingual-07",
+   "category": "multilingual",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 5,
+   "t_wall": 16.74,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 38,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15038421493954957,
+   "decode_s": 2.2051160820992664,
+   "total_s": 2.3557507429504767,
+   "prompt_tokens": 38,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 132,
+   "boundary": "exact",
+   "first_chunk_tokens": 8,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 63,
+   "n_events": 66,
+   "n_steps": 62,
+   "reasoning_chars": 626,
+   "content_chars": 29,
+   "tool_calls": 0,
+   "sha256": "a11d2ab7e0671d7423f12f0525f2cc4a1c7c81c85b5345475757f1e97506e99e",
+   "chunks": [
+    [
+     150.38,
+     27,
+     8,
+     "r"
+    ],
+    [
+     197.66,
+     29,
+     12,
+     "r"
+    ],
+    [
+     244.23,
+     18,
+     15,
+     "r"
+    ],
+    [
+     288.18,
+     16,
+     19,
+     "r"
+    ],
+    [
+     331.82,
+     19,
+     23,
+     "r"
+    ],
+    [
+     380.94,
+     7,
+     24,
+     "r"
+    ],
+    [
+     429.03,
+     43,
+     32,
+     "r"
+    ],
+    [
+     460.49,
+     16,
+     34,
+     "r"
+    ],
+    [
+     491.53,
+     8,
+     36,
+     "r"
+    ],
+    [
+     536.28,
+     6,
+     38,
+     "r"
+    ],
+    [
+     572.95,
+     20,
+     41,
+     "r"
+    ],
+    [
+     609.32,
+     7,
+     42,
+     "r"
+    ],
+    [
+     650.17,
+     18,
+     46,
+     "r"
+    ],
+    [
+     688.31,
+     7,
+     48,
+     "r"
+    ],
+    [
+     728.91,
+     32,
+     54,
+     "r"
+    ],
+    [
+     763.97,
+     25,
+     57,
+     "r"
+    ],
+    [
+     801.05,
+     12,
+     60,
+     "r"
+    ],
+    [
+     836.24,
+     8,
+     62,
+     "r"
+    ],
+    [
+     871.31,
+     15,
+     65,
+     "r"
+    ],
+    [
+     906.23,
+     11,
+     66,
+     "r"
+    ],
+    [
+     943.99,
+     7,
+     68,
+     "r"
+    ],
+    [
+     970.86,
+     9,
+     69,
+     "r"
+    ],
+    [
+     1004.02,
+     1,
+     70,
+     "r"
+    ],
+    [
+     1044.02,
+     13,
+     71,
+     "r"
+    ],
+    [
+     1078.97,
+     19,
+     74,
+     "r"
+    ],
+    [
+     1109.13,
+     6,
+     76,
+     "r"
+    ],
+    [
+     1141.18,
+     11,
+     78,
+     "r"
+    ],
+    [
+     1180.9,
+     20,
+     83,
+     "r"
+    ],
+    [
+     1215.27,
+     11,
+     86,
+     "r"
+    ],
+    [
+     1249.03,
+     10,
+     88,
+     "r"
+    ],
+    [
+     1287.06,
+     11,
+     92,
+     "r"
+    ],
+    [
+     1318.8,
+     6,
+     93,
+     "r"
+    ],
+    [
+     1351.64,
+     8,
+     95,
+     "r"
+    ],
+    [
+     1385.26,
+     8,
+     97,
+     "r"
+    ],
+    [
+     1421.69,
+     1,
+     98,
+     "r"
+    ],
+    [
+     1454.7,
+     17,
+     101,
+     "r"
+    ],
+    [
+     1491.92,
+     4,
+     103,
+     "r"
+    ],
+    [
+     1526.09,
+     6,
+     104,
+     "r"
+    ],
+    [
+     1561.83,
+     7,
+     107,
+     "r"
+    ],
+    [
+     1594.5,
+     7,
+     108,
+     "r"
+    ],
+    [
+     1626.7,
+     6,
+     110,
+     "r"
+    ],
+    [
+     1657.55,
+     1,
+     111,
+     "r"
+    ],
+    [
+     1690.0,
+     10,
+     113,
+     "r"
+    ],
+    [
+     1721.15,
+     7,
+     115,
+     "r"
+    ],
+    [
+     1753.89,
+     6,
+     117,
+     "r"
+    ],
+    [
+     1785.0,
+     1,
+     118,
+     "r"
+    ],
+    [
+     1812.17,
+     8,
+     119,
+     "r"
+    ],
+    [
+     1846.81,
+     20,
+     122,
+     "r"
+    ],
+    [
+     1879.24,
+     8,
+     124,
+     "r"
+    ],
+    [
+     1916.83,
+     16,
+     128,
+     "r"
+    ],
+    [
+     1969.0,
+     17,
+     136,
+     "r"
+    ],
+    [
+     1969.07,
+     3,
+     136,
+     "c"
+    ],
+    [
+     2010.53,
+     4,
+     140,
+     "c"
+    ],
+    [
+     2046.21,
+     1,
+     141,
+     "c"
+    ],
+    [
+     2080.59,
+     2,
+     143,
+     "c"
+    ],
+    [
+     2107.92,
+     1,
+     144,
+     "c"
+    ],
+    [
+     2139.15,
+     3,
+     146,
+     "c"
+    ],
+    [
+     2179.47,
+     2,
+     148,
+     "c"
+    ],
+    [
+     2212.97,
+     1,
+     149,
+     "c"
+    ],
+    [
+     2256.09,
+     6,
+     154,
+     "c"
+    ],
+    [
+     2288.88,
+     1,
+     155,
+     "c"
+    ],
+    [
+     2320.25,
+     2,
+     157,
+     "c"
+    ],
+    [
+     2355.5,
+     3,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 152,
+   "tok_s": 68.93061151469917,
+   "steps_stream": 62,
+   "steps_source": "stream",
+   "step_ms": 35.56638842095591,
+   "tokens_per_step": 2.4516129032258065,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-08",
+   "id": "prose-08",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 6,
+   "t_wall": 19.19,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 30,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.144335055956617,
+   "decode_s": 2.5096305139595643,
+   "total_s": 2.654111392912455,
+   "prompt_tokens": 30,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 96,
+   "boundary": "exact",
+   "first_chunk_tokens": 7,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 69,
+   "n_events": 72,
+   "n_steps": 68,
+   "reasoning_chars": 437,
+   "content_chars": 299,
+   "tool_calls": 0,
+   "sha256": "929cc0b7c3644cdb8ea2968ddbdb59c64fe5b893111307c10a0dab03ab3d88eb",
+   "chunks": [
+    [
+     144.34,
+     23,
+     7,
+     "r"
+    ],
+    [
+     192.62,
+     28,
+     12,
+     "r"
+    ],
+    [
+     231.16,
+     19,
+     15,
+     "r"
+    ],
+    [
+     282.01,
+     49,
+     23,
+     "r"
+    ],
+    [
+     319.16,
+     10,
+     26,
+     "r"
+    ],
+    [
+     356.39,
+     7,
+     27,
+     "r"
+    ],
+    [
+     391.52,
+     3,
+     28,
+     "r"
+    ],
+    [
+     420.41,
+     10,
+     30,
+     "r"
+    ],
+    [
+     466.01,
+     19,
+     35,
+     "r"
+    ],
+    [
+     502.26,
+     4,
+     36,
+     "r"
+    ],
+    [
+     540.74,
+     12,
+     39,
+     "r"
+    ],
+    [
+     578.89,
+     10,
+     40,
+     "r"
+    ],
+    [
+     615.04,
+     5,
+     41,
+     "r"
+    ],
+    [
+     655.03,
+     9,
+     43,
+     "r"
+    ],
+    [
+     693.54,
+     1,
+     44,
+     "r"
+    ],
+    [
+     730.29,
+     15,
+     46,
+     "r"
+    ],
+    [
+     760.75,
+     13,
+     48,
+     "r"
+    ],
+    [
+     806.45,
+     30,
+     53,
+     "r"
+    ],
+    [
+     836.98,
+     5,
+     54,
+     "r"
+    ],
+    [
+     868.11,
+     6,
+     55,
+     "r"
+    ],
+    [
+     898.19,
+     1,
+     56,
+     "r"
+    ],
+    [
+     933.36,
+     8,
+     57,
+     "r"
+    ],
+    [
+     969.21,
+     11,
+     60,
+     "r"
+    ],
+    [
+     1000.37,
+     10,
+     61,
+     "r"
+    ],
+    [
+     1036.27,
+     8,
+     63,
+     "r"
+    ],
+    [
+     1066.91,
+     2,
+     65,
+     "r"
+    ],
+    [
+     1099.58,
+     6,
+     66,
+     "r"
+    ],
+    [
+     1130.92,
+     3,
+     67,
+     "r"
+    ],
+    [
+     1173.15,
+     12,
+     71,
+     "r"
+    ],
+    [
+     1206.4,
+     1,
+     72,
+     "r"
+    ],
+    [
+     1244.27,
+     4,
+     75,
+     "r"
+    ],
+    [
+     1284.12,
+     6,
+     76,
+     "r"
+    ],
+    [
+     1319.72,
+     10,
+     78,
+     "r"
+    ],
+    [
+     1363.24,
+     5,
+     79,
+     "r"
+    ],
+    [
+     1395.27,
+     5,
+     81,
+     "r"
+    ],
+    [
+     1431.29,
+     10,
+     84,
+     "r"
+    ],
+    [
+     1466.47,
+     17,
+     87,
+     "r"
+    ],
+    [
+     1498.37,
+     4,
+     88,
+     "r"
+    ],
+    [
+     1526.23,
+     4,
+     89,
+     "r"
+    ],
+    [
+     1563.02,
+     6,
+     90,
+     "r"
+    ],
+    [
+     1595.94,
+     9,
+     91,
+     "r"
+    ],
+    [
+     1629.8,
+     7,
+     93,
+     "r"
+    ],
+    [
+     1681.92,
+     10,
+     101,
+     "r"
+    ],
+    [
+     1682.0,
+     13,
+     101,
+     "c"
+    ],
+    [
+     1722.49,
+     12,
+     104,
+     "c"
+    ],
+    [
+     1753.01,
+     10,
+     106,
+     "c"
+    ],
+    [
+     1782.94,
+     1,
+     107,
+     "c"
+    ],
+    [
+     1827.06,
+     7,
+     109,
+     "c"
+    ],
+    [
+     1868.78,
+     6,
+     110,
+     "c"
+    ],
+    [
+     1917.24,
+     6,
+     111,
+     "c"
+    ],
+    [
+     1954.02,
+     8,
+     112,
+     "c"
+    ],
+    [
+     1999.04,
+     1,
+     113,
+     "c"
+    ],
+    [
+     2044.58,
+     20,
+     118,
+     "c"
+    ],
+    [
+     2080.52,
+     6,
+     119,
+     "c"
+    ],
+    [
+     2115.33,
+     15,
+     121,
+     "c"
+    ],
+    [
+     2150.58,
+     10,
+     122,
+     "c"
+    ],
+    [
+     2186.35,
+     15,
+     124,
+     "c"
+    ],
+    [
+     2221.97,
+     14,
+     127,
+     "c"
+    ],
+    [
+     2256.73,
+     6,
+     129,
+     "c"
+    ],
+    [
+     2304.44,
+     7,
+     132,
+     "c"
+    ],
+    [
+     2344.08,
+     36,
+     137,
+     "c"
+    ],
+    [
+     2394.9,
+     22,
+     143,
+     "c"
+    ],
+    [
+     2429.49,
+     6,
+     144,
+     "c"
+    ],
+    [
+     2465.42,
+     15,
+     146,
+     "c"
+    ],
+    [
+     2497.9,
+     11,
+     149,
+     "c"
+    ],
+    [
+     2540.47,
+     26,
+     155,
+     "c"
+    ],
+    [
+     2574.39,
+     8,
+     157,
+     "c"
+    ],
+    [
+     2613.34,
+     15,
+     159,
+     "c"
+    ],
+    [
+     2653.97,
+     3,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 153,
+   "tok_s": 60.965149709868875,
+   "steps_stream": 68,
+   "steps_source": "stream",
+   "step_ms": 36.90633108764065,
+   "tokens_per_step": 2.25,
+   "valid_decode": true
+  },
+  {
+   "key": "structured-05",
+   "id": "structured-05",
+   "category": "structured",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 7,
+   "t_wall": 21.97,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 46,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1552037940127775,
+   "decode_s": 2.075653917971067,
+   "total_s": 2.231019006925635,
+   "prompt_tokens": 46,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 55,
+   "n_events": 58,
+   "n_steps": 54,
+   "reasoning_chars": 623,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "f5bd89996b005e89c619b1ce44ac907eeb18fc61dc8a055b8695a9bb68120faa",
+   "chunks": [
+    [
+     155.2,
+     31,
+     9,
+     "r"
+    ],
+    [
+     206.12,
+     21,
+     17,
+     "r"
+    ],
+    [
+     254.2,
+     34,
+     25,
+     "r"
+    ],
+    [
+     302.03,
+     42,
+     33,
+     "r"
+    ],
+    [
+     339.61,
+     21,
+     37,
+     "r"
+    ],
+    [
+     376.61,
+     13,
+     40,
+     "r"
+    ],
+    [
+     414.44,
+     18,
+     43,
+     "r"
+    ],
+    [
+     448.63,
+     4,
+     45,
+     "r"
+    ],
+    [
+     480.42,
+     10,
+     47,
+     "r"
+    ],
+    [
+     512.02,
+     4,
+     48,
+     "r"
+    ],
+    [
+     558.87,
+     23,
+     53,
+     "r"
+    ],
+    [
+     591.32,
+     10,
+     55,
+     "r"
+    ],
+    [
+     628.08,
+     13,
+     58,
+     "r"
+    ],
+    [
+     662.85,
+     6,
+     60,
+     "r"
+    ],
+    [
+     698.4,
+     7,
+     61,
+     "r"
+    ],
+    [
+     739.84,
+     10,
+     63,
+     "r"
+    ],
+    [
+     776.67,
+     1,
+     64,
+     "r"
+    ],
+    [
+     817.8,
+     12,
+     66,
+     "r"
+    ],
+    [
+     853.99,
+     6,
+     67,
+     "r"
+    ],
+    [
+     895.55,
+     9,
+     70,
+     "r"
+    ],
+    [
+     940.05,
+     11,
+     74,
+     "r"
+    ],
+    [
+     974.89,
+     10,
+     77,
+     "r"
+    ],
+    [
+     1010.79,
+     7,
+     80,
+     "r"
+    ],
+    [
+     1056.37,
+     16,
+     84,
+     "r"
+    ],
+    [
+     1088.01,
+     6,
+     85,
+     "r"
+    ],
+    [
+     1119.12,
+     2,
+     86,
+     "r"
+    ],
+    [
+     1158.16,
+     8,
+     87,
+     "r"
+    ],
+    [
+     1194.65,
+     7,
+     89,
+     "r"
+    ],
+    [
+     1227.18,
+     6,
+     91,
+     "r"
+    ],
+    [
+     1259.15,
+     1,
+     92,
+     "r"
+    ],
+    [
+     1299.85,
+     20,
+     97,
+     "r"
+    ],
+    [
+     1338.63,
+     9,
+     99,
+     "r"
+    ],
+    [
+     1369.83,
+     4,
+     101,
+     "r"
+    ],
+    [
+     1417.85,
+     7,
+     103,
+     "r"
+    ],
+    [
+     1449.74,
+     7,
+     105,
+     "r"
+    ],
+    [
+     1495.05,
+     12,
+     109,
+     "r"
+    ],
+    [
+     1535.19,
+     13,
+     112,
+     "r"
+    ],
+    [
+     1570.73,
+     7,
+     114,
+     "r"
+    ],
+    [
+     1609.85,
+     10,
+     117,
+     "r"
+    ],
+    [
+     1650.88,
+     11,
+     118,
+     "r"
+    ],
+    [
+     1701.11,
+     17,
+     123,
+     "r"
+    ],
+    [
+     1739.25,
+     6,
+     125,
+     "r"
+    ],
+    [
+     1782.12,
+     8,
+     127,
+     "r"
+    ],
+    [
+     1819.95,
+     4,
+     128,
+     "r"
+    ],
+    [
+     1855.3,
+     13,
+     131,
+     "r"
+    ],
+    [
+     1889.26,
+     12,
+     133,
+     "r"
+    ],
+    [
+     1931.87,
+     13,
+     137,
+     "r"
+    ],
+    [
+     1981.06,
+     15,
+     145,
+     "r"
+    ],
+    [
+     2018.78,
+     3,
+     146,
+     "r"
+    ],
+    [
+     2054.06,
+     7,
+     148,
+     "r"
+    ],
+    [
+     2089.77,
+     14,
+     151,
+     "r"
+    ],
+    [
+     2127.01,
+     9,
+     154,
+     "r"
+    ],
+    [
+     2161.81,
+     14,
+     157,
+     "r"
+    ],
+    [
+     2192.37,
+     13,
+     159,
+     "r"
+    ],
+    [
+     2230.86,
+     6,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 72.74815839607844,
+   "steps_stream": 54,
+   "steps_source": "stream",
+   "step_ms": 38.438035517982726,
+   "tokens_per_step": 2.7962962962962963,
+   "valid_decode": true
+  },
+  {
+   "key": "multilingual-01",
+   "id": "multilingual-01",
+   "category": "multilingual",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 8,
+   "t_wall": 24.31,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 39,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15338160400278866,
+   "decode_s": 2.2397611628985032,
+   "total_s": 2.3932663979940116,
+   "prompt_tokens": 39,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 154,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 64,
+   "n_events": 67,
+   "n_steps": 63,
+   "reasoning_chars": 710,
+   "content_chars": 16,
+   "tool_calls": 0,
+   "sha256": "0d46301b7c51db069cf4bedd50b06338049457ab830b1be83af7cac55b6f2918",
+   "chunks": [
+    [
+     153.38,
+     29,
+     9,
+     "r"
+    ],
+    [
+     199.97,
+     35,
+     15,
+     "r"
+    ],
+    [
+     249.6,
+     3,
+     16,
+     "r"
+    ],
+    [
+     300.83,
+     40,
+     23,
+     "r"
+    ],
+    [
+     351.77,
+     36,
+     31,
+     "r"
+    ],
+    [
+     386.53,
+     13,
+     33,
+     "r"
+    ],
+    [
+     429.86,
+     21,
+     38,
+     "r"
+    ],
+    [
+     456.7,
+     8,
+     39,
+     "r"
+    ],
+    [
+     492.13,
+     11,
+     40,
+     "r"
+    ],
+    [
+     534.0,
+     4,
+     42,
+     "r"
+    ],
+    [
+     568.69,
+     8,
+     43,
+     "r"
+    ],
+    [
+     600.73,
+     7,
+     45,
+     "r"
+    ],
+    [
+     635.86,
+     13,
+     48,
+     "r"
+    ],
+    [
+     675.52,
+     14,
+     53,
+     "r"
+    ],
+    [
+     707.51,
+     11,
+     54,
+     "r"
+    ],
+    [
+     740.1,
+     9,
+     56,
+     "r"
+    ],
+    [
+     773.82,
+     9,
+     57,
+     "r"
+    ],
+    [
+     806.33,
+     12,
+     59,
+     "r"
+    ],
+    [
+     839.89,
+     11,
+     61,
+     "r"
+    ],
+    [
+     871.76,
+     5,
+     63,
+     "r"
+    ],
+    [
+     911.44,
+     8,
+     65,
+     "r"
+    ],
+    [
+     948.2,
+     6,
+     66,
+     "r"
+    ],
+    [
+     988.24,
+     14,
+     69,
+     "r"
+    ],
+    [
+     1024.09,
+     6,
+     71,
+     "r"
+    ],
+    [
+     1058.89,
+     3,
+     72,
+     "r"
+    ],
+    [
+     1092.8,
+     6,
+     73,
+     "r"
+    ],
+    [
+     1133.95,
+     22,
+     78,
+     "r"
+    ],
+    [
+     1167.74,
+     6,
+     81,
+     "r"
+    ],
+    [
+     1201.67,
+     4,
+     82,
+     "r"
+    ],
+    [
+     1228.03,
+     6,
+     83,
+     "r"
+    ],
+    [
+     1264.27,
+     8,
+     86,
+     "r"
+    ],
+    [
+     1301.16,
+     24,
+     90,
+     "r"
+    ],
+    [
+     1337.06,
+     12,
+     91,
+     "r"
+    ],
+    [
+     1372.19,
+     5,
+     93,
+     "r"
+    ],
+    [
+     1404.97,
+     5,
+     95,
+     "r"
+    ],
+    [
+     1442.12,
+     9,
+     98,
+     "r"
+    ],
+    [
+     1478.57,
+     2,
+     100,
+     "r"
+    ],
+    [
+     1515.25,
+     2,
+     101,
+     "r"
+    ],
+    [
+     1551.2,
+     8,
+     103,
+     "r"
+    ],
+    [
+     1585.05,
+     6,
+     104,
+     "r"
+    ],
+    [
+     1621.64,
+     12,
+     106,
+     "r"
+    ],
+    [
+     1653.83,
+     10,
+     108,
+     "r"
+    ],
+    [
+     1685.65,
+     7,
+     110,
+     "r"
+    ],
+    [
+     1724.0,
+     8,
+     112,
+     "r"
+    ],
+    [
+     1756.77,
+     9,
+     114,
+     "r"
+    ],
+    [
+     1788.8,
+     1,
+     115,
+     "r"
+    ],
+    [
+     1827.81,
+     13,
+     117,
+     "r"
+    ],
+    [
+     1860.7,
+     14,
+     119,
+     "r"
+    ],
+    [
+     1891.82,
+     5,
+     120,
+     "r"
+    ],
+    [
+     1924.93,
+     9,
+     122,
+     "r"
+    ],
+    [
+     1956.2,
+     13,
+     124,
+     "r"
+    ],
+    [
+     1989.55,
+     9,
+     126,
+     "r"
+    ],
+    [
+     2022.18,
+     11,
+     128,
+     "r"
+    ],
+    [
+     2053.87,
+     7,
+     130,
+     "r"
+    ],
+    [
+     2091.73,
+     14,
+     133,
+     "r"
+    ],
+    [
+     2128.56,
+     19,
+     136,
+     "r"
+    ],
+    [
+     2160.82,
+     6,
+     138,
+     "r"
+    ],
+    [
+     2194.0,
+     7,
+     139,
+     "r"
+    ],
+    [
+     2227.86,
+     6,
+     140,
+     "r"
+    ],
+    [
+     2264.37,
+     19,
+     144,
+     "r"
+    ],
+    [
+     2294.62,
+     6,
+     146,
+     "r"
+    ],
+    [
+     2339.88,
+     43,
+     152,
+     "r"
+    ],
+    [
+     2393.07,
+     1,
+     160,
+     "r"
+    ],
+    [
+     2393.14,
+     16,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 67.4179026323454,
+   "steps_stream": 63,
+   "steps_source": "stream",
+   "step_ms": 35.551764490452435,
+   "tokens_per_step": 2.3968253968253967,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-09",
+   "id": "prose-09",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 9,
+   "t_wall": 26.81,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 40,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14977931999601424,
+   "decode_s": 2.156340858899057,
+   "total_s": 2.306293233996257,
+   "prompt_tokens": 40,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 7,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 61,
+   "n_events": 64,
+   "n_steps": 60,
+   "reasoning_chars": 671,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "cd094d9eefb65845a22045bcb0781d27e4999a8d006a6dcb89f133ec708f3033",
+   "chunks": [
+    [
+     149.78,
+     21,
+     7,
+     "r"
+    ],
+    [
+     197.28,
+     35,
+     14,
+     "r"
+    ],
+    [
+     248.65,
+     30,
+     22,
+     "r"
+    ],
+    [
+     295.9,
+     35,
+     30,
+     "r"
+    ],
+    [
+     334.89,
+     5,
+     31,
+     "r"
+    ],
+    [
+     373.85,
+     31,
+     36,
+     "r"
+    ],
+    [
+     408.02,
+     14,
+     39,
+     "r"
+    ],
+    [
+     452.21,
+     31,
+     45,
+     "r"
+    ],
+    [
+     495.38,
+     13,
+     49,
+     "r"
+    ],
+    [
+     537.36,
+     21,
+     54,
+     "r"
+    ],
+    [
+     582.98,
+     24,
+     59,
+     "r"
+    ],
+    [
+     623.98,
+     19,
+     64,
+     "r"
+    ],
+    [
+     658.79,
+     22,
+     67,
+     "r"
+    ],
+    [
+     695.86,
+     28,
+     72,
+     "r"
+    ],
+    [
+     728.21,
+     6,
+     74,
+     "r"
+    ],
+    [
+     758.23,
+     12,
+     76,
+     "r"
+    ],
+    [
+     795.25,
+     1,
+     77,
+     "r"
+    ],
+    [
+     828.96,
+     8,
+     78,
+     "r"
+    ],
+    [
+     867.41,
+     17,
+     82,
+     "r"
+    ],
+    [
+     909.24,
+     32,
+     87,
+     "r"
+    ],
+    [
+     945.03,
+     17,
+     90,
+     "r"
+    ],
+    [
+     981.33,
+     9,
+     92,
+     "r"
+    ],
+    [
+     1013.42,
+     7,
+     94,
+     "r"
+    ],
+    [
+     1048.53,
+     7,
+     97,
+     "r"
+    ],
+    [
+     1081.97,
+     6,
+     99,
+     "r"
+    ],
+    [
+     1108.82,
+     7,
+     100,
+     "r"
+    ],
+    [
+     1155.29,
+     13,
+     105,
+     "r"
+    ],
+    [
+     1186.93,
+     7,
+     107,
+     "r"
+    ],
+    [
+     1218.02,
+     13,
+     109,
+     "r"
+    ],
+    [
+     1248.9,
+     8,
+     111,
+     "r"
+    ],
+    [
+     1281.78,
+     6,
+     112,
+     "r"
+    ],
+    [
+     1312.77,
+     8,
+     113,
+     "r"
+    ],
+    [
+     1353.22,
+     8,
+     115,
+     "r"
+    ],
+    [
+     1390.52,
+     8,
+     118,
+     "r"
+    ],
+    [
+     1427.33,
+     11,
+     122,
+     "r"
+    ],
+    [
+     1459.5,
+     3,
+     123,
+     "r"
+    ],
+    [
+     1499.88,
+     7,
+     125,
+     "r"
+    ],
+    [
+     1536.49,
+     1,
+     126,
+     "r"
+    ],
+    [
+     1568.98,
+     9,
+     128,
+     "r"
+    ],
+    [
+     1600.48,
+     4,
+     129,
+     "r"
+    ],
+    [
+     1634.41,
+     1,
+     130,
+     "r"
+    ],
+    [
+     1672.41,
+     8,
+     131,
+     "r"
+    ],
+    [
+     1712.63,
+     1,
+     132,
+     "r"
+    ],
+    [
+     1751.35,
+     3,
+     133,
+     "r"
+    ],
+    [
+     1790.64,
+     4,
+     134,
+     "r"
+    ],
+    [
+     1827.4,
+     2,
+     135,
+     "r"
+    ],
+    [
+     1854.25,
+     2,
+     136,
+     "r"
+    ],
+    [
+     1887.43,
+     6,
+     138,
+     "r"
+    ],
+    [
+     1918.88,
+     6,
+     140,
+     "r"
+    ],
+    [
+     1945.33,
+     8,
+     141,
+     "r"
+    ],
+    [
+     1978.44,
+     8,
+     142,
+     "r"
+    ],
+    [
+     2014.12,
+     5,
+     144,
+     "r"
+    ],
+    [
+     2046.66,
+     11,
+     146,
+     "r"
+    ],
+    [
+     2078.75,
+     2,
+     148,
+     "r"
+    ],
+    [
+     2105.46,
+     5,
+     149,
+     "r"
+    ],
+    [
+     2137.75,
+     7,
+     151,
+     "r"
+    ],
+    [
+     2165.21,
+     3,
+     152,
+     "r"
+    ],
+    [
+     2201.03,
+     8,
+     153,
+     "r"
+    ],
+    [
+     2236.14,
+     6,
+     156,
+     "r"
+    ],
+    [
+     2272.22,
+     6,
+     159,
+     "r"
+    ],
+    [
+     2306.12,
+     5,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 153,
+   "tok_s": 70.95353193748589,
+   "steps_stream": 60,
+   "steps_source": "stream",
+   "step_ms": 35.939014314984284,
+   "tokens_per_step": 2.55,
+   "valid_decode": true
+  },
+  {
+   "key": "code-07",
+   "id": "code-07",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 10,
+   "t_wall": 29.26,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 64,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1659299620660022,
+   "decode_s": 2.522046240977943,
+   "total_s": 2.688101018080488,
+   "prompt_tokens": 64,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 6,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 73,
+   "n_events": 76,
+   "n_steps": 72,
+   "reasoning_chars": 745,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "b478ad884479e6d79b5d0ba4acc3459110ae5bfa5bb306a988d920d7a7994858",
+   "chunks": [
+    [
+     165.93,
+     17,
+     6,
+     "r"
+    ],
+    [
+     215.28,
+     37,
+     11,
+     "r"
+    ],
+    [
+     261.96,
+     41,
+     19,
+     "r"
+    ],
+    [
+     310.92,
+     35,
+     25,
+     "r"
+    ],
+    [
+     350.85,
+     31,
+     31,
+     "r"
+    ],
+    [
+     388.6,
+     19,
+     34,
+     "r"
+    ],
+    [
+     421.29,
+     11,
+     35,
+     "r"
+    ],
+    [
+     453.22,
+     5,
+     37,
+     "r"
+    ],
+    [
+     489.29,
+     18,
+     40,
+     "r"
+    ],
+    [
+     522.39,
+     7,
+     42,
+     "r"
+    ],
+    [
+     551.96,
+     6,
+     43,
+     "r"
+    ],
+    [
+     582.74,
+     7,
+     44,
+     "r"
+    ],
+    [
+     615.32,
+     9,
+     46,
+     "r"
+    ],
+    [
+     645.96,
+     7,
+     47,
+     "r"
+    ],
+    [
+     677.38,
+     1,
+     48,
+     "r"
+    ],
+    [
+     714.05,
+     5,
+     52,
+     "r"
+    ],
+    [
+     757.17,
+     11,
+     54,
+     "r"
+    ],
+    [
+     799.24,
+     26,
+     59,
+     "r"
+    ],
+    [
+     834.23,
+     5,
+     61,
+     "r"
+    ],
+    [
+     866.6,
+     14,
+     63,
+     "r"
+    ],
+    [
+     893.39,
+     5,
+     64,
+     "r"
+    ],
+    [
+     931.06,
+     1,
+     65,
+     "r"
+    ],
+    [
+     970.08,
+     9,
+     68,
+     "r"
+    ],
+    [
+     1006.0,
+     15,
+     71,
+     "r"
+    ],
+    [
+     1037.56,
+     4,
+     73,
+     "r"
+    ],
+    [
+     1071.18,
+     12,
+     75,
+     "r"
+    ],
+    [
+     1102.72,
+     8,
+     77,
+     "r"
+    ],
+    [
+     1134.89,
+     6,
+     78,
+     "r"
+    ],
+    [
+     1174.38,
+     5,
+     79,
+     "r"
+    ],
+    [
+     1207.81,
+     7,
+     82,
+     "r"
+    ],
+    [
+     1236.13,
+     7,
+     83,
+     "r"
+    ],
+    [
+     1271.24,
+     6,
+     84,
+     "r"
+    ],
+    [
+     1306.12,
+     7,
+     86,
+     "r"
+    ],
+    [
+     1331.6,
+     6,
+     87,
+     "r"
+    ],
+    [
+     1363.53,
+     8,
+     89,
+     "r"
+    ],
+    [
+     1401.05,
+     16,
+     92,
+     "r"
+    ],
+    [
+     1434.01,
+     20,
+     94,
+     "r"
+    ],
+    [
+     1466.06,
+     8,
+     96,
+     "r"
+    ],
+    [
+     1496.04,
+     3,
+     97,
+     "r"
+    ],
+    [
+     1532.1,
+     4,
+     98,
+     "r"
+    ],
+    [
+     1566.45,
+     15,
+     101,
+     "r"
+    ],
+    [
+     1600.12,
+     11,
+     103,
+     "r"
+    ],
+    [
+     1626.17,
+     2,
+     104,
+     "r"
+    ],
+    [
+     1661.96,
+     16,
+     107,
+     "r"
+    ],
+    [
+     1696.69,
+     7,
+     108,
+     "r"
+    ],
+    [
+     1734.6,
+     6,
+     109,
+     "r"
+    ],
+    [
+     1766.32,
+     4,
+     111,
+     "r"
+    ],
+    [
+     1798.59,
+     9,
+     113,
+     "r"
+    ],
+    [
+     1829.19,
+     5,
+     114,
+     "r"
+    ],
+    [
+     1866.95,
+     12,
+     117,
+     "r"
+    ],
+    [
+     1902.65,
+     17,
+     120,
+     "r"
+    ],
+    [
+     1929.52,
+     5,
+     121,
+     "r"
+    ],
+    [
+     1968.05,
+     8,
+     123,
+     "r"
+    ],
+    [
+     1999.42,
+     12,
+     125,
+     "r"
+    ],
+    [
+     2027.71,
+     1,
+     126,
+     "r"
+    ],
+    [
+     2059.51,
+     5,
+     127,
+     "r"
+    ],
+    [
+     2093.06,
+     1,
+     128,
+     "r"
+    ],
+    [
+     2141.99,
+     5,
+     129,
+     "r"
+    ],
+    [
+     2169.68,
+     8,
+     130,
+     "r"
+    ],
+    [
+     2205.53,
+     4,
+     131,
+     "r"
+    ],
+    [
+     2244.78,
+     8,
+     132,
+     "r"
+    ],
+    [
+     2281.9,
+     2,
+     133,
+     "r"
+    ],
+    [
+     2324.95,
+     9,
+     136,
+     "r"
+    ],
+    [
+     2356.41,
+     9,
+     138,
+     "r"
+    ],
+    [
+     2394.27,
+     20,
+     141,
+     "r"
+    ],
+    [
+     2432.46,
+     13,
+     145,
+     "r"
+    ],
+    [
+     2463.35,
+     11,
+     147,
+     "r"
+    ],
+    [
+     2499.56,
+     4,
+     148,
+     "r"
+    ],
+    [
+     2531.68,
+     8,
+     150,
+     "r"
+    ],
+    [
+     2562.32,
+     7,
+     151,
+     "r"
+    ],
+    [
+     2597.17,
+     16,
+     154,
+     "r"
+    ],
+    [
+     2643.31,
+     6,
+     155,
+     "r"
+    ],
+    [
+     2687.98,
+     10,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 154,
+   "tok_s": 61.061529125764686,
+   "steps_stream": 72,
+   "steps_source": "stream",
+   "step_ms": 35.02842001358254,
+   "tokens_per_step": 2.138888888888889,
+   "valid_decode": true
+  },
+  {
+   "key": "code-05",
+   "id": "code-05",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 11,
+   "t_wall": 32.06,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 41,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1545304829487577,
+   "decode_s": 2.1436344321118668,
+   "total_s": 2.298345393035561,
+   "prompt_tokens": 41,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 62,
+   "n_events": 65,
+   "n_steps": 61,
+   "reasoning_chars": 696,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "ce6db22e44996310f1cbb5002b448ae81acf032cc8f25c07f91582ac721add98",
+   "chunks": [
+    [
+     154.53,
+     30,
+     9,
+     "r"
+    ],
+    [
+     196.51,
+     16,
+     12,
+     "r"
+    ],
+    [
+     239.31,
+     31,
+     20,
+     "r"
+    ],
+    [
+     290.78,
+     12,
+     23,
+     "r"
+    ],
+    [
+     341.08,
+     36,
+     31,
+     "r"
+    ],
+    [
+     376.4,
+     14,
+     34,
+     "r"
+    ],
+    [
+     406.76,
+     8,
+     36,
+     "r"
+    ],
+    [
+     442.65,
+     11,
+     39,
+     "r"
+    ],
+    [
+     483.23,
+     17,
+     43,
+     "r"
+    ],
+    [
+     512.99,
+     5,
+     44,
+     "r"
+    ],
+    [
+     549.39,
+     7,
+     46,
+     "r"
+    ],
+    [
+     577.17,
+     4,
+     47,
+     "r"
+    ],
+    [
+     618.38,
+     11,
+     48,
+     "r"
+    ],
+    [
+     650.91,
+     11,
+     50,
+     "r"
+    ],
+    [
+     678.0,
+     7,
+     51,
+     "r"
+    ],
+    [
+     708.69,
+     8,
+     53,
+     "r"
+    ],
+    [
+     743.89,
+     9,
+     54,
+     "r"
+    ],
+    [
+     779.77,
+     13,
+     57,
+     "r"
+    ],
+    [
+     826.08,
+     13,
+     60,
+     "r"
+    ],
+    [
+     862.06,
+     20,
+     64,
+     "r"
+    ],
+    [
+     900.24,
+     9,
+     66,
+     "r"
+    ],
+    [
+     945.44,
+     34,
+     74,
+     "r"
+    ],
+    [
+     972.62,
+     4,
+     75,
+     "r"
+    ],
+    [
+     1007.09,
+     2,
+     77,
+     "r"
+    ],
+    [
+     1049.28,
+     24,
+     82,
+     "r"
+    ],
+    [
+     1082.06,
+     10,
+     84,
+     "r"
+    ],
+    [
+     1112.18,
+     8,
+     86,
+     "r"
+    ],
+    [
+     1143.22,
+     6,
+     88,
+     "r"
+    ],
+    [
+     1174.31,
+     8,
+     89,
+     "r"
+    ],
+    [
+     1216.24,
+     14,
+     93,
+     "r"
+    ],
+    [
+     1255.86,
+     12,
+     96,
+     "r"
+    ],
+    [
+     1287.08,
+     14,
+     98,
+     "r"
+    ],
+    [
+     1318.72,
+     8,
+     100,
+     "r"
+    ],
+    [
+     1352.49,
+     5,
+     102,
+     "r"
+    ],
+    [
+     1390.87,
+     16,
+     105,
+     "r"
+    ],
+    [
+     1424.53,
+     9,
+     107,
+     "r"
+    ],
+    [
+     1453.55,
+     7,
+     108,
+     "r"
+    ],
+    [
+     1489.62,
+     21,
+     112,
+     "r"
+    ],
+    [
+     1526.79,
+     11,
+     115,
+     "r"
+    ],
+    [
+     1558.84,
+     4,
+     116,
+     "r"
+    ],
+    [
+     1593.03,
+     5,
+     117,
+     "r"
+    ],
+    [
+     1620.7,
+     8,
+     118,
+     "r"
+    ],
+    [
+     1654.76,
+     2,
+     120,
+     "r"
+    ],
+    [
+     1693.77,
+     19,
+     123,
+     "r"
+    ],
+    [
+     1720.25,
+     6,
+     124,
+     "r"
+    ],
+    [
+     1761.15,
+     18,
+     128,
+     "r"
+    ],
+    [
+     1792.65,
+     8,
+     130,
+     "r"
+    ],
+    [
+     1827.72,
+     9,
+     133,
+     "r"
+    ],
+    [
+     1858.81,
+     12,
+     135,
+     "r"
+    ],
+    [
+     1897.46,
+     3,
+     136,
+     "r"
+    ],
+    [
+     1938.16,
+     14,
+     140,
+     "r"
+    ],
+    [
+     1967.03,
+     9,
+     141,
+     "r"
+    ],
+    [
+     2003.67,
+     3,
+     144,
+     "r"
+    ],
+    [
+     2030.51,
+     5,
+     145,
+     "r"
+    ],
+    [
+     2071.52,
+     6,
+     146,
+     "r"
+    ],
+    [
+     2112.03,
+     17,
+     151,
+     "r"
+    ],
+    [
+     2138.59,
+     6,
+     152,
+     "r"
+    ],
+    [
+     2171.53,
+     9,
+     154,
+     "r"
+    ],
+    [
+     2201.91,
+     10,
+     155,
+     "r"
+    ],
+    [
+     2236.44,
+     6,
+     157,
+     "r"
+    ],
+    [
+     2266.34,
+     11,
+     159,
+     "r"
+    ],
+    [
+     2298.16,
+     1,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 70.44111520975979,
+   "steps_stream": 61,
+   "steps_source": "stream",
+   "step_ms": 35.141548067407655,
+   "tokens_per_step": 2.4754098360655736,
+   "valid_decode": true
+  },
+  {
+   "key": "agentic-09",
+   "id": "agentic-09",
+   "category": "agentic",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 12,
+   "t_wall": 34.51,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 60,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.17024295509327203,
+   "decode_s": 2.1456255889497697,
+   "total_s": 2.316017566015944,
+   "prompt_tokens": 60,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 59,
+   "n_events": 62,
+   "n_steps": 58,
+   "reasoning_chars": 609,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "a64dbfc8242af78c24f1362e19b409864a5352bf9a7bec7808d94e5338bcb98d",
+   "chunks": [
+    [
+     170.24,
+     14,
+     5,
+     "r"
+    ],
+    [
+     223.4,
+     43,
+     13,
+     "r"
+    ],
+    [
+     265.71,
+     25,
+     18,
+     "r"
+    ],
+    [
+     314.38,
+     38,
+     26,
+     "r"
+    ],
+    [
+     346.02,
+     13,
+     28,
+     "r"
+    ],
+    [
+     390.53,
+     31,
+     34,
+     "r"
+    ],
+    [
+     421.56,
+     9,
+     36,
+     "r"
+    ],
+    [
+     474.25,
+     13,
+     38,
+     "r"
+    ],
+    [
+     524.22,
+     23,
+     46,
+     "r"
+    ],
+    [
+     576.02,
+     36,
+     54,
+     "r"
+    ],
+    [
+     612.5,
+     5,
+     56,
+     "r"
+    ],
+    [
+     648.01,
+     18,
+     58,
+     "r"
+    ],
+    [
+     697.97,
+     7,
+     59,
+     "r"
+    ],
+    [
+     734.46,
+     16,
+     62,
+     "r"
+    ],
+    [
+     765.74,
+     8,
+     63,
+     "r"
+    ],
+    [
+     809.45,
+     12,
+     69,
+     "r"
+    ],
+    [
+     855.34,
+     6,
+     74,
+     "r"
+    ],
+    [
+     894.03,
+     8,
+     78,
+     "r"
+    ],
+    [
+     925.59,
+     11,
+     80,
+     "r"
+    ],
+    [
+     957.27,
+     1,
+     81,
+     "r"
+    ],
+    [
+     989.09,
+     10,
+     83,
+     "r"
+    ],
+    [
+     1016.53,
+     8,
+     84,
+     "r"
+    ],
+    [
+     1055.77,
+     15,
+     88,
+     "r"
+    ],
+    [
+     1102.74,
+     14,
+     93,
+     "r"
+    ],
+    [
+     1135.11,
+     1,
+     94,
+     "r"
+    ],
+    [
+     1173.63,
+     9,
+     97,
+     "r"
+    ],
+    [
+     1209.9,
+     17,
+     100,
+     "r"
+    ],
+    [
+     1241.84,
+     16,
+     102,
+     "r"
+    ],
+    [
+     1275.07,
+     6,
+     103,
+     "r"
+    ],
+    [
+     1306.57,
+     6,
+     105,
+     "r"
+    ],
+    [
+     1334.7,
+     7,
+     106,
+     "r"
+    ],
+    [
+     1364.93,
+     6,
+     107,
+     "r"
+    ],
+    [
+     1401.69,
+     1,
+     108,
+     "r"
+    ],
+    [
+     1428.86,
+     5,
+     109,
+     "r"
+    ],
+    [
+     1472.9,
+     19,
+     112,
+     "r"
+    ],
+    [
+     1516.3,
+     17,
+     117,
+     "r"
+    ],
+    [
+     1551.15,
+     13,
+     120,
+     "r"
+    ],
+    [
+     1582.24,
+     12,
+     122,
+     "r"
+    ],
+    [
+     1609.45,
+     1,
+     123,
+     "r"
+    ],
+    [
+     1637.31,
+     4,
+     124,
+     "r"
+    ],
+    [
+     1666.8,
+     2,
+     125,
+     "r"
+    ],
+    [
+     1708.53,
+     5,
+     127,
+     "r"
+    ],
+    [
+     1747.95,
+     6,
+     130,
+     "r"
+    ],
+    [
+     1801.25,
+     1,
+     131,
+     "r"
+    ],
+    [
+     1851.19,
+     13,
+     137,
+     "r"
+    ],
+    [
+     1878.51,
+     2,
+     138,
+     "r"
+    ],
+    [
+     1910.82,
+     1,
+     139,
+     "r"
+    ],
+    [
+     1948.31,
+     2,
+     141,
+     "r"
+    ],
+    [
+     1981.07,
+     2,
+     142,
+     "r"
+    ],
+    [
+     2013.91,
+     2,
+     144,
+     "r"
+    ],
+    [
+     2046.43,
+     2,
+     145,
+     "r"
+    ],
+    [
+     2079.2,
+     3,
+     146,
+     "r"
+    ],
+    [
+     2105.72,
+     6,
+     147,
+     "r"
+    ],
+    [
+     2136.52,
+     10,
+     149,
+     "r"
+    ],
+    [
+     2165.45,
+     6,
+     150,
+     "r"
+    ],
+    [
+     2197.37,
+     5,
+     152,
+     "r"
+    ],
+    [
+     2242.05,
+     9,
+     156,
+     "r"
+    ],
+    [
+     2276.37,
+     6,
+     158,
+     "r"
+    ],
+    [
+     2315.87,
+     2,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 72.24000347417027,
+   "steps_stream": 58,
+   "steps_source": "stream",
+   "step_ms": 36.99354463706499,
+   "tokens_per_step": 2.6724137931034484,
+   "valid_decode": true
+  },
+  {
+   "key": "longctx-02",
+   "id": "longctx-02",
+   "category": "longctx",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 13,
+   "t_wall": 36.94,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 4930,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1784685660386458,
+   "decode_s": 1.7532118059461936,
+   "total_s": 1.931975058047101,
+   "prompt_tokens": 4930,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 6,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 40,
+   "n_events": 43,
+   "n_steps": 39,
+   "reasoning_chars": 428,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "9ef3c9782c05f53a43698ccb32943fbe004066fb7825b183bcfa6de4192562ab",
+   "chunks": [
+    [
+     178.47,
+     17,
+     6,
+     "r"
+    ],
+    [
+     219.33,
+     22,
+     9,
+     "r"
+    ],
+    [
+     261.7,
+     13,
+     12,
+     "r"
+    ],
+    [
+     314.74,
+     15,
+     17,
+     "r"
+    ],
+    [
+     339.81,
+     8,
+     18,
+     "r"
+    ],
+    [
+     374.76,
+     4,
+     19,
+     "r"
+    ],
+    [
+     412.93,
+     14,
+     21,
+     "r"
+    ],
+    [
+     456.61,
+     7,
+     24,
+     "r"
+    ],
+    [
+     505.93,
+     11,
+     30,
+     "r"
+    ],
+    [
+     546.97,
+     13,
+     35,
+     "r"
+    ],
+    [
+     576.11,
+     1,
+     36,
+     "r"
+    ],
+    [
+     623.15,
+     10,
+     38,
+     "r"
+    ],
+    [
+     676.04,
+     16,
+     41,
+     "r"
+    ],
+    [
+     722.04,
+     9,
+     47,
+     "r"
+    ],
+    [
+     756.62,
+     10,
+     49,
+     "r"
+    ],
+    [
+     804.6,
+     17,
+     56,
+     "r"
+    ],
+    [
+     842.74,
+     11,
+     59,
+     "r"
+    ],
+    [
+     893.05,
+     8,
+     61,
+     "r"
+    ],
+    [
+     942.95,
+     7,
+     63,
+     "r"
+    ],
+    [
+     993.24,
+     17,
+     71,
+     "r"
+    ],
+    [
+     1037.2,
+     10,
+     76,
+     "r"
+    ],
+    [
+     1082.91,
+     7,
+     78,
+     "r"
+    ],
+    [
+     1126.41,
+     13,
+     81,
+     "r"
+    ],
+    [
+     1159.69,
+     16,
+     83,
+     "r"
+    ],
+    [
+     1210.21,
+     18,
+     89,
+     "r"
+    ],
+    [
+     1263.19,
+     19,
+     97,
+     "r"
+    ],
+    [
+     1301.22,
+     5,
+     98,
+     "r"
+    ],
+    [
+     1338.0,
+     12,
+     101,
+     "r"
+    ],
+    [
+     1376.38,
+     1,
+     102,
+     "r"
+    ],
+    [
+     1417.49,
+     12,
+     105,
+     "r"
+    ],
+    [
+     1470.18,
+     4,
+     107,
+     "r"
+    ],
+    [
+     1520.31,
+     17,
+     115,
+     "r"
+    ],
+    [
+     1569.72,
+     12,
+     123,
+     "r"
+    ],
+    [
+     1621.25,
+     11,
+     131,
+     "r"
+    ],
+    [
+     1672.92,
+     9,
+     137,
+     "r"
+    ],
+    [
+     1725.75,
+     10,
+     144,
+     "r"
+    ],
+    [
+     1779.1,
+     11,
+     152,
+     "r"
+    ],
+    [
+     1831.31,
+     6,
+     156,
+     "r"
+    ],
+    [
+     1879.19,
+     3,
+     158,
+     "r"
+    ],
+    [
+     1931.68,
+     2,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 154,
+   "tok_s": 87.83878791923118,
+   "steps_stream": 39,
+   "steps_source": "stream",
+   "step_ms": 44.954148870415224,
+   "tokens_per_step": 3.948717948717949,
+   "valid_decode": true
+  },
+  {
+   "key": "structured-01",
+   "id": "structured-01",
+   "category": "structured",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 14,
+   "t_wall": 39.78,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 41,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15011771500576288,
+   "decode_s": 1.946865182952024,
+   "total_s": 2.097126960987225,
+   "prompt_tokens": 41,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 50,
+   "n_events": 53,
+   "n_steps": 49,
+   "reasoning_chars": 630,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "e77466fec8876dac46e89f097360c9b0cb90c16bff2b7c0bc7554c9c7b3bb5ce",
+   "chunks": [
+    [
+     150.12,
+     13,
+     5,
+     "r"
+    ],
+    [
+     181.54,
+     6,
+     7,
+     "r"
+    ],
+    [
+     232.16,
+     33,
+     15,
+     "r"
+    ],
+    [
+     281.14,
+     31,
+     23,
+     "r"
+    ],
+    [
+     330.93,
+     19,
+     28,
+     "r"
+    ],
+    [
+     381.22,
+     4,
+     29,
+     "r"
+    ],
+    [
+     427.3,
+     32,
+     35,
+     "r"
+    ],
+    [
+     466.98,
+     22,
+     39,
+     "r"
+    ],
+    [
+     504.12,
+     16,
+     42,
+     "r"
+    ],
+    [
+     548.0,
+     32,
+     48,
+     "r"
+    ],
+    [
+     590.88,
+     18,
+     53,
+     "r"
+    ],
+    [
+     618.7,
+     4,
+     54,
+     "r"
+    ],
+    [
+     650.47,
+     8,
+     56,
+     "r"
+    ],
+    [
+     690.26,
+     16,
+     60,
+     "r"
+    ],
+    [
+     725.31,
+     8,
+     62,
+     "r"
+    ],
+    [
+     753.93,
+     8,
+     63,
+     "r"
+    ],
+    [
+     802.94,
+     9,
+     66,
+     "r"
+    ],
+    [
+     847.68,
+     24,
+     74,
+     "r"
+    ],
+    [
+     897.91,
+     23,
+     79,
+     "r"
+    ],
+    [
+     931.19,
+     6,
+     80,
+     "r"
+    ],
+    [
+     978.3,
+     2,
+     82,
+     "r"
+    ],
+    [
+     1012.4,
+     3,
+     85,
+     "r"
+    ],
+    [
+     1044.18,
+     6,
+     86,
+     "r"
+    ],
+    [
+     1080.5,
+     10,
+     87,
+     "r"
+    ],
+    [
+     1113.4,
+     7,
+     89,
+     "r"
+    ],
+    [
+     1154.46,
+     9,
+     90,
+     "r"
+    ],
+    [
+     1186.03,
+     6,
+     92,
+     "r"
+    ],
+    [
+     1217.72,
+     7,
+     93,
+     "r"
+    ],
+    [
+     1249.46,
+     11,
+     95,
+     "r"
+    ],
+    [
+     1287.72,
+     1,
+     96,
+     "r"
+    ],
+    [
+     1321.58,
+     18,
+     99,
+     "r"
+    ],
+    [
+     1360.05,
+     12,
+     103,
+     "r"
+    ],
+    [
+     1400.19,
+     20,
+     107,
+     "r"
+    ],
+    [
+     1440.52,
+     26,
+     112,
+     "r"
+    ],
+    [
+     1475.8,
+     6,
+     113,
+     "r"
+    ],
+    [
+     1512.23,
+     9,
+     116,
+     "r"
+    ],
+    [
+     1549.19,
+     21,
+     120,
+     "r"
+    ],
+    [
+     1596.56,
+     9,
+     124,
+     "r"
+    ],
+    [
+     1631.98,
+     20,
+     128,
+     "r"
+    ],
+    [
+     1685.97,
+     3,
+     130,
+     "r"
+    ],
+    [
+     1713.32,
+     9,
+     131,
+     "r"
+    ],
+    [
+     1757.57,
+     11,
+     134,
+     "r"
+    ],
+    [
+     1799.49,
+     7,
+     139,
+     "r"
+    ],
+    [
+     1847.46,
+     19,
+     145,
+     "r"
+    ],
+    [
+     1891.98,
+     9,
+     147,
+     "r"
+    ],
+    [
+     1942.88,
+     11,
+     151,
+     "r"
+    ],
+    [
+     1977.2,
+     9,
+     154,
+     "r"
+    ],
+    [
+     2021.23,
+     10,
+     158,
+     "r"
+    ],
+    [
+     2061.69,
+     1,
+     159,
+     "r"
+    ],
+    [
+     2096.98,
+     6,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 79.6151687118746,
+   "steps_stream": 49,
+   "steps_source": "stream",
+   "step_ms": 39.73194250922498,
+   "tokens_per_step": 3.163265306122449,
+   "valid_decode": true
+  },
+  {
+   "key": "multilingual-05",
+   "id": "multilingual-05",
+   "category": "multilingual",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 15,
+   "t_wall": 42.02,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 37,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15035534696653485,
+   "decode_s": 2.4905664630932733,
+   "total_s": 2.6411353290313855,
+   "prompt_tokens": 37,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 113,
+   "boundary": "exact",
+   "first_chunk_tokens": 7,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 69,
+   "n_events": 72,
+   "n_steps": 68,
+   "reasoning_chars": 480,
+   "content_chars": 160,
+   "tool_calls": 0,
+   "sha256": "92187a54defd538302e69ae9949b762a03936c83ba4a80f71d18e467bc3ddfd9",
+   "chunks": [
+    [
+     150.36,
+     17,
+     7,
+     "r"
+    ],
+    [
+     194.35,
+     11,
+     9,
+     "r"
+    ],
+    [
+     242.3,
+     22,
+     13,
+     "r"
+    ],
+    [
+     291.63,
+     30,
+     20,
+     "r"
+    ],
+    [
+     342.67,
+     8,
+     22,
+     "r"
+    ],
+    [
+     394.41,
+     28,
+     30,
+     "r"
+    ],
+    [
+     435.39,
+     20,
+     34,
+     "r"
+    ],
+    [
+     476.58,
+     18,
+     38,
+     "r"
+    ],
+    [
+     520.06,
+     12,
+     40,
+     "r"
+    ],
+    [
+     561.79,
+     8,
+     41,
+     "r"
+    ],
+    [
+     588.2,
+     4,
+     42,
+     "r"
+    ],
+    [
+     623.88,
+     15,
+     44,
+     "r"
+    ],
+    [
+     654.89,
+     5,
+     46,
+     "r"
+    ],
+    [
+     691.01,
+     9,
+     49,
+     "r"
+    ],
+    [
+     725.09,
+     3,
+     50,
+     "r"
+    ],
+    [
+     758.41,
+     5,
+     51,
+     "r"
+    ],
+    [
+     797.72,
+     21,
+     56,
+     "r"
+    ],
+    [
+     831.19,
+     4,
+     57,
+     "r"
+    ],
+    [
+     864.35,
+     12,
+     59,
+     "r"
+    ],
+    [
+     892.45,
+     4,
+     60,
+     "r"
+    ],
+    [
+     926.8,
+     15,
+     63,
+     "r"
+    ],
+    [
+     967.79,
+     17,
+     67,
+     "r"
+    ],
+    [
+     1003.32,
+     3,
+     69,
+     "r"
+    ],
+    [
+     1037.71,
+     3,
+     71,
+     "r"
+    ],
+    [
+     1073.28,
+     2,
+     72,
+     "r"
+    ],
+    [
+     1112.79,
+     10,
+     74,
+     "r"
+    ],
+    [
+     1145.59,
+     1,
+     75,
+     "r"
+    ],
+    [
+     1177.92,
+     11,
+     77,
+     "r"
+    ],
+    [
+     1214.26,
+     1,
+     78,
+     "r"
+    ],
+    [
+     1245.91,
+     6,
+     79,
+     "r"
+    ],
+    [
+     1277.15,
+     6,
+     80,
+     "r"
+    ],
+    [
+     1317.94,
+     2,
+     81,
+     "r"
+    ],
+    [
+     1365.31,
+     12,
+     85,
+     "r"
+    ],
+    [
+     1400.7,
+     16,
+     88,
+     "r"
+    ],
+    [
+     1439.3,
+     1,
+     89,
+     "r"
+    ],
+    [
+     1475.92,
+     12,
+     92,
+     "r"
+    ],
+    [
+     1508.35,
+     16,
+     94,
+     "r"
+    ],
+    [
+     1540.82,
+     9,
+     96,
+     "r"
+    ],
+    [
+     1578.92,
+     9,
+     97,
+     "r"
+    ],
+    [
+     1617.42,
+     15,
+     100,
+     "r"
+    ],
+    [
+     1659.79,
+     4,
+     102,
+     "r"
+    ],
+    [
+     1688.87,
+     11,
+     104,
+     "r"
+    ],
+    [
+     1734.94,
+     41,
+     111,
+     "r"
+    ],
+    [
+     1786.63,
+     1,
+     116,
+     "r"
+    ],
+    [
+     1786.68,
+     2,
+     116,
+     "c"
+    ],
+    [
+     1824.97,
+     10,
+     119,
+     "c"
+    ],
+    [
+     1853.65,
+     5,
+     120,
+     "c"
+    ],
+    [
+     1886.18,
+     19,
+     122,
+     "c"
+    ],
+    [
+     1923.16,
+     12,
+     124,
+     "c"
+    ],
+    [
+     1962.29,
+     3,
+     125,
+     "c"
+    ],
+    [
+     1992.67,
+     3,
+     126,
+     "c"
+    ],
+    [
+     2034.92,
+     4,
+     127,
+     "c"
+    ],
+    [
+     2069.26,
+     7,
+     130,
+     "c"
+    ],
+    [
+     2101.31,
+     2,
+     131,
+     "c"
+    ],
+    [
+     2134.25,
+     3,
+     133,
+     "c"
+    ],
+    [
+     2175.99,
+     14,
+     136,
+     "c"
+    ],
+    [
+     2209.11,
+     6,
+     138,
+     "c"
+    ],
+    [
+     2241.27,
+     2,
+     139,
+     "c"
+    ],
+    [
+     2279.33,
+     4,
+     141,
+     "c"
+    ],
+    [
+     2311.54,
+     5,
+     142,
+     "c"
+    ],
+    [
+     2344.86,
+     4,
+     144,
+     "c"
+    ],
+    [
+     2383.25,
+     3,
+     145,
+     "c"
+    ],
+    [
+     2425.2,
+     6,
+     148,
+     "c"
+    ],
+    [
+     2456.34,
+     6,
+     150,
+     "c"
+    ],
+    [
+     2491.55,
+     4,
+     151,
+     "c"
+    ],
+    [
+     2527.33,
+     3,
+     152,
+     "c"
+    ],
+    [
+     2559.9,
+     8,
+     154,
+     "c"
+    ],
+    [
+     2596.08,
+     19,
+     158,
+     "c"
+    ],
+    [
+     2640.92,
+     6,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 153,
+   "tok_s": 61.43180769003636,
+   "steps_stream": 68,
+   "steps_source": "stream",
+   "step_ms": 36.62597739843049,
+   "tokens_per_step": 2.25,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-01",
+   "id": "prose-01",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 16,
+   "t_wall": 44.77,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 36,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14945755002554506,
+   "decode_s": 2.194254697067663,
+   "total_s": 2.3439761489862576,
+   "prompt_tokens": 36,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 61,
+   "n_events": 64,
+   "n_steps": 60,
+   "reasoning_chars": 666,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "08e1ca4506799a4f455355d7ea2b2395ccf376535fa114a86956d0385e73f22e",
+   "chunks": [
+    [
+     149.46,
+     34,
+     9,
+     "r"
+    ],
+    [
+     198.32,
+     28,
+     14,
+     "r"
+    ],
+    [
+     245.43,
+     28,
+     20,
+     "r"
+    ],
+    [
+     295.73,
+     30,
+     27,
+     "r"
+    ],
+    [
+     328.56,
+     13,
+     29,
+     "r"
+    ],
+    [
+     360.01,
+     1,
+     30,
+     "r"
+    ],
+    [
+     393.21,
+     9,
+     32,
+     "r"
+    ],
+    [
+     427.47,
+     19,
+     35,
+     "r"
+    ],
+    [
+     466.25,
+     1,
+     36,
+     "r"
+    ],
+    [
+     493.07,
+     4,
+     37,
+     "r"
+    ],
+    [
+     534.63,
+     11,
+     40,
+     "r"
+    ],
+    [
+     569.86,
+     17,
+     43,
+     "r"
+    ],
+    [
+     612.29,
+     24,
+     48,
+     "r"
+    ],
+    [
+     646.55,
+     25,
+     51,
+     "r"
+    ],
+    [
+     681.98,
+     6,
+     54,
+     "r"
+    ],
+    [
+     733.59,
+     11,
+     57,
+     "r"
+    ],
+    [
+     774.06,
+     18,
+     61,
+     "r"
+    ],
+    [
+     815.0,
+     16,
+     65,
+     "r"
+    ],
+    [
+     846.78,
+     7,
+     67,
+     "r"
+    ],
+    [
+     873.13,
+     5,
+     68,
+     "r"
+    ],
+    [
+     907.36,
+     5,
+     69,
+     "r"
+    ],
+    [
+     937.68,
+     3,
+     71,
+     "r"
+    ],
+    [
+     979.48,
+     9,
+     74,
+     "r"
+    ],
+    [
+     1019.29,
+     6,
+     75,
+     "r"
+    ],
+    [
+     1056.7,
+     12,
+     79,
+     "r"
+    ],
+    [
+     1092.41,
+     5,
+     80,
+     "r"
+    ],
+    [
+     1118.02,
+     6,
+     81,
+     "r"
+    ],
+    [
+     1149.79,
+     5,
+     82,
+     "r"
+    ],
+    [
+     1180.41,
+     13,
+     84,
+     "r"
+    ],
+    [
+     1214.79,
+     6,
+     86,
+     "r"
+    ],
+    [
+     1248.08,
+     16,
+     89,
+     "r"
+    ],
+    [
+     1297.58,
+     11,
+     90,
+     "r"
+    ],
+    [
+     1347.55,
+     7,
+     92,
+     "r"
+    ],
+    [
+     1386.51,
+     17,
+     97,
+     "r"
+    ],
+    [
+     1436.82,
+     13,
+     102,
+     "r"
+    ],
+    [
+     1471.97,
+     5,
+     103,
+     "r"
+    ],
+    [
+     1507.91,
+     10,
+     106,
+     "r"
+    ],
+    [
+     1541.93,
+     7,
+     108,
+     "r"
+    ],
+    [
+     1577.49,
+     15,
+     111,
+     "r"
+    ],
+    [
+     1612.78,
+     7,
+     113,
+     "r"
+    ],
+    [
+     1652.33,
+     9,
+     117,
+     "r"
+    ],
+    [
+     1696.29,
+     23,
+     122,
+     "r"
+    ],
+    [
+     1728.9,
+     6,
+     124,
+     "r"
+    ],
+    [
+     1766.56,
+     3,
+     126,
+     "r"
+    ],
+    [
+     1792.54,
+     6,
+     127,
+     "r"
+    ],
+    [
+     1823.01,
+     6,
+     128,
+     "r"
+    ],
+    [
+     1857.98,
+     7,
+     129,
+     "r"
+    ],
+    [
+     1894.35,
+     9,
+     132,
+     "r"
+    ],
+    [
+     1935.82,
+     19,
+     137,
+     "r"
+    ],
+    [
+     1972.75,
+     12,
+     139,
+     "r"
+    ],
+    [
+     2008.75,
+     5,
+     142,
+     "r"
+    ],
+    [
+     2047.85,
+     10,
+     145,
+     "r"
+    ],
+    [
+     2084.7,
+     10,
+     147,
+     "r"
+    ],
+    [
+     2110.88,
+     5,
+     148,
+     "r"
+    ],
+    [
+     2142.23,
+     3,
+     149,
+     "r"
+    ],
+    [
+     2173.61,
+     9,
+     151,
+     "r"
+    ],
+    [
+     2205.29,
+     5,
+     152,
+     "r"
+    ],
+    [
+     2236.0,
+     7,
+     154,
+     "r"
+    ],
+    [
+     2274.17,
+     1,
+     155,
+     "r"
+    ],
+    [
+     2306.62,
+     8,
+     157,
+     "r"
+    ],
+    [
+     2343.71,
+     18,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 68.81607691294539,
+   "steps_stream": 60,
+   "steps_source": "stream",
+   "step_ms": 36.57091161779439,
+   "tokens_per_step": 2.5166666666666666,
+   "valid_decode": true
+  },
+  {
+   "key": "structured-08",
+   "id": "structured-08",
+   "category": "structured",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 17,
+   "t_wall": 47.24,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 38,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1504171759588644,
+   "decode_s": 2.4985981039935723,
+   "total_s": 2.6492607980035245,
+   "prompt_tokens": 38,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 66,
+   "n_events": 69,
+   "n_steps": 65,
+   "reasoning_chars": 641,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "7794b0bc43383cbde5c4facfd10ce52dc4789770e35f532430f50fb914f73811",
+   "chunks": [
+    [
+     150.42,
+     38,
+     9,
+     "r"
+    ],
+    [
+     197.09,
+     44,
+     17,
+     "r"
+    ],
+    [
+     243.94,
+     36,
+     25,
+     "r"
+    ],
+    [
+     298.8,
+     34,
+     33,
+     "r"
+    ],
+    [
+     331.18,
+     21,
+     36,
+     "r"
+    ],
+    [
+     370.53,
+     19,
+     40,
+     "r"
+    ],
+    [
+     404.49,
+     16,
+     43,
+     "r"
+    ],
+    [
+     436.12,
+     9,
+     44,
+     "r"
+    ],
+    [
+     472.96,
+     6,
+     45,
+     "r"
+    ],
+    [
+     506.27,
+     4,
+     47,
+     "r"
+    ],
+    [
+     536.58,
+     7,
+     48,
+     "r"
+    ],
+    [
+     577.22,
+     23,
+     53,
+     "r"
+    ],
+    [
+     609.05,
+     5,
+     54,
+     "r"
+    ],
+    [
+     641.05,
+     11,
+     56,
+     "r"
+    ],
+    [
+     673.8,
+     10,
+     58,
+     "r"
+    ],
+    [
+     706.19,
+     15,
+     60,
+     "r"
+    ],
+    [
+     743.39,
+     3,
+     62,
+     "r"
+    ],
+    [
+     792.16,
+     13,
+     65,
+     "r"
+    ],
+    [
+     837.36,
+     7,
+     68,
+     "r"
+    ],
+    [
+     875.36,
+     4,
+     69,
+     "r"
+    ],
+    [
+     906.24,
+     12,
+     71,
+     "r"
+    ],
+    [
+     957.29,
+     8,
+     73,
+     "r"
+    ],
+    [
+     1002.55,
+     10,
+     75,
+     "r"
+    ],
+    [
+     1030.57,
+     1,
+     76,
+     "r"
+    ],
+    [
+     1079.29,
+     6,
+     77,
+     "r"
+    ],
+    [
+     1116.34,
+     5,
+     79,
+     "r"
+    ],
+    [
+     1167.11,
+     8,
+     80,
+     "r"
+    ],
+    [
+     1217.47,
+     1,
+     81,
+     "r"
+    ],
+    [
+     1268.18,
+     3,
+     82,
+     "r"
+    ],
+    [
+     1297.39,
+     1,
+     83,
+     "r"
+    ],
+    [
+     1323.35,
+     5,
+     84,
+     "r"
+    ],
+    [
+     1376.14,
+     20,
+     91,
+     "r"
+    ],
+    [
+     1413.27,
+     6,
+     93,
+     "r"
+    ],
+    [
+     1443.96,
+     6,
+     95,
+     "r"
+    ],
+    [
+     1483.88,
+     6,
+     97,
+     "r"
+    ],
+    [
+     1516.12,
+     9,
+     99,
+     "r"
+    ],
+    [
+     1547.34,
+     1,
+     100,
+     "r"
+    ],
+    [
+     1573.8,
+     4,
+     101,
+     "r"
+    ],
+    [
+     1605.94,
+     8,
+     103,
+     "r"
+    ],
+    [
+     1651.4,
+     9,
+     105,
+     "r"
+    ],
+    [
+     1697.79,
+     9,
+     106,
+     "r"
+    ],
+    [
+     1752.55,
+     15,
+     111,
+     "r"
+    ],
+    [
+     1791.06,
+     8,
+     113,
+     "r"
+    ],
+    [
+     1835.12,
+     6,
+     115,
+     "r"
+    ],
+    [
+     1872.25,
+     6,
+     117,
+     "r"
+    ],
+    [
+     1911.57,
+     13,
+     121,
+     "r"
+    ],
+    [
+     1948.6,
+     5,
+     122,
+     "r"
+    ],
+    [
+     1987.47,
+     9,
+     124,
+     "r"
+    ],
+    [
+     2024.63,
+     6,
+     126,
+     "r"
+    ],
+    [
+     2054.39,
+     1,
+     127,
+     "r"
+    ],
+    [
+     2089.76,
+     1,
+     128,
+     "r"
+    ],
+    [
+     2125.53,
+     12,
+     131,
+     "r"
+    ],
+    [
+     2180.28,
+     1,
+     132,
+     "r"
+    ],
+    [
+     2233.61,
+     25,
+     139,
+     "r"
+    ],
+    [
+     2265.52,
+     6,
+     141,
+     "r"
+    ],
+    [
+     2299.1,
+     1,
+     142,
+     "r"
+    ],
+    [
+     2335.72,
+     2,
+     143,
+     "r"
+    ],
+    [
+     2367.55,
+     5,
+     145,
+     "r"
+    ],
+    [
+     2407.51,
+     10,
+     148,
+     "r"
+    ],
+    [
+     2438.24,
+     9,
+     150,
+     "r"
+    ],
+    [
+     2471.17,
+     1,
+     151,
+     "r"
+    ],
+    [
+     2515.02,
+     5,
+     152,
+     "r"
+    ],
+    [
+     2548.22,
+     8,
+     154,
+     "r"
+    ],
+    [
+     2581.08,
+     10,
+     156,
+     "r"
+    ],
+    [
+     2614.69,
+     6,
+     158,
+     "r"
+    ],
+    [
+     2649.02,
+     7,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 60.43388881095079,
+   "steps_stream": 65,
+   "steps_source": "stream",
+   "step_ms": 38.43997083067034,
+   "tokens_per_step": 2.3230769230769233,
+   "valid_decode": true
+  },
+  {
+   "key": "code-01",
+   "id": "code-01",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 18,
+   "t_wall": 50.02,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 41,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1478972010081634,
+   "decode_s": 1.6271081359591335,
+   "total_s": 1.7751729360315949,
+   "prompt_tokens": 41,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 55,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 37,
+   "n_events": 40,
+   "n_steps": 36,
+   "reasoning_chars": 251,
+   "content_chars": 227,
+   "tool_calls": 0,
+   "sha256": "2b22d14186e23b377f97f21236e679b02dd547e24d70cc29b1849587bf33762e",
+   "chunks": [
+    [
+     147.9,
+     14,
+     5,
+     "r"
+    ],
+    [
+     193.66,
+     34,
+     11,
+     "r"
+    ],
+    [
+     240.87,
+     48,
+     19,
+     "r"
+    ],
+    [
+     289.88,
+     23,
+     25,
+     "r"
+    ],
+    [
+     334.56,
+     22,
+     30,
+     "r"
+    ],
+    [
+     369.68,
+     12,
+     33,
+     "r"
+    ],
+    [
+     411.91,
+     34,
+     39,
+     "r"
+    ],
+    [
+     448.43,
+     18,
+     42,
+     "r"
+    ],
+    [
+     480.14,
+     7,
+     44,
+     "r"
+    ],
+    [
+     522.41,
+     17,
+     49,
+     "r"
+    ],
+    [
+     571.34,
+     22,
+     57,
+     "r"
+    ],
+    [
+     620.49,
+     35,
+     65,
+     "c"
+    ],
+    [
+     660.19,
+     19,
+     70,
+     "c"
+    ],
+    [
+     698.55,
+     7,
+     72,
+     "c"
+    ],
+    [
+     738.75,
+     11,
+     75,
+     "c"
+    ],
+    [
+     783.92,
+     22,
+     79,
+     "c"
+    ],
+    [
+     834.69,
+     13,
+     82,
+     "c"
+    ],
+    [
+     883.22,
+     5,
+     83,
+     "c"
+    ],
+    [
+     931.12,
+     5,
+     85,
+     "c"
+    ],
+    [
+     977.76,
+     4,
+     87,
+     "c"
+    ],
+    [
+     1024.01,
+     7,
+     91,
+     "c"
+    ],
+    [
+     1069.03,
+     6,
+     92,
+     "c"
+    ],
+    [
+     1109.95,
+     4,
+     95,
+     "c"
+    ],
+    [
+     1155.23,
+     2,
+     97,
+     "c"
+    ],
+    [
+     1200.66,
+     5,
+     101,
+     "c"
+    ],
+    [
+     1244.78,
+     8,
+     109,
+     "c"
+    ],
+    [
+     1294.48,
+     11,
+     116,
+     "c"
+    ],
+    [
+     1334.75,
+     8,
+     120,
+     "c"
+    ],
+    [
+     1380.91,
+     4,
+     124,
+     "c"
+    ],
+    [
+     1423.73,
+     4,
+     127,
+     "c"
+    ],
+    [
+     1473.61,
+     11,
+     135,
+     "c"
+    ],
+    [
+     1522.39,
+     5,
+     137,
+     "c"
+    ],
+    [
+     1569.19,
+     4,
+     140,
+     "c"
+    ],
+    [
+     1621.6,
+     2,
+     142,
+     "c"
+    ],
+    [
+     1671.95,
+     11,
+     150,
+     "c"
+    ],
+    [
+     1722.19,
+     6,
+     153,
+     "c"
+    ],
+    [
+     1775.01,
+     8,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 95.26103187274148,
+   "steps_stream": 36,
+   "steps_source": "stream",
+   "step_ms": 45.19744822108704,
+   "tokens_per_step": 4.305555555555555,
+   "valid_decode": true
+  },
+  {
+   "key": "agentic-07",
+   "id": "agentic-07",
+   "category": "agentic",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 19,
+   "t_wall": 51.92,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 93,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.18064291693735868,
+   "decode_s": 1.8077942300587893,
+   "total_s": 1.9886291129514575,
+   "prompt_tokens": 93,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 6,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 49,
+   "n_events": 52,
+   "n_steps": 48,
+   "reasoning_chars": 684,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "5c8081cf6ca6f7cfb8ca868dfd06d72eb82b8318d56d187f3d2b45ebe5cd3ca7",
+   "chunks": [
+    [
+     180.64,
+     14,
+     6,
+     "r"
+    ],
+    [
+     232.66,
+     27,
+     14,
+     "r"
+    ],
+    [
+     281.63,
+     27,
+     22,
+     "r"
+    ],
+    [
+     333.39,
+     31,
+     30,
+     "r"
+    ],
+    [
+     368.92,
+     7,
+     32,
+     "r"
+    ],
+    [
+     419.38,
+     17,
+     35,
+     "r"
+    ],
+    [
+     470.17,
+     32,
+     43,
+     "r"
+    ],
+    [
+     521.25,
+     36,
+     51,
+     "r"
+    ],
+    [
+     569.79,
+     2,
+     52,
+     "r"
+    ],
+    [
+     619.64,
+     33,
+     60,
+     "r"
+    ],
+    [
+     652.83,
+     8,
+     61,
+     "r"
+    ],
+    [
+     683.82,
+     6,
+     63,
+     "r"
+    ],
+    [
+     715.42,
+     14,
+     65,
+     "r"
+    ],
+    [
+     741.01,
+     6,
+     66,
+     "r"
+    ],
+    [
+     791.3,
+     22,
+     74,
+     "r"
+    ],
+    [
+     844.36,
+     17,
+     82,
+     "r"
+    ],
+    [
+     880.92,
+     15,
+     85,
+     "r"
+    ],
+    [
+     912.66,
+     7,
+     86,
+     "r"
+    ],
+    [
+     944.81,
+     12,
+     88,
+     "r"
+    ],
+    [
+     972.02,
+     4,
+     89,
+     "r"
+    ],
+    [
+     1008.61,
+     16,
+     91,
+     "r"
+    ],
+    [
+     1050.26,
+     29,
+     96,
+     "r"
+    ],
+    [
+     1085.9,
+     6,
+     98,
+     "r"
+    ],
+    [
+     1116.56,
+     15,
+     100,
+     "r"
+    ],
+    [
+     1149.96,
+     1,
+     101,
+     "r"
+    ],
+    [
+     1181.88,
+     10,
+     103,
+     "r"
+    ],
+    [
+     1212.74,
+     4,
+     104,
+     "r"
+    ],
+    [
+     1244.19,
+     7,
+     105,
+     "r"
+    ],
+    [
+     1275.27,
+     8,
+     107,
+     "r"
+    ],
+    [
+     1309.38,
+     15,
+     110,
+     "r"
+    ],
+    [
+     1340.37,
+     8,
+     112,
+     "r"
+    ],
+    [
+     1391.34,
+     41,
+     120,
+     "r"
+    ],
+    [
+     1431.34,
+     16,
+     124,
+     "r"
+    ],
+    [
+     1462.65,
+     8,
+     125,
+     "r"
+    ],
+    [
+     1495.55,
+     12,
+     126,
+     "r"
+    ],
+    [
+     1531.86,
+     13,
+     129,
+     "r"
+    ],
+    [
+     1564.42,
+     11,
+     131,
+     "r"
+    ],
+    [
+     1605.9,
+     6,
+     132,
+     "r"
+    ],
+    [
+     1639.8,
+     6,
+     134,
+     "r"
+    ],
+    [
+     1670.5,
+     9,
+     136,
+     "r"
+    ],
+    [
+     1701.02,
+     12,
+     138,
+     "r"
+    ],
+    [
+     1731.13,
+     7,
+     140,
+     "r"
+    ],
+    [
+     1767.52,
+     4,
+     141,
+     "r"
+    ],
+    [
+     1803.64,
+     14,
+     144,
+     "r"
+    ],
+    [
+     1853.96,
+     31,
+     152,
+     "r"
+    ],
+    [
+     1880.84,
+     7,
+     153,
+     "r"
+    ],
+    [
+     1919.36,
+     13,
+     156,
+     "r"
+    ],
+    [
+     1950.29,
+     6,
+     158,
+     "r"
+    ],
+    [
+     1988.44,
+     12,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 154,
+   "tok_s": 85.1866863160593,
+   "steps_stream": 48,
+   "steps_source": "stream",
+   "step_ms": 37.66237979289144,
+   "tokens_per_step": 3.2083333333333335,
+   "valid_decode": true
+  },
+  {
+   "key": "longctx-04",
+   "id": "longctx-04",
+   "category": "longctx",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 20,
+   "t_wall": 54.09,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 2694,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.11200334306340665,
+   "decode_s": 1.6610032679745927,
+   "total_s": 1.7731490740552545,
+   "prompt_tokens": 2694,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 37,
+   "n_events": 40,
+   "n_steps": 36,
+   "reasoning_chars": 473,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "02993caeafe9965b1ed17edec20ccd5b7cf293bd1178440acf9c9fc5683ef810",
+   "chunks": [
+    [
+     112.0,
+     34,
+     9,
+     "r"
+    ],
+    [
+     158.71,
+     19,
+     14,
+     "r"
+    ],
+    [
+     202.21,
+     25,
+     20,
+     "r"
+    ],
+    [
+     234.99,
+     9,
+     22,
+     "r"
+    ],
+    [
+     285.09,
+     16,
+     25,
+     "r"
+    ],
+    [
+     329.06,
+     23,
+     31,
+     "r"
+    ],
+    [
+     380.96,
+     6,
+     33,
+     "r"
+    ],
+    [
+     434.42,
+     17,
+     38,
+     "r"
+    ],
+    [
+     478.45,
+     3,
+     39,
+     "r"
+    ],
+    [
+     516.8,
+     19,
+     42,
+     "r"
+    ],
+    [
+     552.06,
+     8,
+     44,
+     "r"
+    ],
+    [
+     599.66,
+     18,
+     50,
+     "r"
+    ],
+    [
+     635.58,
+     12,
+     52,
+     "r"
+    ],
+    [
+     687.79,
+     27,
+     60,
+     "r"
+    ],
+    [
+     725.93,
+     15,
+     63,
+     "r"
+    ],
+    [
+     776.72,
+     11,
+     66,
+     "r"
+    ],
+    [
+     814.07,
+     13,
+     68,
+     "r"
+    ],
+    [
+     859.55,
+     23,
+     74,
+     "r"
+    ],
+    [
+     905.54,
+     8,
+     77,
+     "r"
+    ],
+    [
+     951.83,
+     27,
+     84,
+     "r"
+    ],
+    [
+     988.6,
+     4,
+     85,
+     "r"
+    ],
+    [
+     1033.3,
+     6,
+     87,
+     "r"
+    ],
+    [
+     1084.3,
+     13,
+     93,
+     "r"
+    ],
+    [
+     1133.8,
+     15,
+     101,
+     "r"
+    ],
+    [
+     1179.5,
+     6,
+     105,
+     "r"
+    ],
+    [
+     1230.81,
+     3,
+     107,
+     "r"
+    ],
+    [
+     1286.4,
+     14,
+     115,
+     "r"
+    ],
+    [
+     1331.84,
+     9,
+     120,
+     "r"
+    ],
+    [
+     1380.59,
+     3,
+     122,
+     "r"
+    ],
+    [
+     1431.99,
+     13,
+     130,
+     "r"
+    ],
+    [
+     1484.4,
+     15,
+     138,
+     "r"
+    ],
+    [
+     1518.57,
+     4,
+     140,
+     "r"
+    ],
+    [
+     1562.46,
+     3,
+     142,
+     "r"
+    ],
+    [
+     1614.41,
+     5,
+     146,
+     "r"
+    ],
+    [
+     1670.04,
+     8,
+     150,
+     "r"
+    ],
+    [
+     1723.7,
+     8,
+     155,
+     "r"
+    ],
+    [
+     1773.01,
+     11,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 90.90891204815483,
+   "steps_stream": 36,
+   "steps_source": "stream",
+   "step_ms": 46.13897966596091,
+   "tokens_per_step": 4.194444444444445,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-03",
+   "id": "prose-03",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 21,
+   "t_wall": 56.42,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 38,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.153139850939624,
+   "decode_s": 2.0332822940545157,
+   "total_s": 2.186655470984988,
+   "prompt_tokens": 38,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 90,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 57,
+   "n_events": 60,
+   "n_steps": 56,
+   "reasoning_chars": 412,
+   "content_chars": 341,
+   "tool_calls": 0,
+   "sha256": "7b359691901f3f7a58f1f7bba7ddfb5835963305933fd1eaddbe3fde26171722",
+   "chunks": [
+    [
+     153.14,
+     27,
+     9,
+     "r"
+    ],
+    [
+     202.7,
+     36,
+     17,
+     "r"
+    ],
+    [
+     250.5,
+     32,
+     22,
+     "r"
+    ],
+    [
+     296.73,
+     20,
+     27,
+     "r"
+    ],
+    [
+     339.92,
+     33,
+     34,
+     "r"
+    ],
+    [
+     370.37,
+     4,
+     35,
+     "r"
+    ],
+    [
+     409.17,
+     17,
+     39,
+     "r"
+    ],
+    [
+     445.56,
+     9,
+     42,
+     "r"
+    ],
+    [
+     486.16,
+     21,
+     46,
+     "r"
+    ],
+    [
+     521.35,
+     10,
+     49,
+     "r"
+    ],
+    [
+     560.45,
+     16,
+     51,
+     "r"
+    ],
+    [
+     596.4,
+     11,
+     54,
+     "r"
+    ],
+    [
+     631.69,
+     22,
+     57,
+     "r"
+    ],
+    [
+     663.06,
+     5,
+     59,
+     "r"
+    ],
+    [
+     698.52,
+     7,
+     60,
+     "r"
+    ],
+    [
+     733.65,
+     2,
+     61,
+     "r"
+    ],
+    [
+     769.92,
+     21,
+     64,
+     "r"
+    ],
+    [
+     807.2,
+     8,
+     66,
+     "r"
+    ],
+    [
+     844.34,
+     8,
+     68,
+     "r"
+    ],
+    [
+     876.49,
+     10,
+     70,
+     "r"
+    ],
+    [
+     903.86,
+     6,
+     71,
+     "r"
+    ],
+    [
+     939.69,
+     8,
+     74,
+     "r"
+    ],
+    [
+     974.77,
+     5,
+     75,
+     "r"
+    ],
+    [
+     1009.08,
+     9,
+     77,
+     "r"
+    ],
+    [
+     1042.69,
+     16,
+     79,
+     "r"
+    ],
+    [
+     1082.0,
+     23,
+     83,
+     "r"
+    ],
+    [
+     1125.24,
+     26,
+     89,
+     "r"
+    ],
+    [
+     1176.55,
+     17,
+     96,
+     "c"
+    ],
+    [
+     1205.34,
+     5,
+     97,
+     "c"
+    ],
+    [
+     1235.26,
+     9,
+     98,
+     "c"
+    ],
+    [
+     1266.79,
+     3,
+     99,
+     "c"
+    ],
+    [
+     1296.94,
+     10,
+     101,
+     "c"
+    ],
+    [
+     1331.92,
+     5,
+     103,
+     "c"
+    ],
+    [
+     1368.68,
+     7,
+     104,
+     "c"
+    ],
+    [
+     1405.61,
+     19,
+     107,
+     "c"
+    ],
+    [
+     1435.72,
+     8,
+     108,
+     "c"
+    ],
+    [
+     1467.36,
+     8,
+     109,
+     "c"
+    ],
+    [
+     1498.84,
+     10,
+     111,
+     "c"
+    ],
+    [
+     1532.51,
+     5,
+     112,
+     "c"
+    ],
+    [
+     1562.9,
+     10,
+     114,
+     "c"
+    ],
+    [
+     1601.85,
+     15,
+     118,
+     "c"
+    ],
+    [
+     1638.34,
+     18,
+     120,
+     "c"
+    ],
+    [
+     1688.52,
+     28,
+     127,
+     "c"
+    ],
+    [
+     1718.46,
+     6,
+     129,
+     "c"
+    ],
+    [
+     1758.94,
+     22,
+     135,
+     "c"
+    ],
+    [
+     1791.25,
+     14,
+     137,
+     "c"
+    ],
+    [
+     1820.27,
+     9,
+     138,
+     "c"
+    ],
+    [
+     1866.34,
+     11,
+     140,
+     "c"
+    ],
+    [
+     1909.28,
+     11,
+     143,
+     "c"
+    ],
+    [
+     1947.45,
+     17,
+     146,
+     "c"
+    ],
+    [
+     1982.69,
+     3,
+     147,
+     "c"
+    ],
+    [
+     2014.34,
+     11,
+     149,
+     "c"
+    ],
+    [
+     2046.89,
+     17,
+     151,
+     "c"
+    ],
+    [
+     2083.17,
+     21,
+     155,
+     "c"
+    ],
+    [
+     2117.17,
+     6,
+     156,
+     "c"
+    ],
+    [
+     2147.79,
+     11,
+     158,
+     "c"
+    ],
+    [
+     2186.42,
+     5,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 74.26415920776785,
+   "steps_stream": 56,
+   "steps_source": "stream",
+   "step_ms": 36.308612393830636,
+   "tokens_per_step": 2.6964285714285716,
+   "valid_decode": true
+  },
+  {
+   "key": "code-10",
+   "id": "code-10",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 22,
+   "t_wall": 58.75,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 34,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14038170804269612,
+   "decode_s": 1.6229577920166776,
+   "total_s": 1.7635830809595063,
+   "prompt_tokens": 34,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 27,
+   "boundary": "exact",
+   "first_chunk_tokens": 6,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 36,
+   "n_events": 39,
+   "n_steps": 35,
+   "reasoning_chars": 122,
+   "content_chars": 470,
+   "tool_calls": 0,
+   "sha256": "4c04a516673edb097f4152ce0300c5333b2aff8f2712dd824b5a78593d4798fa",
+   "chunks": [
+    [
+     140.38,
+     17,
+     6,
+     "r"
+    ],
+    [
+     187.65,
+     34,
+     12,
+     "r"
+    ],
+    [
+     234.33,
+     4,
+     13,
+     "r"
+    ],
+    [
+     283.03,
+     7,
+     15,
+     "r"
+    ],
+    [
+     318.87,
+     5,
+     16,
+     "r"
+    ],
+    [
+     366.92,
+     42,
+     24,
+     "r"
+    ],
+    [
+     417.96,
+     13,
+     30,
+     "r"
+    ],
+    [
+     418.05,
+     1,
+     30,
+     "c"
+    ],
+    [
+     466.29,
+     2,
+     31,
+     "c"
+    ],
+    [
+     512.75,
+     3,
+     32,
+     "c"
+    ],
+    [
+     561.02,
+     3,
+     33,
+     "c"
+    ],
+    [
+     610.61,
+     7,
+     35,
+     "c"
+    ],
+    [
+     660.96,
+     19,
+     39,
+     "c"
+    ],
+    [
+     707.07,
+     6,
+     41,
+     "c"
+    ],
+    [
+     754.17,
+     34,
+     49,
+     "c"
+    ],
+    [
+     800.88,
+     33,
+     56,
+     "c"
+    ],
+    [
+     845.63,
+     21,
+     61,
+     "c"
+    ],
+    [
+     890.61,
+     8,
+     64,
+     "c"
+    ],
+    [
+     938.91,
+     14,
+     69,
+     "c"
+    ],
+    [
+     989.23,
+     13,
+     73,
+     "c"
+    ],
+    [
+     1033.75,
+     16,
+     78,
+     "c"
+    ],
+    [
+     1084.52,
+     21,
+     86,
+     "c"
+    ],
+    [
+     1126.46,
+     13,
+     89,
+     "c"
+    ],
+    [
+     1161.52,
+     17,
+     92,
+     "c"
+    ],
+    [
+     1209.82,
+     33,
+     99,
+     "c"
+    ],
+    [
+     1261.11,
+     4,
+     100,
+     "c"
+    ],
+    [
+     1314.4,
+     29,
+     108,
+     "c"
+    ],
+    [
+     1365.09,
+     25,
+     116,
+     "c"
+    ],
+    [
+     1416.25,
+     33,
+     124,
+     "c"
+    ],
+    [
+     1467.68,
+     27,
+     131,
+     "c"
+    ],
+    [
+     1517.65,
+     24,
+     139,
+     "c"
+    ],
+    [
+     1565.76,
+     11,
+     142,
+     "c"
+    ],
+    [
+     1615.16,
+     11,
+     146,
+     "c"
+    ],
+    [
+     1664.54,
+     9,
+     150,
+     "c"
+    ],
+    [
+     1712.77,
+     28,
+     158,
+     "c"
+    ],
+    [
+     1763.34,
+     5,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 154,
+   "tok_s": 94.88848123933064,
+   "steps_stream": 35,
+   "steps_source": "stream",
+   "step_ms": 46.37022262904793,
+   "tokens_per_step": 4.4,
+   "valid_decode": true
+  },
+  {
+   "key": "structured-02",
+   "id": "structured-02",
+   "category": "structured",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 23,
+   "t_wall": 60.64,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 51,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.16267700400203466,
+   "decode_s": 1.6781041360227391,
+   "total_s": 1.8409110739594325,
+   "prompt_tokens": 51,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 87,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 42,
+   "n_events": 45,
+   "n_steps": 41,
+   "reasoning_chars": 326,
+   "content_chars": 195,
+   "tool_calls": 0,
+   "sha256": "27ddb4cf76d56664fb05da83d84da78dd037f26f3d5708f6ecbb99bc5c09cb8d",
+   "chunks": [
+    [
+     162.68,
+     29,
+     9,
+     "r"
+    ],
+    [
+     211.18,
+     40,
+     17,
+     "r"
+    ],
+    [
+     262.71,
+     18,
+     24,
+     "r"
+    ],
+    [
+     313.67,
+     30,
+     32,
+     "r"
+    ],
+    [
+     365.88,
+     36,
+     40,
+     "r"
+    ],
+    [
+     404.27,
+     19,
+     44,
+     "r"
+    ],
+    [
+     435.87,
+     13,
+     46,
+     "r"
+    ],
+    [
+     467.92,
+     1,
+     47,
+     "r"
+    ],
+    [
+     504.54,
+     12,
+     50,
+     "r"
+    ],
+    [
+     541.34,
+     4,
+     51,
+     "r"
+    ],
+    [
+     576.69,
+     7,
+     52,
+     "r"
+    ],
+    [
+     608.78,
+     5,
+     53,
+     "r"
+    ],
+    [
+     650.74,
+     2,
+     55,
+     "r"
+    ],
+    [
+     699.4,
+     13,
+     59,
+     "r"
+    ],
+    [
+     732.26,
+     2,
+     60,
+     "r"
+    ],
+    [
+     778.13,
+     20,
+     66,
+     "r"
+    ],
+    [
+     822.64,
+     21,
+     71,
+     "r"
+    ],
+    [
+     857.76,
+     5,
+     72,
+     "r"
+    ],
+    [
+     889.82,
+     2,
+     74,
+     "r"
+    ],
+    [
+     928.43,
+     17,
+     77,
+     "r"
+    ],
+    [
+     965.57,
+     15,
+     81,
+     "r"
+    ],
+    [
+     997.39,
+     6,
+     83,
+     "r"
+    ],
+    [
+     1047.56,
+     9,
+     91,
+     "r"
+    ],
+    [
+     1047.65,
+     7,
+     91,
+     "c"
+    ],
+    [
+     1098.4,
+     14,
+     96,
+     "c"
+    ],
+    [
+     1149.5,
+     14,
+     101,
+     "c"
+    ],
+    [
+     1200.18,
+     21,
+     109,
+     "c"
+    ],
+    [
+     1251.34,
+     12,
+     114,
+     "c"
+    ],
+    [
+     1300.78,
+     15,
+     118,
+     "c"
+    ],
+    [
+     1352.67,
+     9,
+     122,
+     "c"
+    ],
+    [
+     1403.96,
+     17,
+     129,
+     "c"
+    ],
+    [
+     1450.76,
+     4,
+     133,
+     "c"
+    ],
+    [
+     1487.02,
+     7,
+     135,
+     "c"
+    ],
+    [
+     1523.9,
+     4,
+     136,
+     "c"
+    ],
+    [
+     1557.01,
+     3,
+     138,
+     "c"
+    ],
+    [
+     1584.14,
+     7,
+     139,
+     "c"
+    ],
+    [
+     1635.36,
+     21,
+     147,
+     "c"
+    ],
+    [
+     1670.73,
+     6,
+     150,
+     "c"
+    ],
+    [
+     1722.76,
+     13,
+     157,
+     "c"
+    ],
+    [
+     1760.44,
+     12,
+     158,
+     "c"
+    ],
+    [
+     1791.93,
+     1,
+     159,
+     "c"
+    ],
+    [
+     1840.78,
+     8,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 89.98249677036365,
+   "steps_stream": 41,
+   "steps_source": "stream",
+   "step_ms": 40.92936917128632,
+   "tokens_per_step": 3.682926829268293,
+   "valid_decode": true
+  },
+  {
+   "key": "code-14",
+   "id": "code-14",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 24,
+   "t_wall": 62.63,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 121,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.1705316110746935,
+   "decode_s": 1.3984485788969323,
+   "total_s": 1.5691800439963117,
+   "prompt_tokens": 121,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 4,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 33,
+   "n_events": 36,
+   "n_steps": 32,
+   "reasoning_chars": 444,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "6485acdbb93728254a66ea1f5812b2d9801e3348e7af75fed24ebbe2a37617e1",
+   "chunks": [
+    [
+     170.53,
+     8,
+     4,
+     "r"
+    ],
+    [
+     209.23,
+     17,
+     8,
+     "r"
+    ],
+    [
+     253.83,
+     4,
+     9,
+     "r"
+    ],
+    [
+     299.11,
+     23,
+     15,
+     "r"
+    ],
+    [
+     339.45,
+     20,
+     20,
+     "r"
+    ],
+    [
+     376.3,
+     2,
+     22,
+     "r"
+    ],
+    [
+     426.32,
+     16,
+     30,
+     "r"
+    ],
+    [
+     475.43,
+     15,
+     38,
+     "r"
+    ],
+    [
+     525.43,
+     13,
+     46,
+     "r"
+    ],
+    [
+     572.24,
+     20,
+     54,
+     "r"
+    ],
+    [
+     620.67,
+     22,
+     62,
+     "r"
+    ],
+    [
+     667.7,
+     17,
+     70,
+     "r"
+    ],
+    [
+     713.82,
+     14,
+     78,
+     "r"
+    ],
+    [
+     763.17,
+     28,
+     86,
+     "r"
+    ],
+    [
+     813.94,
+     27,
+     94,
+     "r"
+    ],
+    [
+     863.19,
+     24,
+     101,
+     "r"
+    ],
+    [
+     906.9,
+     19,
+     109,
+     "r"
+    ],
+    [
+     957.43,
+     6,
+     112,
+     "r"
+    ],
+    [
+     1000.27,
+     9,
+     115,
+     "r"
+    ],
+    [
+     1046.57,
+     15,
+     123,
+     "r"
+    ],
+    [
+     1087.36,
+     12,
+     125,
+     "r"
+    ],
+    [
+     1134.78,
+     17,
+     133,
+     "r"
+    ],
+    [
+     1166.36,
+     9,
+     135,
+     "r"
+    ],
+    [
+     1207.12,
+     15,
+     137,
+     "r"
+    ],
+    [
+     1242.75,
+     13,
+     139,
+     "r"
+    ],
+    [
+     1276.56,
+     3,
+     140,
+     "r"
+    ],
+    [
+     1315.09,
+     9,
+     143,
+     "r"
+    ],
+    [
+     1350.81,
+     11,
+     146,
+     "r"
+    ],
+    [
+     1391.56,
+     8,
+     147,
+     "r"
+    ],
+    [
+     1445.0,
+     5,
+     149,
+     "r"
+    ],
+    [
+     1489.39,
+     11,
+     154,
+     "r"
+    ],
+    [
+     1522.36,
+     7,
+     157,
+     "r"
+    ],
+    [
+     1568.98,
+     5,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 156,
+   "tok_s": 111.55218887136316,
+   "steps_stream": 32,
+   "steps_source": "stream",
+   "step_ms": 43.701518090529134,
+   "tokens_per_step": 4.875,
+   "valid_decode": true
+  },
+  {
+   "key": "agentic-02",
+   "id": "agentic-02",
+   "category": "agentic",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 25,
+   "t_wall": 64.34,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 624,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.2685840289341286,
+   "decode_s": 2.0400380950886756,
+   "total_s": 2.3087684109341353,
+   "prompt_tokens": 624,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 30,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 55,
+   "n_events": 58,
+   "n_steps": 54,
+   "reasoning_chars": 121,
+   "content_chars": 411,
+   "tool_calls": 0,
+   "sha256": "5feb5072669c0ffdf84395207be0a949610ff8cc22c5f7d3263f9c19945bf348",
+   "chunks": [
+    [
+     268.58,
+     13,
+     5,
+     "r"
+    ],
+    [
+     316.49,
+     22,
+     11,
+     "r"
+    ],
+    [
+     351.6,
+     14,
+     14,
+     "r"
+    ],
+    [
+     382.51,
+     9,
+     16,
+     "r"
+    ],
+    [
+     419.85,
+     12,
+     19,
+     "r"
+    ],
+    [
+     456.1,
+     13,
+     22,
+     "r"
+    ],
+    [
+     487.72,
+     7,
+     23,
+     "r"
+    ],
+    [
+     524.5,
+     9,
+     25,
+     "r"
+    ],
+    [
+     558.63,
+     5,
+     26,
+     "r"
+    ],
+    [
+     607.5,
+     17,
+     34,
+     "r"
+    ],
+    [
+     607.57,
+     5,
+     34,
+     "c"
+    ],
+    [
+     652.1,
+     17,
+     39,
+     "c"
+    ],
+    [
+     687.78,
+     1,
+     40,
+     "c"
+    ],
+    [
+     733.92,
+     13,
+     45,
+     "c"
+    ],
+    [
+     772.48,
+     17,
+     49,
+     "c"
+    ],
+    [
+     807.82,
+     9,
+     51,
+     "c"
+    ],
+    [
+     836.11,
+     5,
+     52,
+     "c"
+    ],
+    [
+     869.21,
+     2,
+     53,
+     "c"
+    ],
+    [
+     903.36,
+     8,
+     55,
+     "c"
+    ],
+    [
+     940.4,
+     5,
+     56,
+     "c"
+    ],
+    [
+     987.85,
+     21,
+     62,
+     "c"
+    ],
+    [
+     1036.75,
+     14,
+     66,
+     "c"
+    ],
+    [
+     1070.3,
+     9,
+     69,
+     "c"
+    ],
+    [
+     1119.66,
+     16,
+     75,
+     "c"
+    ],
+    [
+     1170.96,
+     11,
+     80,
+     "c"
+    ],
+    [
+     1206.46,
+     18,
+     83,
+     "c"
+    ],
+    [
+     1246.19,
+     9,
+     86,
+     "c"
+    ],
+    [
+     1278.55,
+     12,
+     88,
+     "c"
+    ],
+    [
+     1316.19,
+     11,
+     89,
+     "c"
+    ],
+    [
+     1353.78,
+     2,
+     91,
+     "c"
+    ],
+    [
+     1401.57,
+     11,
+     97,
+     "c"
+    ],
+    [
+     1439.68,
+     8,
+     100,
+     "c"
+    ],
+    [
+     1479.47,
+     5,
+     101,
+     "c"
+    ],
+    [
+     1527.25,
+     14,
+     107,
+     "c"
+    ],
+    [
+     1573.15,
+     15,
+     113,
+     "c"
+    ],
+    [
+     1609.71,
+     14,
+     116,
+     "c"
+    ],
+    [
+     1652.53,
+     6,
+     118,
+     "c"
+    ],
+    [
+     1684.0,
+     9,
+     120,
+     "c"
+    ],
+    [
+     1714.75,
+     8,
+     122,
+     "c"
+    ],
+    [
+     1745.88,
+     2,
+     124,
+     "c"
+    ],
+    [
+     1787.05,
+     4,
+     127,
+     "c"
+    ],
+    [
+     1820.7,
+     11,
+     129,
+     "c"
+    ],
+    [
+     1851.86,
+     3,
+     130,
+     "c"
+    ],
+    [
+     1887.34,
+     12,
+     133,
+     "c"
+    ],
+    [
+     1922.79,
+     7,
+     135,
+     "c"
+    ],
+    [
+     1965.13,
+     4,
+     139,
+     "c"
+    ],
+    [
+     1998.41,
+     2,
+     140,
+     "c"
+    ],
+    [
+     2035.22,
+     8,
+     142,
+     "c"
+    ],
+    [
+     2075.1,
+     16,
+     146,
+     "c"
+    ],
+    [
+     2114.86,
+     15,
+     150,
+     "c"
+    ],
+    [
+     2146.47,
+     2,
+     151,
+     "c"
+    ],
+    [
+     2181.71,
+     3,
+     154,
+     "c"
+    ],
+    [
+     2221.76,
+     18,
+     158,
+     "c"
+    ],
+    [
+     2265.51,
+     2,
+     159,
+     "c"
+    ],
+    [
+     2308.62,
+     7,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 75.97897332072249,
+   "steps_stream": 54,
+   "steps_source": "stream",
+   "step_ms": 37.77848324238288,
+   "tokens_per_step": 2.8703703703703702,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-12",
+   "id": "prose-12",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 26,
+   "t_wall": 66.9,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 33,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14666310092434287,
+   "decode_s": 2.501906226039864,
+   "total_s": 2.6486606219550595,
+   "prompt_tokens": 33,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 119,
+   "boundary": "exact",
+   "first_chunk_tokens": 7,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 69,
+   "n_events": 72,
+   "n_steps": 68,
+   "reasoning_chars": 541,
+   "content_chars": 162,
+   "tool_calls": 0,
+   "sha256": "33b51e726d84a292830992f0dcf75c9699800063fd1ec1eee4dfa9e2cd8999cc",
+   "chunks": [
+    [
+     146.66,
+     20,
+     7,
+     "r"
+    ],
+    [
+     196.27,
+     37,
+     15,
+     "r"
+    ],
+    [
+     246.44,
+     51,
+     23,
+     "r"
+    ],
+    [
+     293.67,
+     31,
+     29,
+     "r"
+    ],
+    [
+     337.9,
+     26,
+     35,
+     "r"
+    ],
+    [
+     364.52,
+     6,
+     36,
+     "r"
+    ],
+    [
+     400.46,
+     15,
+     39,
+     "r"
+    ],
+    [
+     438.49,
+     6,
+     40,
+     "r"
+    ],
+    [
+     475.12,
+     8,
+     43,
+     "r"
+    ],
+    [
+     506.39,
+     6,
+     44,
+     "r"
+    ],
+    [
+     532.52,
+     7,
+     45,
+     "r"
+    ],
+    [
+     570.89,
+     14,
+     49,
+     "r"
+    ],
+    [
+     604.73,
+     10,
+     51,
+     "r"
+    ],
+    [
+     642.56,
+     8,
+     54,
+     "r"
+    ],
+    [
+     669.71,
+     4,
+     55,
+     "r"
+    ],
+    [
+     704.63,
+     5,
+     56,
+     "r"
+    ],
+    [
+     738.75,
+     1,
+     57,
+     "r"
+    ],
+    [
+     766.07,
+     5,
+     58,
+     "r"
+    ],
+    [
+     800.85,
+     5,
+     59,
+     "r"
+    ],
+    [
+     833.55,
+     10,
+     61,
+     "r"
+    ],
+    [
+     867.83,
+     15,
+     64,
+     "r"
+    ],
+    [
+     906.01,
+     17,
+     67,
+     "r"
+    ],
+    [
+     948.69,
+     7,
+     68,
+     "r"
+    ],
+    [
+     979.13,
+     8,
+     69,
+     "r"
+    ],
+    [
+     1017.19,
+     10,
+     71,
+     "r"
+    ],
+    [
+     1048.34,
+     12,
+     73,
+     "r"
+    ],
+    [
+     1085.01,
+     2,
+     75,
+     "r"
+    ],
+    [
+     1120.37,
+     11,
+     76,
+     "r"
+    ],
+    [
+     1152.1,
+     12,
+     78,
+     "r"
+    ],
+    [
+     1188.19,
+     19,
+     81,
+     "r"
+    ],
+    [
+     1217.71,
+     5,
+     83,
+     "r"
+    ],
+    [
+     1260.82,
+     6,
+     84,
+     "r"
+    ],
+    [
+     1304.58,
+     21,
+     90,
+     "r"
+    ],
+    [
+     1335.37,
+     7,
+     91,
+     "r"
+    ],
+    [
+     1375.52,
+     15,
+     95,
+     "r"
+    ],
+    [
+     1408.43,
+     5,
+     96,
+     "r"
+    ],
+    [
+     1445.9,
+     5,
+     97,
+     "r"
+    ],
+    [
+     1480.57,
+     6,
+     99,
+     "r"
+    ],
+    [
+     1515.46,
+     19,
+     102,
+     "r"
+    ],
+    [
+     1557.28,
+     15,
+     107,
+     "r"
+    ],
+    [
+     1590.54,
+     13,
+     109,
+     "r"
+    ],
+    [
+     1630.16,
+     5,
+     110,
+     "r"
+    ],
+    [
+     1668.29,
+     5,
+     111,
+     "r"
+    ],
+    [
+     1701.88,
+     8,
+     113,
+     "r"
+    ],
+    [
+     1735.47,
+     9,
+     115,
+     "r"
+    ],
+    [
+     1762.92,
+     6,
+     116,
+     "r"
+    ],
+    [
+     1804.3,
+     3,
+     118,
+     "r"
+    ],
+    [
+     1851.46,
+     5,
+     122,
+     "c"
+    ],
+    [
+     1893.47,
+     10,
+     125,
+     "c"
+    ],
+    [
+     1928.0,
+     7,
+     127,
+     "c"
+    ],
+    [
+     1965.1,
+     12,
+     131,
+     "c"
+    ],
+    [
+     2003.59,
+     6,
+     133,
+     "c"
+    ],
+    [
+     2041.83,
+     10,
+     135,
+     "c"
+    ],
+    [
+     2073.17,
+     6,
+     136,
+     "c"
+    ],
+    [
+     2109.44,
+     7,
+     137,
+     "c"
+    ],
+    [
+     2146.95,
+     7,
+     139,
+     "c"
+    ],
+    [
+     2180.18,
+     6,
+     140,
+     "c"
+    ],
+    [
+     2212.23,
+     2,
+     141,
+     "c"
+    ],
+    [
+     2251.06,
+     4,
+     142,
+     "c"
+    ],
+    [
+     2287.47,
+     19,
+     146,
+     "c"
+    ],
+    [
+     2325.99,
+     11,
+     149,
+     "c"
+    ],
+    [
+     2361.18,
+     6,
+     151,
+     "c"
+    ],
+    [
+     2396.31,
+     11,
+     154,
+     "c"
+    ],
+    [
+     2437.41,
+     8,
+     155,
+     "c"
+    ],
+    [
+     2482.73,
+     6,
+     156,
+     "c"
+    ],
+    [
+     2525.91,
+     8,
+     157,
+     "c"
+    ],
+    [
+     2570.98,
+     1,
+     158,
+     "c"
+    ],
+    [
+     2609.92,
+     5,
+     159,
+     "c"
+    ],
+    [
+     2648.57,
+     5,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 153,
+   "tok_s": 61.15337114060252,
+   "steps_stream": 68,
+   "steps_source": "stream",
+   "step_ms": 36.792738618233294,
+   "tokens_per_step": 2.25,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-14",
+   "id": "prose-14",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 27,
+   "t_wall": 69.65,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 33,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.14784682297613472,
+   "decode_s": 2.167301119072363,
+   "total_s": 2.315294019994326,
+   "prompt_tokens": 33,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 118,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 60,
+   "n_events": 63,
+   "n_steps": 59,
+   "reasoning_chars": 470,
+   "content_chars": 153,
+   "tool_calls": 0,
+   "sha256": "64a111ab5d3e9324ac67829b812cd18393a4af1352af85adf2cd8c9b91c09ac5",
+   "chunks": [
+    [
+     147.85,
+     32,
+     9,
+     "r"
+    ],
+    [
+     194.27,
+     43,
+     17,
+     "r"
+    ],
+    [
+     244.34,
+     30,
+     25,
+     "r"
+    ],
+    [
+     281.25,
+     2,
+     26,
+     "r"
+    ],
+    [
+     325.54,
+     29,
+     30,
+     "r"
+    ],
+    [
+     363.41,
+     20,
+     34,
+     "r"
+    ],
+    [
+     393.31,
+     6,
+     36,
+     "r"
+    ],
+    [
+     428.18,
+     11,
+     38,
+     "r"
+    ],
+    [
+     462.37,
+     16,
+     41,
+     "r"
+    ],
+    [
+     502.78,
+     15,
+     45,
+     "r"
+    ],
+    [
+     537.66,
+     1,
+     46,
+     "r"
+    ],
+    [
+     585.76,
+     5,
+     47,
+     "r"
+    ],
+    [
+     628.85,
+     6,
+     52,
+     "r"
+    ],
+    [
+     663.72,
+     10,
+     55,
+     "r"
+    ],
+    [
+     696.97,
+     1,
+     56,
+     "r"
+    ],
+    [
+     733.38,
+     3,
+     57,
+     "r"
+    ],
+    [
+     770.44,
+     4,
+     58,
+     "r"
+    ],
+    [
+     801.3,
+     5,
+     60,
+     "r"
+    ],
+    [
+     834.41,
+     9,
+     62,
+     "r"
+    ],
+    [
+     867.85,
+     5,
+     64,
+     "r"
+    ],
+    [
+     913.21,
+     13,
+     68,
+     "r"
+    ],
+    [
+     943.65,
+     1,
+     69,
+     "r"
+    ],
+    [
+     981.83,
+     19,
+     73,
+     "r"
+    ],
+    [
+     1013.69,
+     7,
+     75,
+     "r"
+    ],
+    [
+     1050.81,
+     20,
+     78,
+     "r"
+    ],
+    [
+     1086.38,
+     16,
+     81,
+     "r"
+    ],
+    [
+     1124.75,
+     2,
+     83,
+     "r"
+    ],
+    [
+     1161.45,
+     12,
+     86,
+     "r"
+    ],
+    [
+     1194.96,
+     5,
+     88,
+     "r"
+    ],
+    [
+     1230.39,
+     6,
+     91,
+     "r"
+    ],
+    [
+     1269.59,
+     10,
+     93,
+     "r"
+    ],
+    [
+     1296.94,
+     7,
+     94,
+     "r"
+    ],
+    [
+     1328.92,
+     10,
+     96,
+     "r"
+    ],
+    [
+     1361.51,
+     7,
+     98,
+     "r"
+    ],
+    [
+     1397.19,
+     5,
+     99,
+     "r"
+    ],
+    [
+     1434.56,
+     14,
+     103,
+     "r"
+    ],
+    [
+     1477.84,
+     5,
+     104,
+     "r"
+    ],
+    [
+     1521.54,
+     9,
+     105,
+     "r"
+    ],
+    [
+     1562.16,
+     23,
+     109,
+     "r"
+    ],
+    [
+     1600.47,
+     11,
+     113,
+     "r"
+    ],
+    [
+     1631.46,
+     8,
+     115,
+     "r"
+    ],
+    [
+     1677.69,
+     7,
+     122,
+     "r"
+    ],
+    [
+     1677.74,
+     7,
+     122,
+     "c"
+    ],
+    [
+     1712.35,
+     6,
+     124,
+     "c"
+    ],
+    [
+     1755.77,
+     18,
+     128,
+     "c"
+    ],
+    [
+     1797.16,
+     6,
+     129,
+     "c"
+    ],
+    [
+     1839.09,
+     4,
+     131,
+     "c"
+    ],
+    [
+     1882.45,
+     4,
+     132,
+     "c"
+    ],
+    [
+     1918.81,
+     7,
+     134,
+     "c"
+    ],
+    [
+     1963.98,
+     19,
+     140,
+     "c"
+    ],
+    [
+     2007.82,
+     16,
+     144,
+     "c"
+    ],
+    [
+     2040.8,
+     8,
+     145,
+     "c"
+    ],
+    [
+     2068.09,
+     6,
+     146,
+     "c"
+    ],
+    [
+     2101.93,
+     11,
+     148,
+     "c"
+    ],
+    [
+     2135.13,
+     12,
+     151,
+     "c"
+    ],
+    [
+     2170.08,
+     5,
+     153,
+     "c"
+    ],
+    [
+     2199.99,
+     3,
+     154,
+     "c"
+    ],
+    [
+     2240.01,
+     6,
+     155,
+     "c"
+    ],
+    [
+     2275.47,
+     11,
+     158,
+     "c"
+    ],
+    [
+     2315.15,
+     4,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 69.67190607303809,
+   "steps_stream": 59,
+   "steps_source": "stream",
+   "step_ms": 36.73391727241293,
+   "tokens_per_step": 2.559322033898305,
+   "valid_decode": true
+  },
+  {
+   "key": "code-03",
+   "id": "code-03",
+   "category": "code",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 28,
+   "t_wall": 72.07,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 37,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15211625897791237,
+   "decode_s": 2.2074586980743334,
+   "total_s": 2.359685803996399,
+   "prompt_tokens": 37,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 59,
+   "n_events": 62,
+   "n_steps": 58,
+   "reasoning_chars": 613,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "1815b667159020f635c54c4119842a63b0f558fb453c7b01aa83cdeb59356243",
+   "chunks": [
+    [
+     152.12,
+     31,
+     9,
+     "r"
+    ],
+    [
+     200.54,
+     39,
+     17,
+     "r"
+    ],
+    [
+     247.48,
+     31,
+     25,
+     "r"
+    ],
+    [
+     282.67,
+     4,
+     26,
+     "r"
+    ],
+    [
+     327.02,
+     41,
+     34,
+     "r"
+    ],
+    [
+     368.04,
+     10,
+     38,
+     "r"
+    ],
+    [
+     411.61,
+     12,
+     41,
+     "r"
+    ],
+    [
+     449.94,
+     4,
+     44,
+     "r"
+    ],
+    [
+     492.04,
+     7,
+     45,
+     "r"
+    ],
+    [
+     537.83,
+     12,
+     49,
+     "r"
+    ],
+    [
+     583.17,
+     7,
+     53,
+     "r"
+    ],
+    [
+     616.41,
+     4,
+     54,
+     "r"
+    ],
+    [
+     663.24,
+     8,
+     58,
+     "r"
+    ],
+    [
+     699.26,
+     9,
+     59,
+     "r"
+    ],
+    [
+     731.39,
+     6,
+     61,
+     "r"
+    ],
+    [
+     762.96,
+     5,
+     63,
+     "r"
+    ],
+    [
+     796.12,
+     2,
+     64,
+     "r"
+    ],
+    [
+     844.4,
+     15,
+     68,
+     "r"
+    ],
+    [
+     875.28,
+     7,
+     69,
+     "r"
+    ],
+    [
+     917.39,
+     3,
+     70,
+     "r"
+    ],
+    [
+     948.72,
+     10,
+     72,
+     "r"
+    ],
+    [
+     996.35,
+     6,
+     74,
+     "r"
+    ],
+    [
+     1040.99,
+     20,
+     78,
+     "r"
+    ],
+    [
+     1089.71,
+     14,
+     84,
+     "r"
+    ],
+    [
+     1116.92,
+     5,
+     85,
+     "r"
+    ],
+    [
+     1150.24,
+     9,
+     86,
+     "r"
+    ],
+    [
+     1184.9,
+     4,
+     88,
+     "r"
+    ],
+    [
+     1230.22,
+     17,
+     94,
+     "r"
+    ],
+    [
+     1274.27,
+     11,
+     97,
+     "r"
+    ],
+    [
+     1315.37,
+     11,
+     100,
+     "r"
+    ],
+    [
+     1357.43,
+     8,
+     104,
+     "r"
+    ],
+    [
+     1395.15,
+     19,
+     108,
+     "r"
+    ],
+    [
+     1436.52,
+     14,
+     113,
+     "r"
+    ],
+    [
+     1464.65,
+     2,
+     114,
+     "r"
+    ],
+    [
+     1500.83,
+     4,
+     115,
+     "r"
+    ],
+    [
+     1534.41,
+     2,
+     116,
+     "r"
+    ],
+    [
+     1565.36,
+     5,
+     117,
+     "r"
+    ],
+    [
+     1607.76,
+     12,
+     119,
+     "r"
+    ],
+    [
+     1652.05,
+     7,
+     120,
+     "r"
+    ],
+    [
+     1697.06,
+     11,
+     123,
+     "r"
+    ],
+    [
+     1736.42,
+     11,
+     125,
+     "r"
+    ],
+    [
+     1764.57,
+     9,
+     126,
+     "r"
+    ],
+    [
+     1798.53,
+     6,
+     128,
+     "r"
+    ],
+    [
+     1826.47,
+     7,
+     129,
+     "r"
+    ],
+    [
+     1861.61,
+     21,
+     132,
+     "r"
+    ],
+    [
+     1899.6,
+     14,
+     135,
+     "r"
+    ],
+    [
+     1934.04,
+     3,
+     136,
+     "r"
+    ],
+    [
+     1973.53,
+     14,
+     140,
+     "r"
+    ],
+    [
+     2005.98,
+     7,
+     142,
+     "r"
+    ],
+    [
+     2037.3,
+     13,
+     144,
+     "r"
+    ],
+    [
+     2064.68,
+     5,
+     145,
+     "r"
+    ],
+    [
+     2095.51,
+     11,
+     147,
+     "r"
+    ],
+    [
+     2137.5,
+     1,
+     148,
+     "r"
+    ],
+    [
+     2176.76,
+     7,
+     149,
+     "r"
+    ],
+    [
+     2211.16,
+     5,
+     152,
+     "r"
+    ],
+    [
+     2243.67,
+     4,
+     153,
+     "r"
+    ],
+    [
+     2276.27,
+     9,
+     154,
+     "r"
+    ],
+    [
+     2311.43,
+     4,
+     155,
+     "r"
+    ],
+    [
+     2359.57,
+     14,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 68.40445084282852,
+   "steps_stream": 58,
+   "steps_source": "stream",
+   "step_ms": 38.05963272541954,
+   "tokens_per_step": 2.603448275862069,
+   "valid_decode": true
+  },
+  {
+   "key": "prose-17",
+   "id": "prose-17",
+   "category": "prose",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "measure",
+   "pos": 29,
+   "t_wall": 74.55,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 35,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.15255304297897965,
+   "decode_s": 2.631127267028205,
+   "total_s": 2.7838429479161277,
+   "prompt_tokens": 35,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 118,
+   "boundary": "exact",
+   "first_chunk_tokens": 5,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 77,
+   "n_events": 80,
+   "n_steps": 76,
+   "reasoning_chars": 477,
+   "content_chars": 152,
+   "tool_calls": 0,
+   "sha256": "ebf94c6ac68cb1458e5b12aad6215c6d5e148a4576fd5312085068b8dca9f28e",
+   "chunks": [
+    [
+     152.55,
+     13,
+     5,
+     "r"
+    ],
+    [
+     201.54,
+     12,
+     9,
+     "r"
+    ],
+    [
+     248.58,
+     37,
+     17,
+     "r"
+    ],
+    [
+     292.72,
+     12,
+     20,
+     "r"
+    ],
+    [
+     333.56,
+     10,
+     22,
+     "r"
+    ],
+    [
+     375.1,
+     21,
+     26,
+     "r"
+    ],
+    [
+     406.07,
+     17,
+     28,
+     "r"
+    ],
+    [
+     441.28,
+     13,
+     31,
+     "r"
+    ],
+    [
+     472.44,
+     1,
+     32,
+     "r"
+    ],
+    [
+     509.43,
+     5,
+     33,
+     "r"
+    ],
+    [
+     545.2,
+     7,
+     35,
+     "r"
+    ],
+    [
+     583.51,
+     17,
+     39,
+     "r"
+    ],
+    [
+     632.54,
+     25,
+     46,
+     "r"
+    ],
+    [
+     671.26,
+     5,
+     47,
+     "r"
+    ],
+    [
+     702.66,
+     6,
+     49,
+     "r"
+    ],
+    [
+     732.89,
+     6,
+     50,
+     "r"
+    ],
+    [
+     767.34,
+     10,
+     53,
+     "r"
+    ],
+    [
+     811.19,
+     15,
+     58,
+     "r"
+    ],
+    [
+     846.22,
+     6,
+     59,
+     "r"
+    ],
+    [
+     878.1,
+     5,
+     61,
+     "r"
+    ],
+    [
+     911.15,
+     4,
+     63,
+     "r"
+    ],
+    [
+     947.15,
+     18,
+     67,
+     "r"
+    ],
+    [
+     982.95,
+     11,
+     69,
+     "r"
+    ],
+    [
+     1014.43,
+     9,
+     70,
+     "r"
+    ],
+    [
+     1046.37,
+     2,
+     72,
+     "r"
+    ],
+    [
+     1081.72,
+     10,
+     75,
+     "r"
+    ],
+    [
+     1115.6,
+     5,
+     76,
+     "r"
+    ],
+    [
+     1149.61,
+     4,
+     79,
+     "r"
+    ],
+    [
+     1184.6,
+     4,
+     80,
+     "r"
+    ],
+    [
+     1220.57,
+     6,
+     81,
+     "r"
+    ],
+    [
+     1255.7,
+     2,
+     83,
+     "r"
+    ],
+    [
+     1283.14,
+     7,
+     84,
+     "r"
+    ],
+    [
+     1313.86,
+     11,
+     85,
+     "r"
+    ],
+    [
+     1354.07,
+     16,
+     89,
+     "r"
+    ],
+    [
+     1387.99,
+     10,
+     90,
+     "r"
+    ],
+    [
+     1422.46,
+     3,
+     91,
+     "r"
+    ],
+    [
+     1453.53,
+     10,
+     92,
+     "r"
+    ],
+    [
+     1481.22,
+     8,
+     93,
+     "r"
+    ],
+    [
+     1508.17,
+     7,
+     94,
+     "r"
+    ],
+    [
+     1540.35,
+     6,
+     96,
+     "r"
+    ],
+    [
+     1568.65,
+     5,
+     97,
+     "r"
+    ],
+    [
+     1595.58,
+     6,
+     98,
+     "r"
+    ],
+    [
+     1627.37,
+     1,
+     99,
+     "r"
+    ],
+    [
+     1660.21,
+     10,
+     101,
+     "r"
+    ],
+    [
+     1687.19,
+     5,
+     102,
+     "r"
+    ],
+    [
+     1724.12,
+     11,
+     105,
+     "r"
+    ],
+    [
+     1752.35,
+     1,
+     106,
+     "r"
+    ],
+    [
+     1783.42,
+     5,
+     107,
+     "r"
+    ],
+    [
+     1816.07,
+     6,
+     108,
+     "r"
+    ],
+    [
+     1856.39,
+     13,
+     110,
+     "r"
+    ],
+    [
+     1889.98,
+     6,
+     112,
+     "r"
+    ],
+    [
+     1924.49,
+     1,
+     113,
+     "r"
+    ],
+    [
+     1961.79,
+     5,
+     114,
+     "r"
+    ],
+    [
+     1994.57,
+     1,
+     115,
+     "r"
+    ],
+    [
+     2032.31,
+     5,
+     118,
+     "r"
+    ],
+    [
+     2076.9,
+     4,
+     121,
+     "c"
+    ],
+    [
+     2113.55,
+     3,
+     123,
+     "c"
+    ],
+    [
+     2148.71,
+     13,
+     126,
+     "c"
+    ],
+    [
+     2182.67,
+     8,
+     128,
+     "c"
+    ],
+    [
+     2215.71,
+     5,
+     129,
+     "c"
+    ],
+    [
+     2250.11,
+     4,
+     130,
+     "c"
+    ],
+    [
+     2282.31,
+     3,
+     131,
+     "c"
+    ],
+    [
+     2311.97,
+     7,
+     132,
+     "c"
+    ],
+    [
+     2342.54,
+     3,
+     133,
+     "c"
+    ],
+    [
+     2375.71,
+     1,
+     134,
+     "c"
+    ],
+    [
+     2406.34,
+     4,
+     135,
+     "c"
+    ],
+    [
+     2441.51,
+     4,
+     136,
+     "c"
+    ],
+    [
+     2473.37,
+     10,
+     138,
+     "c"
+    ],
+    [
+     2505.87,
+     12,
+     141,
+     "c"
+    ],
+    [
+     2542.58,
+     21,
+     144,
+     "c"
+    ],
+    [
+     2575.73,
+     6,
+     147,
+     "c"
+    ],
+    [
+     2602.74,
+     7,
+     148,
+     "c"
+    ],
+    [
+     2636.63,
+     7,
+     150,
+     "c"
+    ],
+    [
+     2670.85,
+     3,
+     151,
+     "c"
+    ],
+    [
+     2708.64,
+     10,
+     154,
+     "c"
+    ],
+    [
+     2746.21,
+     15,
+     158,
+     "c"
+    ],
+    [
+     2783.68,
+     2,
+     160,
+     "c"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 155,
+   "tok_s": 58.91011124485391,
+   "steps_stream": 76,
+   "steps_source": "stream",
+   "step_ms": 34.62009561879217,
+   "tokens_per_step": 2.039473684210526,
+   "valid_decode": true
+  },
+  {
+   "key": "agentic-01",
+   "id": "agentic-01",
+   "category": "agentic",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "sentinel",
+   "pos": 30,
+   "t_wall": 77.46,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 699,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.28314261592458934,
+   "decode_s": 0.3631189400330186,
+   "total_s": 0.6464400029508397,
+   "prompt_tokens": 699,
+   "completion_tokens": 51,
+   "cached_tokens": null,
+   "reasoning_tokens": 12,
+   "boundary": "exact",
+   "first_chunk_tokens": 3,
+   "last_chunk_tokens": 51,
+   "finish_reason": "tool_calls",
+   "done_marker": true,
+   "n_chunks": 4,
+   "n_events": 7,
+   "n_steps": 3,
+   "reasoning_chars": 33,
+   "content_chars": 0,
+   "tool_calls": 1,
+   "sha256": "a91d29de54528cd0710cd306e5595fe0d88afbba956431d200b1102751b1e1c8",
+   "chunks": [
+    [
+     283.14,
+     3,
+     3,
+     "r"
+    ],
+    [
+     326.35,
+     20,
+     8,
+     "r"
+    ],
+    [
+     381.44,
+     10,
+     15,
+     "r"
+    ],
+    [
+     646.26,
+     33,
+     51,
+     "t"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 48,
+   "tok_s": 132.1880924075052,
+   "steps_stream": 3,
+   "steps_source": "stream",
+   "step_ms": 121.03964667767286,
+   "tokens_per_step": 16.0,
+   "valid_decode": true
+  },
+  {
+   "key": "longctx-07",
+   "id": "longctx-07",
+   "category": "longctx",
+   "seed": null,
+   "variant": 0,
+   "repeat": 0,
+   "kind": "sentinel",
+   "pos": 31,
+   "t_wall": 78.37,
+   "prime": {
+    "ok": true,
+    "ttft_s": null,
+    "prompt_tokens": 1626,
+    "cached_tokens": null,
+    "error": null
+   },
+   "ttft_s": 0.17908483603969216,
+   "decode_s": 1.6010051589692011,
+   "total_s": 1.78024568897672,
+   "prompt_tokens": 1626,
+   "completion_tokens": 160,
+   "cached_tokens": null,
+   "reasoning_tokens": 160,
+   "boundary": "exact",
+   "first_chunk_tokens": 9,
+   "last_chunk_tokens": 160,
+   "finish_reason": "length",
+   "done_marker": true,
+   "n_chunks": 34,
+   "n_events": 37,
+   "n_steps": 33,
+   "reasoning_chars": 587,
+   "content_chars": 0,
+   "tool_calls": 0,
+   "sha256": "8ac06610715c3651ed17372a06901e30368fb67ff83c76d30d1b10e7757c527d",
+   "chunks": [
+    [
+     179.08,
+     31,
+     9,
+     "r"
+    ],
+    [
+     220.1,
+     20,
+     13,
+     "r"
+    ],
+    [
+     255.87,
+     3,
+     14,
+     "r"
+    ],
+    [
+     298.41,
+     19,
+     18,
+     "r"
+    ],
+    [
+     347.37,
+     4,
+     19,
+     "r"
+    ],
+    [
+     386.75,
+     12,
+     22,
+     "r"
+    ],
+    [
+     435.48,
+     3,
+     23,
+     "r"
+    ],
+    [
+     485.81,
+     3,
+     25,
+     "r"
+    ],
+    [
+     538.71,
+     3,
+     27,
+     "r"
+    ],
+    [
+     589.43,
+     2,
+     29,
+     "r"
+    ],
+    [
+     637.85,
+     32,
+     37,
+     "r"
+    ],
+    [
+     688.86,
+     28,
+     45,
+     "r"
+    ],
+    [
+     741.03,
+     3,
+     46,
+     "r"
+    ],
+    [
+     783.51,
+     12,
+     51,
+     "r"
+    ],
+    [
+     835.46,
+     27,
+     58,
+     "r"
+    ],
+    [
+     883.2,
+     17,
+     63,
+     "r"
+    ],
+    [
+     919.71,
+     7,
+     65,
+     "r"
+    ],
+    [
+     971.36,
+     8,
+     70,
+     "r"
+    ],
+    [
+     1024.06,
+     21,
+     76,
+     "r"
+    ],
+    [
+     1073.58,
+     20,
+     81,
+     "r"
+    ],
+    [
+     1124.16,
+     16,
+     86,
+     "r"
+    ],
+    [
+     1173.8,
+     20,
+     91,
+     "r"
+    ],
+    [
+     1220.88,
+     31,
+     98,
+     "r"
+    ],
+    [
+     1275.25,
+     23,
+     104,
+     "r"
+    ],
+    [
+     1324.99,
+     35,
+     112,
+     "r"
+    ],
+    [
+     1378.89,
+     27,
+     120,
+     "r"
+    ],
+    [
+     1433.34,
+     16,
+     124,
+     "r"
+    ],
+    [
+     1486.61,
+     26,
+     132,
+     "r"
+    ],
+    [
+     1520.26,
+     7,
+     133,
+     "r"
+    ],
+    [
+     1572.05,
+     40,
+     141,
+     "r"
+    ],
+    [
+     1623.03,
+     28,
+     149,
+     "r"
+    ],
+    [
+     1674.06,
+     6,
+     150,
+     "r"
+    ],
+    [
+     1725.08,
+     29,
+     158,
+     "r"
+    ],
+    [
+     1780.09,
+     8,
+     160,
+     "r"
+    ]
+   ],
+   "ok": true,
+   "decode_tokens": 151,
+   "tok_s": 94.31574854963026,
+   "steps_stream": 33,
+   "steps_source": "stream",
+   "step_ms": 48.51530784755155,
+   "tokens_per_step": 4.575757575757576,
+   "valid_decode": true
+  }
+ ]
+}

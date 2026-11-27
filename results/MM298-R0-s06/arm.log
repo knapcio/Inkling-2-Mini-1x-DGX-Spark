@@ -1,0 +1,11 @@
+2026-11-27T11:35:14Z R0 mode warm start 36.54
+R0-warm: {"failed": 0, "valid_decode": 30, "ALL": {"n": 30, "median_tok_s": 70.7, "geomean_tok_s": 75.08, "aggregate_tok_s": 73.01, "median_ttft_ms": 152.3, "truncated_frac": 0.967, "reasoning_token_frac": 0.783, "reasoning_char_frac": 0.829, "median_step_ms": 37.3, "median_tokens_per_step": 2.581, "steps_source": "stream"}, "sentinel": {"n": 2, "identical_text": 2, "drift_pct_identical": -0.083, "drift_pct_all": -0.083}}
+wrote results/R0/warm.json (1.3 min)
+2026-11-27T11:36:34Z R0 mode warm end rc=0 37.07
+2026-11-27T11:36:34Z R0 mode sbf1 start 37.07
+R0: {"failed": 0, "valid_decode": 73, "ALL": {"n": 73, "median_tok_s": 71.39, "geomean_tok_s": 74.08, "aggregate_tok_s": 72.06, "median_ttft_ms": 153.2, "truncated_frac": 0.932, "reasoning_token_frac": 0.646, "reasoning_char_frac": 0.708, "median_step_ms": 38.71, "median_tokens_per_step": 2.742, "steps_source": "response", "median_accept_rate": 0.2488, "median_draft_per_step": 7.0}, "sentinel": {"n": 4, "identical_text": 4, "drift_pct_identical": 0.041, "drift_pct_all": 0.041}}
+wrote results/R0/sbf1.json (4.8 min)
+2026-11-27T11:41:20Z R0 mode sbf1 end rc=0 37.04
+2026-11-27T11:41:20Z R0 mode img start 37.04
+2026-11-27T11:41:32Z R0 mode img end rc=0 36.45
+memavail_min_gib 36.40
